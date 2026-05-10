@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>변수와 자료형 — 파이썬 프로그래밍</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #e2e6ee;
+  --accent:  #1a73e8;
+  --accent2: #7c3aed;
+  --accent3: #d97706;
+  --green:   #059669;
+  --red:     #dc2626;
+  --text:    #1a1f36;
+  --muted:   #6b7280;
+  --border:  #d1d8e8;
+  --surface: #f4f6fb;
+  --surface2:#eaecf4;
+  --code-bg: #1e2235;
+
+  /* phase colours */
+  --lec:  #1a73e8;
+  --cod:  #059669;
+  --act:  #d97706;
+  --ref:  #7c3aed;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100vh;overflow:hidden;
+}
+
+/* ── STAGE 4:3 ── */
+#stage{
+  position:relative;
+  width:800px;height:600px;
+  background:#fff;
+  border-radius:6px;
+  box-shadow:0 10px 44px rgba(0,0,0,0.16);
+  overflow:hidden;
+  flex-shrink:0;
+}
+
+/* ── PHASE RIBBON (top coloured bar) ── */
+#phase-ribbon{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:5px;
+  transition:background 0.4s;
+  z-index:20;
+}
+#phase-label{
+  position:absolute;
+  top:10px;left:16px;
+  font-size:0.6rem;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  padding:2px 9px;
+  border-radius:50px;
+  color:#fff;
+  z-index:20;
+  transition:background 0.4s;
+}
+#slide-num{
+  position:absolute;
+  top:10px;right:14px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;color:var(--muted);z-index:20;
+}
+
+/* ── SLIDES ── */
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:flex-start;
+  padding:46px 52px 46px;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.3s ease;
+  color:var(--text);background:#fff;
+}
+.slide.active{opacity:1;pointer-events:all;}
+.slide.center{align-items:center;}
+.slide.blue-bg{background:linear-gradient(150deg,#f0f7ff 0%,#fff 65%);}
+.slide.purp-bg{background:linear-gradient(150deg,#f5f0ff 0%,#fff 65%);}
+.slide.grn-bg {background:linear-gradient(150deg,#f0fdf8 0%,#fff 65%);}
+.slide.amb-bg {background:linear-gradient(150deg,#fffbeb 0%,#fff 65%);}
+
+/* ── PHASE SECTION DIVIDER ── */
+.phase-divider{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:12px;
+}
+.phase-icon{font-size:3.2rem;line-height:1;}
+.phase-title{font-size:2rem;font-weight:900;letter-spacing:-0.02em;}
+.phase-sub{font-size:0.95rem;color:var(--muted);font-weight:300;}
+.phase-time{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,0.06);
+  border-radius:50px;padding:5px 16px;
+  font-size:0.78rem;font-weight:700;color:var(--text);
+  margin-top:4px;
+}
+
+/* ── TYPOGRAPHY ── */
+.hero-title{font-size:3.4rem;font-weight:900;line-height:1.1;text-align:center;letter-spacing:-0.03em;}
+.hero-sub{font-size:1rem;color:var(--muted);margin-top:10px;text-align:center;font-weight:300;}
+.slide-title{
+  font-size:1.45rem;font-weight:900;margin-bottom:14px;
+  letter-spacing:-0.02em;
+  border-left:4px solid var(--accent);padding-left:12px;line-height:1.2;
+}
+.accent {color:var(--accent);}
+.accent2{color:var(--accent2);}
+.accent3{color:var(--accent3);}
+.green  {color:var(--green);}
+.red    {color:var(--red);}
+
+/* ── HERO ── */
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(26,115,232,0.08);border:1px solid rgba(26,115,232,0.22);
+  border-radius:50px;padding:5px 14px;
+  font-size:0.7rem;color:var(--accent);
+  font-family:'JetBrains Mono',monospace;margin-bottom:16px;letter-spacing:0.04em;
+}
+.hero-badge::before{content:'●';font-size:0.42rem;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+.concept-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px;justify-content:center;}
+.concept-pill{
+  background:var(--surface);border:1px solid var(--border);border-radius:50px;
+  padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:0.74rem;color:var(--text);
+}
+.hero-decor{position:absolute;border-radius:50%;opacity:0.06;pointer-events:none;}
+.decor1{width:300px;height:300px;background:var(--accent);top:-70px;right:-70px;}
+.decor2{width:200px;height:200px;background:var(--accent2);bottom:-50px;left:-50px;}
+
+/* ── QUESTION BOX ── */
+.question-box{
+  background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(26,115,232,0.03));
+  border:1px solid rgba(124,58,237,0.22);border-radius:9px;
+  padding:10px 14px;width:100%;margin-bottom:9px;
+}
+.question-box .qlabel{font-size:0.58rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent2);margin-bottom:3px;font-weight:700;}
+.question-box p{font-size:0.83rem;line-height:1.5;font-weight:600;}
+
+/* ── CODE ── */
+.code-block{
+  background:var(--code-bg);border-radius:8px;
+  padding:12px 14px;font-family:'JetBrains Mono',monospace;
+  font-size:0.74rem;line-height:1.72;
+  position:relative;width:100%;overflow-x:auto;color:#e2e8f0;
+}
+.code-block::before{
+  content:'python';position:absolute;top:5px;right:9px;
+  font-size:0.54rem;color:#4a5568;text-transform:uppercase;letter-spacing:0.1em;
+}
+.ln {color:#4a5568;margin-right:12px;user-select:none;}
+.kw {color:#c084fc;}
+.fn {color:#60a5fa;}
+.st {color:#34d399;}
+.nm {color:#fbbf24;}
+.cm {color:#6b7280;font-style:italic;}
+
+/* ── OUTPUT / ERROR ── */
+.output-block{
+  background:rgba(5,150,105,0.07);border:1px solid rgba(5,150,105,0.22);
+  border-radius:6px;padding:7px 12px;
+  font-family:'JetBrains Mono',monospace;font-size:0.7rem;line-height:1.65;
+  width:100%;margin-top:5px;color:var(--text);
+}
+.output-block::before{content:'▶ 출력';display:block;font-size:0.54rem;color:var(--green);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;}
+.error-block{
+  background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.25);
+  border-radius:6px;padding:7px 12px;
+  font-family:'JetBrains Mono',monospace;font-size:0.68rem;line-height:1.65;
+  width:100%;margin-top:5px;color:var(--text);
+}
+.error-block::before{content:'⚠ 오류';display:block;font-size:0.54rem;color:var(--red);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 13px;}
+.card-title{font-weight:700;font-size:0.78rem;margin-bottom:3px;}
+.card-desc{font-size:0.71rem;color:var(--muted);line-height:1.5;}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:0.71rem;}
+.data-table th{background:var(--surface2);padding:6px 9px;text-align:left;font-weight:700;color:var(--accent);border-bottom:2px solid var(--border);font-size:0.6rem;letter-spacing:0.04em;text-transform:uppercase;}
+.data-table td{padding:5px 9px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:0.69rem;line-height:1.4;color:var(--text);}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:var(--surface);}
+.tag{display:inline-block;background:rgba(26,115,232,0.09);color:var(--accent);border:1px solid rgba(26,115,232,0.2);border-radius:4px;padding:1px 5px;font-size:0.6rem;font-family:'JetBrains Mono',monospace;}
+.tag.purple{background:rgba(124,58,237,0.09);color:var(--accent2);border-color:rgba(124,58,237,0.22);}
+.tag.green{background:rgba(5,150,105,0.09);color:var(--green);border-color:rgba(5,150,105,0.22);}
+
+/* ── QUIZ ── */
+.quiz-options{display:flex;flex-direction:column;gap:6px;width:100%;}
+.quiz-btn{
+  background:#fff;border:1px solid var(--border);border-radius:7px;
+  padding:8px 13px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:0.78rem;
+  cursor:pointer;text-align:left;transition:all 0.15s;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+}
+.quiz-btn:hover{border-color:var(--accent);background:rgba(26,115,232,0.05);}
+.quiz-btn.correct{border-color:var(--green);background:rgba(5,150,105,0.07);color:var(--green);font-weight:700;}
+.quiz-btn.wrong{border-color:var(--red);background:rgba(220,38,38,0.06);color:var(--red);}
+#quiz-feedback{margin-top:7px;font-size:0.78rem;font-weight:700;min-height:18px;}
+
+/* ── BTN ── */
+.btn{
+  border:none;border-radius:6px;padding:7px 18px;color:#fff;
+  font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:0.76rem;
+  cursor:pointer;margin-top:7px;transition:opacity 0.15s;
+}
+.btn:hover{opacity:0.85;}
+.btn-blue  {background:var(--accent);}
+.btn-green {background:var(--green);}
+.btn-amber {background:var(--accent3);}
+.btn-full  {width:100%;}
+
+/* ── LAYOUT ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;align-items:start;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;align-items:start;}
+.full-width{width:100%;}
+.mt{margin-top:7px;} .mt2{margin-top:12px;}
+.small{font-size:0.74rem;color:var(--muted);line-height:1.55;}
+.hidden{display:none!important;}
+
+/* ── DRAWER ── */
+.drawer-demo{display:flex;gap:7px;justify-content:center;margin:8px 0;flex-wrap:wrap;}
+.drawer{width:90px;background:var(--surface);border:1px solid var(--border);border-radius:7px;text-align:center;overflow:hidden;transition:all 0.4s;}
+.drawer-label{background:var(--surface2);padding:3px;font-size:0.58rem;color:var(--accent);font-family:'JetBrains Mono',monospace;font-weight:700;}
+.drawer-val{padding:7px 3px;font-family:'JetBrains Mono',monospace;font-size:0.74rem;font-weight:700;min-height:34px;display:flex;align-items:center;justify-content:center;transition:all 0.4s;}
+.drawer.highlight{border-color:var(--accent);box-shadow:0 0 8px rgba(26,115,232,0.18);}
+
+/* ── STEPS ── */
+.steps{display:flex;gap:0;width:100%;margin-bottom:10px;}
+.step{flex:1;text-align:center;padding:4px 3px;font-size:0.65rem;border-bottom:2px solid var(--border);color:var(--muted);transition:all 0.3s;}
+.step.done  {border-color:var(--green);color:var(--green);}
+.step.active{border-color:var(--accent);color:var(--accent);font-weight:700;}
+
+/* ── SUMMARY ── */
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%;}
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px 9px;text-align:center;}
+.summary-card .num{font-size:1.6rem;font-weight:900;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:3px;}
+.summary-card .lbl{font-size:0.63rem;color:var(--muted);line-height:1.4;}
+
+/* ── ACTIVITY SHEET ── */
+.activity-sheet{
+  width:100%;background:#fff;
+  border:1.5px solid var(--border);border-radius:10px;
+  overflow:hidden;
+}
+.activity-header{
+  background:var(--amb-row,#fffbeb);
+  border-bottom:1.5px solid var(--border);
+  padding:8px 14px;
+  display:flex;align-items:center;gap:10px;
+}
+.activity-header .ah-icon{font-size:1.1rem;}
+.activity-header .ah-title{font-weight:900;font-size:0.88rem;}
+.activity-body{padding:10px 14px;display:flex;flex-direction:column;gap:9px;}
+
+.act-row{display:flex;align-items:flex-start;gap:10px;}
+.act-num{
+  flex-shrink:0;width:20px;height:20px;
+  background:var(--accent3);color:#fff;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:0.62rem;font-weight:900;margin-top:1px;
+}
+.act-q{flex:1;font-size:0.78rem;font-weight:600;line-height:1.45;}
+.act-space{
+  border:1px dashed var(--border);border-radius:6px;
+  background:#fafbfd;
+  min-height:38px;width:100%;
+  margin-top:3px;padding:6px 10px;
+  font-size:0.72rem;color:var(--muted);
+  display:flex;align-items:center;
+}
+
+/* ── CODING PRACTICE ── */
+.code-task{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:10px 13px;width:100%;
+}
+.code-task-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--green);color:#fff;
+  font-size:0.62rem;font-weight:900;margin-right:6px;flex-shrink:0;
+}
+.code-task-title{font-weight:700;font-size:0.8rem;display:flex;align-items:center;margin-bottom:6px;}
+.code-task-desc{font-size:0.72rem;color:var(--muted);margin-bottom:7px;line-height:1.5;}
+.editor-area{
+  background:var(--code-bg);border-radius:6px;
+  padding:10px 12px;
+  font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.7;
+  color:#e2e8f0;width:100%;
+  border:2px solid transparent;transition:border-color 0.2s;
+}
+.editor-area:focus{outline:none;border-color:var(--green);}
+
+/* ── LIVE TIMER ── */
+.timer-bar{
+  position:absolute;bottom:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--green),#34d399);
+  transform-origin:left;transition:transform 1s linear;
+  z-index:20;
+}
+
+/* ── FLOW INDICATOR (bottom of stage) ── */
+#flow-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  height:28px;background:var(--surface2);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;gap:0;z-index:15;
+}
+.flow-step{
+  display:flex;align-items:center;gap:5px;
+  padding:0 12px;font-size:0.6rem;font-weight:700;
+  color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;
+  border-right:1px solid var(--border);
+  transition:color 0.3s;
+}
+.flow-step:last-child{border-right:none;}
+.flow-step.current{color:var(--text);}
+.flow-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background 0.3s;}
+.flow-step.current .flow-dot{background:var(--accent);}
+.flow-step.done .flow-dot{background:var(--green);}
+.flow-step.done{color:var(--green);}
+
+/* ── NAV ── */
+#nav{display:flex;align-items:center;gap:10px;margin-top:14px;}
+#nav button{
+  background:#fff;border:1px solid var(--border);border-radius:50%;
+  width:34px;height:34px;font-size:0.9rem;cursor:pointer;color:var(--text);
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;
+}
+#nav button:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+#slide-counter{font-family:'JetBrains Mono',monospace;font-size:0.76rem;color:var(--muted);min-width:52px;text-align:center;}
+#slide-label{font-size:0.71rem;color:var(--muted);min-width:80px;}
+#hint{font-size:0.63rem;color:#bbb;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="phase-ribbon"></div>
+  <div id="phase-label"></div>
+  <div id="slide-num"></div>
+
+  <!-- ════════════════════════════════
+       PHASE 0 — 표지
+  ════════════════════════════════ -->
+
+  <!-- S1 표지 -->
+  <div class="slide center active" id="s1" data-phase="intro">
+    <div class="hero-decor decor1"></div>
+    <div class="hero-decor decor2"></div>
+    <div class="hero-badge">정보 · 3단원 2절 · 파이썬 프로그래밍</div>
+    <h1 class="hero-title"><span class="accent">변수</span>와 <span class="accent2">자료형</span></h1>
+    <p class="hero-sub">컴퓨터는 어떻게 데이터를 기억할까?</p>
+    <div class="concept-row">
+      <span class="concept-pill">📦 변수</span>
+      <span class="concept-pill">🔢 int · float</span>
+      <span class="concept-pill">🔤 str</span>
+      <span class="concept-pill">✅ bool</span>
+      <span class="concept-pill">📋 list · dict</span>
+    </div>
+  </div>
+
+  <!-- S2 수업 흐름 안내 -->
+  <div class="slide center blue-bg" id="s2" data-phase="intro">
+    <h2 class="slide-title" style="align-self:flex-start;">🗺 오늘 수업 흐름</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;margin-top:4px;">
+      <div class="card" style="border-top:4px solid var(--lec);text-align:center;padding:16px 10px;">
+        <div style="font-size:1.6rem;margin-bottom:6px;">📖</div>
+        <div style="font-weight:900;font-size:0.85rem;color:var(--lec);margin-bottom:4px;">① 강의</div>
+        <div style="font-size:0.68rem;color:var(--muted);">변수·자료형 개념<br>탐구 질문</div>
+        <div style="margin-top:8px;font-size:0.65rem;font-weight:700;color:var(--lec);">15분</div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--cod);text-align:center;padding:16px 10px;">
+        <div style="font-size:1.6rem;margin-bottom:6px;">💻</div>
+        <div style="font-weight:900;font-size:0.85rem;color:var(--cod);margin-bottom:4px;">② 함께 코딩</div>
+        <div style="font-size:0.68rem;color:var(--muted);">교사와 같이<br>코드 실행 체험</div>
+        <div style="margin-top:8px;font-size:0.65rem;font-weight:700;color:var(--cod);">10분</div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--act);text-align:center;padding:16px 10px;">
+        <div style="font-size:1.6rem;margin-bottom:6px;">✏️</div>
+        <div style="font-weight:900;font-size:0.85rem;color:var(--act);margin-bottom:4px;">③ 실습</div>
+        <div style="font-size:0.68rem;color:var(--muted);">나만의 정보 카드<br>개인 코딩</div>
+        <div style="margin-top:8px;font-size:0.65rem;font-weight:700;color:var(--act);">15분</div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--ref);text-align:center;padding:16px 10px;">
+        <div style="font-size:1.6rem;margin-bottom:6px;">📝</div>
+        <div style="font-weight:900;font-size:0.85rem;color:var(--ref);margin-bottom:4px;">④ 활동지</div>
+        <div style="font-size:0.68rem;color:var(--muted);">개념 정리<br>성찰 기록</div>
+        <div style="margin-top:8px;font-size:0.65rem;font-weight:700;color:var(--ref);">10분</div>
+      </div>
+    </div>
+    <p class="small mt2" style="text-align:center;">배우고 → 따라하고 → 직접 만들고 → 정리하는 사이클로 컴퓨팅 사고력을 키웁니다 🚀</p>
+  </div>
+
+  <!-- ════════════════════════════════
+       PHASE 1 — 강의 (Lecture)
+  ════════════════════════════════ -->
+
+  <!-- S3 강의 시작 구분 슬라이드 -->
+  <div class="slide center" id="s3" data-phase="lecture" style="background:linear-gradient(150deg,#eef4ff,#fff);">
+    <div class="phase-divider">
+      <div class="phase-icon">📖</div>
+      <div class="phase-title" style="color:var(--lec);">① 강의</div>
+      <div class="phase-sub">변수와 자료형의 개념을 함께 알아봅니다</div>
+      <div class="phase-time">⏱ 15분</div>
+    </div>
+  </div>
+
+  <!-- S4 탐구질문 -->
+  <div class="slide purp-bg" id="s4" data-phase="lecture">
+    <h2 class="slide-title">🔍 오늘의 <span class="accent">탐구 질문</span></h2>
+    <div class="question-box">
+      <div class="qlabel">사실적 질문</div>
+      <p>변수란 무엇이고, 파이썬에서 어떤 자료형들이 존재하는가?</p>
+    </div>
+    <div class="question-box">
+      <div class="qlabel">개념적 질문</div>
+      <p>왜 같은 숫자 <code style="color:var(--accent3)">30</code>이라도 <code style="color:var(--accent)">int</code>, <code style="color:var(--accent2)">float</code>, <code style="color:var(--green)">str</code>로 나뉘어야 할까?</p>
+    </div>
+    <div class="question-box">
+      <div class="qlabel">논쟁적 질문</div>
+      <p>파이썬이 자료형을 자동으로 정해주는 건 <strong>편리함</strong>일까, <strong>위험함</strong>일까?</p>
+    </div>
+  </div>
+
+  <!-- S5 변수 개념 -->
+  <div class="slide blue-bg" id="s5" data-phase="lecture">
+    <h2 class="slide-title">📦 <span class="accent">변수</span>란?</h2>
+    <p class="small full-width" style="margin-bottom:7px;">값을 저장하고 꺼내 쓰는 <strong>이름이 붙은 서랍장</strong>입니다. <code>=</code>는 수학의 등호가 아니라 <strong>"저장"</strong>을 의미합니다.</p>
+    <div class="drawer-demo">
+      <div class="drawer"><div class="drawer-label">name</div><div class="drawer-val" style="color:var(--green)">'정수연'</div></div>
+      <div class="drawer"><div class="drawer-label">age</div><div class="drawer-val" style="color:var(--accent3)">17</div></div>
+      <div class="drawer"><div class="drawer-label">height</div><div class="drawer-val" style="color:var(--accent)">162.7</div></div>
+      <div class="drawer"><div class="drawer-label">glasses</div><div class="drawer-val" style="color:var(--accent2)">False</div></div>
+    </div>
+    <div class="two-col">
+      <div class="code-block">
+        <span class="ln">1</span><span class="nm">name</span> = <span class="st">'정수연'</span><br>
+        <span class="ln">2</span><span class="nm">age</span> = <span class="nm">17</span><br>
+        <span class="ln">3</span><span class="nm">height</span> = <span class="nm">162.7</span><br>
+        <span class="ln">4</span><span class="nm">glasses</span> = <span class="kw">False</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <div class="card"><div class="card-title accent">= 는 "저장"</div><div class="card-desc">오른쪽 값을 왼쪽 이름에 저장합니다. 수학의 등호와 다릅니다!</div></div>
+        <div class="card"><div class="card-title">새 값을 대입하면?</div><div class="card-desc">기존 값이 사라지고 새 값과 자료형으로 완전히 바뀝니다.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S6 자료형 표 -->
+  <div class="slide" id="s6" data-phase="lecture">
+    <h2 class="slide-title">🗂 <span class="accent">자료형</span>의 종류</h2>
+    <table class="data-table full-width">
+      <thead><tr><th>구분</th><th>자료형</th><th>예시</th><th>특징</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag">단일형</span></td><td><code>int</code></td><td style="color:var(--accent3)">-100, 0, 42</td><td>소수점 없는 정수</td></tr>
+        <tr><td><span class="tag">단일형</span></td><td><code>float</code></td><td style="color:var(--accent3)">3.14, -0.5</td><td>소수점 포함 실수</td></tr>
+        <tr><td><span class="tag">단일형</span></td><td><code>str</code></td><td style="color:var(--green)">'hello', '정보'</td><td>따옴표로 감싼 문자열</td></tr>
+        <tr><td><span class="tag">단일형</span></td><td><code>bool</code></td><td style="color:var(--accent2)">True, False</td><td>참/거짓 두 가지만</td></tr>
+        <tr><td><span class="tag purple">컨테이너</span></td><td><code>list</code></td><td style="color:var(--accent)">[1, 2, 3]</td><td>대괄호, 순서 있음, 수정 가능</td></tr>
+        <tr><td><span class="tag purple">컨테이너</span></td><td><code>tuple</code></td><td style="color:var(--accent)">(1, 2, 3)</td><td>괄호, 생성 후 수정 불가</td></tr>
+        <tr><td><span class="tag purple">컨테이너</span></td><td><code>dict</code></td><td style="color:var(--accent)">{'a': 1}</td><td>키:값 쌍</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- S7 퀴즈 -->
+  <div class="slide blue-bg" id="s7" data-phase="lecture">
+    <h2 class="slide-title">🎯 <span class="accent">퀴즈</span> — 자료형을 맞혀라!</h2>
+    <p class="small full-width" style="margin-bottom:10px;">아래 값의 자료형은 무엇일까요? 클릭해서 확인!</p>
+    <div style="width:100%;max-width:480px;">
+      <p style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;text-align:center;margin-bottom:12px;font-weight:700;">
+        <span id="quiz-val" style="color:var(--accent3)">162.7</span>
+      </p>
+      <div class="quiz-options" id="quiz-opts">
+        <button class="quiz-btn" onclick="checkQuiz(this,'int')">int &nbsp;&nbsp;— 정수형</button>
+        <button class="quiz-btn" onclick="checkQuiz(this,'float')">float — 실수형</button>
+        <button class="quiz-btn" onclick="checkQuiz(this,'str')">str &nbsp;&nbsp;— 문자열형</button>
+        <button class="quiz-btn" onclick="checkQuiz(this,'bool')">bool — 불형</button>
+      </div>
+      <div id="quiz-feedback"></div>
+      <button class="btn btn-blue btn-full mt" id="next-quiz-btn" onclick="nextQuiz()" style="display:none;">다음 문제 →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       PHASE 2 — 함께 코딩
+  ════════════════════════════════ -->
+
+  <!-- S8 함께 코딩 시작 구분 -->
+  <div class="slide center" id="s8" data-phase="coding" style="background:linear-gradient(150deg,#f0fdf8,#fff);">
+    <div class="phase-divider">
+      <div class="phase-icon">💻</div>
+      <div class="phase-title" style="color:var(--cod);">② 함께 코딩</div>
+      <div class="phase-sub">교사와 함께 코드를 실행하며 개념을 확인합니다</div>
+      <div class="phase-time">⏱ 10분</div>
+    </div>
+  </div>
+
+  <!-- S9 type() 확인 -->
+  <div class="slide grn-bg" id="s9" data-phase="coding">
+    <h2 class="slide-title" style="border-color:var(--green);">▶ 코드로 <span class="green">자료형 확인</span>하기</h2>
+    <div class="two-col">
+      <div>
+        <div class="code-block">
+          <span class="ln">1</span><span class="nm">a</span> = <span class="nm">100</span><br>
+          <span class="ln">2</span><span class="nm">b</span> = <span class="nm">3.1415</span><br>
+          <span class="ln">3</span><span class="nm">c</span> = <span class="st">'Python'</span><br>
+          <span class="ln">4</span><span class="nm">d</span> = <span class="kw">True</span><br>
+          <span class="ln">5</span><span class="fn">print</span>(a, <span class="fn">type</span>(a))<br>
+          <span class="ln">6</span><span class="fn">print</span>(b, <span class="fn">type</span>(b))<br>
+          <span class="ln">7</span><span class="fn">print</span>(c, <span class="fn">type</span>(c))<br>
+          <span class="ln">8</span><span class="fn">print</span>(d, <span class="fn">type</span>(d))
+        </div>
+        <div class="output-block">
+          100 &lt;class '<span style="color:var(--accent3)">int</span>'&gt;<br>
+          3.1415 &lt;class '<span style="color:var(--accent)">float</span>'&gt;<br>
+          Python &lt;class '<span style="color:var(--green)">str</span>'&gt;<br>
+          True &lt;class '<span style="color:var(--accent2)">bool</span>'&gt;
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="card" style="border-color:rgba(5,150,105,0.3)">
+          <div class="card-title green">✔ 따라해보세요</div>
+          <div class="card-desc">코랩을 열고 왼쪽 코드를 직접 입력한 후 실행해보세요. 결과가 맞게 나왔나요?</div>
+        </div>
+        <div class="card">
+          <div class="card-title">💡 type() 함수</div>
+          <div class="card-desc">변수에 어떤 자료형이 들어있는지 확인하는 함수입니다. 파이썬이 자동으로 자료형을 결정합니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S10 덮어쓰기 -->
+  <div class="slide" id="s10" data-phase="coding">
+    <h2 class="slide-title" style="border-color:var(--green);">🔄 변수 <span class="green">덮어쓰기</span> 확인</h2>
+    <p class="small full-width" style="margin-bottom:7px;">새 값을 대입하면 기존 값이 사라집니다. 버튼을 눌러 시뮬레이션 해보세요!</p>
+    <div class="two-col">
+      <div class="code-block">
+        <span class="ln">1</span><span class="nm">a</span> = <span class="nm">100</span><br>
+        <span class="ln">2</span><span class="fn">print</span>(a, <span class="fn">type</span>(a))<br>
+        <span class="ln">3</span><span class="nm">a</span> = <span class="st">'Python'</span><br>
+        <span class="ln">4</span><span class="fn">print</span>(a, <span class="fn">type</span>(a))
+      </div>
+      <div>
+        <div class="drawer" id="overwrite-drawer" style="width:100%;margin-bottom:7px;">
+          <div class="drawer-label">a</div>
+          <div class="drawer-val" id="overwrite-val" style="color:var(--accent3)">100 &lt;int&gt;</div>
+        </div>
+        <button class="btn btn-green btn-full" id="overwrite-btn" onclick="runOverwrite()">▶ 3번 줄 실행</button>
+        <div id="overwrite-out" class="hidden mt">
+          <div class="output-block">100 &lt;class '<span style="color:var(--accent3)">int</span>'&gt;<br>Python &lt;class '<span style="color:var(--green)">str</span>'&gt;</div>
+          <p class="small mt">💡 새 값을 대입하면 <strong>자료형까지 바뀝니다.</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S11 오류 탐구 -->
+  <div class="slide" id="s11" data-phase="coding">
+    <h2 class="slide-title" style="border-color:var(--red);">⚠️ <span class="red">오류 탐구</span> — int + str = ?</h2>
+    <div class="steps">
+      <div class="step done" id="step1">① 예측</div>
+      <div class="step active" id="step2">② 실행</div>
+      <div class="step" id="step3">③ 이해</div>
+    </div>
+    <div class="two-col">
+      <div class="code-block">
+        <span class="ln">1</span><span class="nm">a</span>, <span class="nm">b</span>, <span class="nm">c</span> = <span class="nm">30</span>, <span class="nm">30.0</span>, <span class="st">'30'</span><br>
+        <span class="ln">2</span><br>
+        <span class="ln">3</span><span class="nm">sum1</span> = <span class="nm">a</span> + <span class="nm">b</span>&nbsp;<span class="cm"># int + float</span><br>
+        <span class="ln">4</span><span class="fn">print</span>(sum1)<br>
+        <span class="ln">5</span><br>
+        <span class="ln">6</span><span class="nm">sum2</span> = <span class="nm">a</span> + <span class="nm">c</span>&nbsp;<span class="cm"># int + str = ?</span><br>
+        <span class="ln">7</span><span class="fn">print</span>(sum2)
+      </div>
+      <div>
+        <div id="error-result" style="color:var(--muted);font-size:0.76rem;padding:14px;text-align:center;background:var(--surface);border-radius:8px;border:1px solid var(--border);">실행 버튼을 눌러보세요...</div>
+        <button class="btn btn-green btn-full mt" id="run-btn" onclick="runError()">▶ 코드 실행</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- S12 형변환 해결 -->
+  <div class="slide grn-bg" id="s12" data-phase="coding">
+    <h2 class="slide-title" style="border-color:var(--green);">🛠 오류 <span class="green">해결</span> — 형변환</h2>
+    <div class="two-col">
+      <div>
+        <p style="font-size:0.68rem;color:var(--red);margin-bottom:4px;font-weight:700;">❌ 오류 코드</p>
+        <div class="code-block">
+          <span class="ln">1</span><span class="nm">a</span> = <span class="nm">30</span><br>
+          <span class="ln">2</span><span class="nm">c</span> = <span class="st">'30'</span><br>
+          <span class="ln">3</span><span class="nm">result</span> = <span class="nm">a</span> + <span class="nm">c</span>&nbsp;<span class="cm"># TypeError!</span>
+        </div>
+        <div class="error-block">TypeError: unsupported operand<br>type(s) for +: 'int' and 'str'</div>
+      </div>
+      <div>
+        <p style="font-size:0.68rem;color:var(--green);margin-bottom:4px;font-weight:700;">✅ 형변환으로 해결</p>
+        <div class="code-block">
+          <span class="ln">1</span><span class="nm">a</span> = <span class="nm">30</span><br>
+          <span class="ln">2</span><span class="nm">c</span> = <span class="st">'30'</span><br>
+          <span class="ln">3</span><span class="nm">result</span> = <span class="nm">a</span> + <span class="fn">int</span>(c)<br>
+          <span class="ln">4</span><span class="fn">print</span>(result)
+        </div>
+        <div class="output-block">60</div>
+        <div class="card mt" style="border-color:rgba(5,150,105,0.3)">
+          <div class="card-title green">형변환 함수 3가지</div>
+          <div class="card-desc"><code>int('30')</code> → 30 &nbsp; <code>float('3.14')</code> → 3.14 &nbsp; <code>str(100)</code> → '100'</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       PHASE 3 — 개인 실습
+  ════════════════════════════════ -->
+
+  <!-- S13 실습 시작 구분 -->
+  <div class="slide center" id="s13" data-phase="practice" style="background:linear-gradient(150deg,#fffbeb,#fff);">
+    <div class="phase-divider">
+      <div class="phase-icon">✏️</div>
+      <div class="phase-title" style="color:var(--act);">③ 개인 실습</div>
+      <div class="phase-sub">나만의 정보 카드 프로그램을 직접 작성합니다</div>
+      <div class="phase-time">⏱ 15분</div>
+    </div>
+  </div>
+
+  <!-- S14 실습 과제 -->
+  <div class="slide amb-bg" id="s14" data-phase="practice">
+    <h2 class="slide-title" style="border-color:var(--act);">✏️ <span class="accent3">실습 과제</span> — 나만의 정보 카드</h2>
+    <div class="two-col">
+      <div>
+        <div class="code-block">
+          <span class="ln">1</span><span class="cm"># 예시: 나의 정보 카드</span><br>
+          <span class="ln">2</span><span class="nm">이름</span> = <span class="st">'정수연'</span>&nbsp;<span class="cm"># str: 문자열</span><br>
+          <span class="ln">3</span><span class="nm">나이</span> = <span class="nm">17</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># int: 정수</span><br>
+          <span class="ln">4</span><span class="nm">키</span>  = <span class="nm">162.7</span>&nbsp;&nbsp;<span class="cm"># float: 실수</span><br>
+          <span class="ln">5</span><span class="nm">안경</span> = <span class="kw">False</span>&nbsp;&nbsp;<span class="cm"># bool: 참/거짓</span><br>
+          <span class="ln">6</span><span class="nm">취미</span> = [<span class="st">'영화'</span>,<span class="st">'독서'</span>]<span class="cm"># list</span><br>
+          <span class="ln">7</span><br>
+          <span class="ln">8</span><span class="fn">print</span>(<span class="st">'이름:'</span>, 이름)<br>
+          <span class="ln">9</span><span class="fn">print</span>(<span class="st">'취미:'</span>, 취미)
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <div class="card" style="border-color:rgba(217,119,6,0.3)">
+          <div class="card-title accent3">📋 필수 조건</div>
+          <div class="card-desc">✔ 변수 <strong>5개 이상</strong><br>✔ 각 변수 옆에 <code>#</code> 주석으로 자료형 이유 작성<br>✔ <code>print()</code>로 출력</div>
+        </div>
+        <div class="card" style="border-color:rgba(124,58,237,0.3)">
+          <div class="card-title accent2">🚀 심화 도전</div>
+          <div class="card-desc">✔ <code>list</code> 또는 <code>dict</code> 컨테이너형 포함<br>✔ 두 변수를 연산한 결과 출력</div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-card"><div class="num accent">A</div><div class="lbl">5개+컨테이너+주석</div></div>
+          <div class="summary-card"><div class="num accent2">B</div><div class="lbl">5개+주석</div></div>
+          <div class="summary-card"><div class="num accent3">C</div><div class="lbl">4개 이하</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S15 실습 중 타이머 & 도움말 -->
+  <div class="slide amb-bg" id="s15" data-phase="practice">
+    <h2 class="slide-title" style="border-color:var(--act);">⏱ <span class="accent3">실습 중</span> — 막히면 참고하세요</h2>
+    <div class="two-col">
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <div class="card" style="border-color:rgba(217,119,6,0.3)">
+          <div class="card-title">자주 나오는 오류</div>
+          <div class="card-desc" style="font-family:'JetBrains Mono',monospace;">
+            <span style="color:var(--red)">NameError</span> → 변수 이름 오타 확인<br>
+            <span style="color:var(--red)">TypeError</span> → 자료형 불일치, 형변환 사용<br>
+            <span style="color:var(--red)">SyntaxError</span> → 따옴표·괄호 확인
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">유용한 팁</div>
+          <div class="card-desc">• 한국어 변수명도 가능합니다<br>• <code>print(type(변수명))</code>으로 자료형 확인<br>• 오류는 실수가 아니라 배움의 기회!</div>
+        </div>
+      </div>
+      <div>
+        <div style="text-align:center;padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border);">
+          <div style="font-size:3rem;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--act);line-height:1;" id="timer-display">15:00</div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">남은 실습 시간</div>
+          <div style="display:flex;gap:7px;justify-content:center;margin-top:12px;">
+            <button class="btn btn-amber" onclick="startTimer()" id="timer-start-btn">▶ 시작</button>
+            <button class="btn" style="background:var(--muted);" onclick="resetTimer()">↺ 리셋</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       PHASE 4 — 활동지
+  ════════════════════════════════ -->
+
+  <!-- S16 활동지 시작 구분 -->
+  <div class="slide center" id="s16" data-phase="activity" style="background:linear-gradient(150deg,#f5f0ff,#fff);">
+    <div class="phase-divider">
+      <div class="phase-icon">📝</div>
+      <div class="phase-title" style="color:var(--ref);">④ 활동지</div>
+      <div class="phase-sub">배운 내용을 정리하고 스스로의 학습을 돌아봅니다</div>
+      <div class="phase-time">⏱ 10분</div>
+    </div>
+  </div>
+
+  <!-- S17 활동지 1 — 개념 확인 -->
+  <div class="slide purp-bg" id="s17" data-phase="activity">
+    <h2 class="slide-title" style="border-color:var(--ref);">📝 활동지 <span class="accent2">① 개념 확인</span></h2>
+    <div class="activity-sheet">
+      <div class="activity-header" style="background:linear-gradient(135deg,#f5f0ff,#eee9ff);">
+        <span class="ah-icon">🔎</span>
+        <span class="ah-title">다음 빈칸을 채워보세요</span>
+      </div>
+      <div class="activity-body">
+        <div class="act-row">
+          <div class="act-num" style="background:var(--accent2);">1</div>
+          <div style="flex:1;">
+            <div class="act-q">변수란 <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>을 저장하는 기억 공간이다.</div>
+          </div>
+        </div>
+        <div class="act-row">
+          <div class="act-num" style="background:var(--accent2);">2</div>
+          <div style="flex:1;">
+            <div class="act-q">파이썬에서 소수점이 있는 실수를 저장하는 자료형은 <code style="background:var(--surface);padding:1px 6px;border-radius:4px;">________</code>이다.</div>
+          </div>
+        </div>
+        <div class="act-row">
+          <div class="act-num" style="background:var(--accent2);">3</div>
+          <div style="flex:1;">
+            <div class="act-q"><code>'30'</code>과 <code>30</code>의 자료형 차이를 설명하고, 두 값을 더할 때 발생하는 문제와 해결 방법을 쓰시오.</div>
+            <div class="act-space">여기에 답을 써보세요...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S18 활동지 2 — 자료형 매칭 -->
+  <div class="slide purp-bg" id="s18" data-phase="activity">
+    <h2 class="slide-title" style="border-color:var(--ref);">📝 활동지 <span class="accent2">② 자료형 매칭</span></h2>
+    <div class="activity-sheet">
+      <div class="activity-header" style="background:linear-gradient(135deg,#f5f0ff,#eee9ff);">
+        <span class="ah-icon">🔗</span>
+        <span class="ah-title">각 값의 자료형을 오른쪽에서 골라 쓰세요</span>
+        <span style="margin-left:auto;font-size:0.65rem;color:var(--muted);">[ int · float · str · bool · list ]</span>
+      </div>
+      <div class="activity-body" style="gap:6px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+          <div class="act-row"><div class="act-num" style="background:var(--accent2);">①</div><div style="flex:1;"><div class="act-q"><code>True</code> → <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div></div></div>
+          <div class="act-row"><div class="act-num" style="background:var(--accent2);">②</div><div style="flex:1;"><div class="act-q"><code>['월','화','수']</code> → <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div></div></div>
+          <div class="act-row"><div class="act-num" style="background:var(--accent2);">③</div><div style="flex:1;"><div class="act-q"><code>3.14</code> → <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div></div></div>
+          <div class="act-row"><div class="act-num" style="background:var(--accent2);">④</div><div style="flex:1;"><div class="act-q"><code>'안녕하세요'</code> → <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div></div></div>
+          <div class="act-row"><div class="act-num" style="background:var(--accent2);">⑤</div><div style="flex:1;"><div class="act-q"><code>42</code> → <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div></div></div>
+          <div class="act-row"><div class="act-num" style="background:var(--accent2);">⑥</div><div style="flex:1;"><div class="act-q">학번 <code>20301</code>의 자료형은? → <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div></div></div>
+        </div>
+        <div class="card mt" style="border-color:rgba(124,58,237,0.25)">
+          <div class="card-title accent2">정답 확인</div>
+          <div id="match-ans" class="hidden" style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text);line-height:1.8;">
+            ① bool &nbsp; ② list &nbsp; ③ float &nbsp; ④ str &nbsp; ⑤ int &nbsp; ⑥ int
+          </div>
+          <button class="btn btn-full" style="background:var(--accent2);margin-top:5px;" onclick="toggleAns()">정답 보기 / 가리기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S19 활동지 3 — 코드 예측 -->
+  <div class="slide purp-bg" id="s19" data-phase="activity">
+    <h2 class="slide-title" style="border-color:var(--ref);">📝 활동지 <span class="accent2">③ 코드 실행 결과 예측</span></h2>
+    <div class="two-col">
+      <div>
+        <div class="code-block" style="margin-bottom:8px;">
+          <span class="ln">1</span><span class="nm">x</span> = <span class="nm">10</span><br>
+          <span class="ln">2</span><span class="nm">y</span> = <span class="nm">100</span><br>
+          <span class="ln">3</span><span class="nm">x</span> = <span class="nm">x</span> + <span class="nm">1</span><br>
+          <span class="ln">4</span><span class="nm">y</span> = <span class="nm">y</span> + <span class="nm">x</span><br>
+          <span class="ln">5</span><span class="fn">print</span>(<span class="st">'x:'</span>, x)<br>
+          <span class="ln">6</span><span class="fn">print</span>(<span class="st">'y:'</span>, y)
+        </div>
+        <div style="background:var(--surface);border:1px dashed var(--border);border-radius:6px;padding:8px 12px;">
+          <div style="font-size:0.65rem;color:var(--muted);margin-bottom:5px;font-weight:700;">나의 예측:</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.76rem;">
+            x: <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
+            y: <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="code-block" style="margin-bottom:8px;">
+          <span class="ln">1</span><span class="nm">radius</span> = <span class="nm">5</span><br>
+          <span class="ln">2</span><span class="nm">pi</span> = <span class="nm">3.141592</span><br>
+          <span class="ln">3</span><span class="nm">area</span> = <span class="nm">2</span> * <span class="nm">pi</span> * <span class="nm">radius</span><br>
+          <span class="ln">4</span><span class="fn">print</span>(<span class="nm">area</span>, <span class="fn">type</span>(<span class="nm">area</span>))
+        </div>
+        <div style="background:var(--surface);border:1px dashed var(--border);border-radius:6px;padding:8px 12px;margin-bottom:7px;">
+          <div style="font-size:0.65rem;color:var(--muted);margin-bottom:5px;font-weight:700;">나의 예측:</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.76rem;">
+            출력: <span style="text-decoration:underline;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          </div>
+        </div>
+        <button class="btn btn-full" style="background:var(--accent2);" onclick="togglePredict()">정답 확인</button>
+        <div id="predict-ans" class="hidden mt">
+          <div class="output-block">x: 11 &nbsp; y: 111<br>31.41592 &lt;class 'float'&gt;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S20 활동지 4 — 성찰 -->
+  <div class="slide purp-bg" id="s20" data-phase="activity">
+    <h2 class="slide-title" style="border-color:var(--ref);">📝 활동지 <span class="accent2">④ 성찰 기록</span></h2>
+    <div class="activity-sheet">
+      <div class="activity-header" style="background:linear-gradient(135deg,#f5f0ff,#eee9ff);">
+        <span class="ah-icon">💭</span>
+        <span class="ah-title">오늘 수업을 돌아보며 솔직하게 써보세요</span>
+      </div>
+      <div class="activity-body">
+        <div class="act-row">
+          <div class="act-num" style="background:var(--green);">✅</div>
+          <div style="flex:1;">
+            <div class="act-q">오늘 새롭게 알게 된 것은 무엇인가요?</div>
+            <div class="act-space">여기에 써보세요...</div>
+          </div>
+        </div>
+        <div class="act-row">
+          <div class="act-num" style="background:var(--accent3);">❓</div>
+          <div style="flex:1;">
+            <div class="act-q">아직 잘 이해가 안 되는 부분은 무엇인가요?</div>
+            <div class="act-space">여기에 써보세요...</div>
+          </div>
+        </div>
+        <div class="act-row">
+          <div class="act-num" style="background:var(--accent2);">💡</div>
+          <div style="flex:1;">
+            <div class="act-q">변수·자료형이 실생활 어디서 쓰일지 한 가지 예를 들어보세요.</div>
+            <div class="act-space">여기에 써보세요...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S21 마무리 -->
+  <div class="slide center blue-bg" id="s21" data-phase="activity">
+    <h2 class="slide-title" style="align-self:flex-start;">💡 오늘 배운 것 <span class="accent">정리</span></h2>
+    <div class="summary-grid" style="margin-bottom:12px;">
+      <div class="summary-card"><div class="num accent">변수</div><div class="lbl">값을 저장하는<br>이름 붙은 기억 공간</div></div>
+      <div class="summary-card"><div class="num accent2">자료형</div><div class="lbl">데이터 종류<br>int·float·str·bool···</div></div>
+      <div class="summary-card"><div class="num accent3">형변환</div><div class="lbl">int()·float()·str()<br>으로 자료형 변환</div></div>
+    </div>
+    <div class="question-box" style="width:100%">
+      <div class="qlabel">🏆 수업 목표 달성 확인</div>
+      <p style="font-size:0.8rem;line-height:1.8;">
+        ✅ 변수의 개념과 역할을 설명할 수 있다<br>
+        ✅ 자료형의 종류(int·float·str·bool·list·dict)를 구분할 수 있다<br>
+        ✅ TypeError 오류를 형변환으로 해결할 수 있다
+      </p>
+    </div>
+    <p style="color:var(--muted);font-size:0.72rem;margin-top:8px;text-align:center;">수고했어요! 다음 시간에는 <strong>연산자와 입력</strong>을 배웁니다 🚀</p>
+  </div>
+
+  <!-- ── FLOW BAR ── -->
+  <div id="flow-bar">
+    <div class="flow-step" id="flow-intro"><div class="flow-dot"></div>도입</div>
+    <div class="flow-step" id="flow-lecture"><div class="flow-dot"></div>① 강의</div>
+    <div class="flow-step" id="flow-coding"><div class="flow-dot"></div>② 함께코딩</div>
+    <div class="flow-step" id="flow-practice"><div class="flow-dot"></div>③ 실습</div>
+    <div class="flow-step" id="flow-activity"><div class="flow-dot"></div>④ 활동지</div>
+  </div>
+
+</div><!-- /stage -->
+
+<div id="nav">
+  <button onclick="go(-1)">◀</button>
+  <span id="slide-counter">1 / 21</span>
+  <span id="slide-label">표지</span>
+  <button onclick="go(1)">▶</button>
+</div>
+<div id="hint">← → 키보드로도 이동 가능</div>
+
+<script>
+/* ── SLIDE DATA ── */
+const slideData = [
+  {label:'표지',         phase:'intro'},
+  {label:'수업 흐름',    phase:'intro'},
+  {label:'강의 시작',   phase:'lecture'},
+  {label:'탐구 질문',   phase:'lecture'},
+  {label:'변수 개념',   phase:'lecture'},
+  {label:'자료형 표',   phase:'lecture'},
+  {label:'퀴즈',         phase:'lecture'},
+  {label:'함께 코딩',   phase:'coding'},
+  {label:'type() 확인', phase:'coding'},
+  {label:'덮어쓰기',    phase:'coding'},
+  {label:'오류 탐구',   phase:'coding'},
+  {label:'형변환 해결', phase:'coding'},
+  {label:'실습 시작',   phase:'practice'},
+  {label:'실습 과제',   phase:'practice'},
+  {label:'실습 중',      phase:'practice'},
+  {label:'활동지 시작', phase:'activity'},
+  {label:'활동지①',     phase:'activity'},
+  {label:'활동지②',     phase:'activity'},
+  {label:'활동지③',     phase:'activity'},
+  {label:'활동지④',     phase:'activity'},
+  {label:'마무리',       phase:'activity'},
+];
+
+const phaseConfig = {
+  intro:    {color:'#94a3b8', name:'도입'},
+  lecture:  {color:'#1a73e8', name:'① 강의'},
+  coding:   {color:'#059669', name:'② 함께 코딩'},
+  practice: {color:'#d97706', name:'③ 실습'},
+  activity: {color:'#7c3aed', name:'④ 활동지'},
+};
+
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+function updatePhaseUI(phase) {
+  const cfg = phaseConfig[phase];
+  document.getElementById('phase-ribbon').style.background = cfg.color;
+  const lbl = document.getElementById('phase-label');
+  lbl.textContent = cfg.name;
+  lbl.style.background = cfg.color;
+
+  // flow bar
+  const phases = ['intro','lecture','coding','practice','activity'];
+  const idx = phases.indexOf(phase);
+  phases.forEach((p,i) => {
+    const el = document.getElementById('flow-'+p);
+    el.classList.remove('current','done');
+    if (i < idx) el.classList.add('done');
+    else if (i === idx) el.classList.add('current');
+  });
+}
+
+function go(dir) {
+  slides[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(total-1, cur+dir));
+  slides[cur].classList.add('active');
+  const d = slideData[cur];
+  document.getElementById('slide-counter').textContent = `${cur+1} / ${total}`;
+  document.getElementById('slide-label').textContent = d.label;
+  document.getElementById('slide-num').textContent = `${cur+1} / ${total}`;
+  updatePhaseUI(d.phase);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key===' ') go(1);
+  if (e.key==='ArrowLeft') go(-1);
+});
+// init
+updatePhaseUI('intro');
+document.getElementById('slide-num').textContent = `1 / ${total}`;
+document.getElementById('slide-label').textContent = slideData[0].label;
+
+/* ── QUIZ ── */
+const quizData = [
+  {display:'162.7',       ans:'float', color:'var(--accent3)'},
+  {display:"'안녕하세요'", ans:'str',   color:'var(--green)'},
+  {display:'True',         ans:'bool',  color:'var(--accent2)'},
+  {display:'42',           ans:'int',   color:'var(--accent3)'},
+];
+const exp = {int:'소수점 없는 정수는 int입니다.',float:'소수점이 있으면 float입니다.',str:'따옴표로 감싸면 str입니다.',bool:'True/False는 bool입니다.'};
+let qi=0;
+function checkQuiz(btn,chosen){
+  const correct=quizData[qi].ans;
+  document.querySelectorAll('.quiz-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('quiz-feedback');
+  if(chosen===correct){btn.classList.add('correct');fb.style.color='var(--green)';fb.textContent='✅ 정답! '+exp[correct];}
+  else{btn.classList.add('wrong');document.querySelectorAll('.quiz-btn').forEach(b=>{if(b.textContent.trim().startsWith(correct))b.classList.add('correct');});fb.style.color='var(--red)';fb.textContent='❌ 아쉬워요. '+exp[correct];}
+  const nb=document.getElementById('next-quiz-btn');nb.style.display='block';
+  if(qi>=quizData.length-1)nb.textContent='완료 🎉';
+}
+function nextQuiz(){
+  qi++;if(qi>=quizData.length)return;
+  const d=quizData[qi];
+  document.getElementById('quiz-val').textContent=d.display;
+  document.getElementById('quiz-val').style.color=d.color;
+  document.getElementById('quiz-feedback').textContent='';
+  document.getElementById('next-quiz-btn').style.display='none';
+  document.querySelectorAll('.quiz-btn').forEach(b=>{b.disabled=false;b.className='quiz-btn';});
+}
+
+/* ── OVERWRITE DEMO ── */
+function runOverwrite(){
+  const val=document.getElementById('overwrite-val');
+  val.style.opacity='0';
+  setTimeout(()=>{val.textContent='Python <str>';val.style.color='var(--green)';val.style.opacity='1';document.getElementById('overwrite-drawer').classList.add('highlight');},350);
+  document.getElementById('overwrite-out').classList.remove('hidden');
+  document.getElementById('overwrite-btn').disabled=true;
+}
+
+/* ── ERROR DEMO ── */
+function runError(){
+  const res=document.getElementById('error-result');
+  document.getElementById('run-btn').disabled=true;
+  res.innerHTML='<div style="color:var(--muted);font-size:0.74rem;padding:12px;text-align:center;">실행 중...</div>';
+  setTimeout(()=>{
+    res.innerHTML=`
+      <div class="output-block">60.0 <span style="color:var(--muted);font-size:0.66rem;">← sum1 정상 출력</span></div>
+      <div class="error-block" style="margin-top:5px;">
+        <strong style="color:var(--red)">TypeError</strong>: unsupported operand<br>
+        type(s) for +: '<span style="color:var(--accent3)">int</span>' and '<span style="color:var(--green)">str</span>'<br>
+        <span style="color:var(--muted);font-size:0.65rem;">→ 6번 줄: sum2 = a + c</span>
+      </div>
+      <div class="card mt" style="border-color:rgba(220,38,38,0.28)">
+        <div class="card-title red">왜 오류가 났을까?</div>
+        <div class="card-desc">30(int)과 '30'(str)은 다른 자료형 — 덧셈 불가!<br>짝과 이야기해보세요 🤔</div>
+      </div>`;
+    document.getElementById('step2').classList.replace('active','done');
+    document.getElementById('step3').classList.add('active');
+  },700);
+}
+
+/* ── ACTIVITY SHEET TOGGLES ── */
+function toggleAns(){document.getElementById('match-ans').classList.toggle('hidden');}
+function togglePredict(){document.getElementById('predict-ans').classList.toggle('hidden');}
+
+/* ── TIMER ── */
+let timerInterval=null, timerSec=900;
+function startTimer(){
+  if(timerInterval)return;
+  document.getElementById('timer-start-btn').disabled=true;
+  timerInterval=setInterval(()=>{
+    timerSec--;
+    if(timerSec<0){clearInterval(timerInterval);timerInterval=null;document.getElementById('timer-display').textContent='완료!';return;}
+    const m=Math.floor(timerSec/60), s=timerSec%60;
+    document.getElementById('timer-display').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if(timerSec<=60)document.getElementById('timer-display').style.color='var(--red)';
+  },1000);
+}
+function resetTimer(){
+  clearInterval(timerInterval);timerInterval=null;timerSec=900;
+  document.getElementById('timer-display').textContent='15:00';
+  document.getElementById('timer-display').style.color='var(--act)';
+  document.getElementById('timer-start-btn').disabled=false;
+}
+</script>
+</body>
+</html>
