@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>표준입출력과 파일입출력 | 2. 프로그래밍</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0e1a; --card: #141b2d; --border: #1e2d45;
+    --accent: #00d4ff; --purple: #7c3aed; --green: #10b981;
+    --yellow: #f59e0b; --danger: #ef4444;
+    --text: #e2e8f0; --muted: #64748b; --code-bg: #0d1117;
+  }
+  html, body { width:100%; height:100%; background:#111; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+
+  /* 4:3 stage */
+  #stage { position:relative; background:var(--bg); overflow:hidden; }
+
+  /* slides */
+  .slide { position:absolute; inset:0; display:none; flex-direction:column; opacity:0; transform:translateX(4%); transition:opacity .35s,transform .35s; }
+  .slide.active { display:flex; opacity:1; transform:translateX(0); }
+  .slide.exit   { opacity:0; transform:translateX(-4%); pointer-events:none; }
+
+  /* font: em-based, base set by JS */
+  #stage { font-size:20px; font-family:'Noto Sans KR',sans-serif; }
+
+  h1 { font-size:2.5em; font-weight:900; line-height:1.15; letter-spacing:-.02em;
+       background:linear-gradient(135deg,#fff,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  h2 { font-size:1.65em; font-weight:800; color:#fff; margin-bottom:.4em; }
+  h3 { font-size:1.1em; font-weight:700; color:var(--accent); margin-bottom:.3em; }
+  p,li,td,th { font-size:1em; line-height:1.65; color:var(--text); }
+  .sm  { font-size:.85em; }
+  .xs  { font-size:.75em; }
+  .mono { font-family:'JetBrains Mono',monospace; }
+
+  /* layout */
+  .pad  { padding:2.5% 3.8%; }
+  .col2 { display:grid; grid-template-columns:1fr 1fr; gap:1.6%; }
+  .fc   { display:flex; flex-direction:column; }
+  .f1   { flex:1; }
+
+  /* header */
+  .hdr { display:flex; align-items:center; gap:.7em; padding:1.6% 3.8% .5%; flex-shrink:0; }
+  .chip { font-size:.68em; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:.28em .8em; border-radius:20px; border:1px solid var(--accent); color:var(--accent); }
+  .chip.p { border-color:var(--purple); color:#a78bfa; }
+  .chip.g { border-color:var(--green); color:var(--green); }
+  .chip.y { border-color:var(--yellow); color:var(--yellow); }
+  .snum { margin-left:auto; font-size:.7em; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+
+  /* cards */
+  .card  { background:var(--card); border:1px solid var(--border); border-radius:.65em; padding:.85em 1em; }
+  .b-b   { background:rgba(0,212,255,.07);   border:1px solid rgba(0,212,255,.25);   border-radius:.65em; padding:.8em 1em; }
+  .b-p   { background:rgba(124,58,237,.09);  border:1px solid rgba(124,58,237,.3);   border-radius:.65em; padding:.8em 1em; }
+  .b-g   { background:rgba(16,185,129,.08);  border:1px solid rgba(16,185,129,.28);  border-radius:.65em; padding:.8em 1em; }
+  .b-y   { background:rgba(245,158,11,.07);  border:1px solid rgba(245,158,11,.3);   border-radius:.65em; padding:.8em 1em; }
+  .b-yw  { background:rgba(245,158,11,.08);  border-left:.22em solid var(--yellow);  border-radius:0 .5em .5em 0; padding:.65em .9em; }
+  .b-er  { background:rgba(239,68,68,.09);   border-left:.22em solid var(--danger);  border-radius:0 .5em .5em 0; padding:.65em .9em; }
+
+  /* code */
+  .code { background:var(--code-bg); border:1px solid #21262d; border-radius:.5em; padding:.75em .95em;
+          font-family:'JetBrains Mono',monospace; font-size:.82em; line-height:1.65; position:relative; overflow:hidden; }
+  .code::before { content:''; position:absolute; top:0; left:0; width:.18em; height:100%; background:linear-gradient(to bottom,var(--accent),var(--purple)); }
+  .ln  { color:#3d4f62; display:inline-block; width:1.4em; margin-right:.7em; text-align:right; }
+  .kw  { color:#ff7b72; } .fn  { color:#d2a8ff; } .str { color:#a5d6ff; }
+  .num { color:#79c0ff; } .cmt { color:#8b949e; font-style:italic; } .var { color:#ffa657; } .op { color:#ff7b72; }
+
+  .out { background:#021116; border:1px solid var(--accent); border-left:.22em solid var(--green); border-radius:.45em;
+         padding:.55em .85em; font-family:'JetBrains Mono',monospace; font-size:.8em; color:var(--green); margin-top:.5em; }
+  .out-label { font-size:.72em; font-weight:700; letter-spacing:.1em; color:var(--green); opacity:.7; margin-bottom:.25em; text-transform:uppercase; }
+
+  /* list items */
+  .li  { display:flex; gap:.55em; align-items:flex-start; padding:.22em 0; }
+  .dot { width:.42em; height:.42em; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:.6em; }
+  .dot.p{background:var(--purple);} .dot.g{background:var(--green);} .dot.y{background:var(--yellow);}
+
+  /* flow */
+  .flow { display:flex; align-items:center; justify-content:center; }
+  .fbox { background:var(--card); border:2px solid var(--border); border-radius:.6em; padding:.65em 1.3em; text-align:center; }
+  .fbox.a{border-color:var(--accent);} .fbox.p{border-color:var(--purple);} .fbox.g{border-color:var(--green);}
+  .ficon { font-size:1.55em; display:block; margin-bottom:.12em; }
+  .flabel { font-size:.92em; font-weight:700; }
+  .fsub   { font-size:.7em; color:var(--muted); margin-top:.08em; }
+  .arr    { font-size:1.35em; color:var(--accent); margin:0 .38em; }
+
+  /* table */
+  table { width:100%; border-collapse:collapse; font-size:.86em; }
+  th { background:rgba(0,212,255,.12); color:var(--accent); font-weight:700; padding:.48em .75em; border:1px solid var(--border); text-align:left; font-size:.86em; letter-spacing:.04em; }
+  td { padding:.48em .75em; border:1px solid var(--border); vertical-align:top; line-height:1.5; }
+  tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+  .tdm { font-family:'JetBrains Mono',monospace; color:#d2a8ff; font-size:.84em; }
+
+  /* mode badges */
+  .mr { display:inline-block; padding:.22em .65em; border-radius:.35em; font-family:'JetBrains Mono',monospace; font-size:.8em; font-weight:700; background:rgba(0,212,255,.12); color:var(--accent); border:1px solid rgba(0,212,255,.25); }
+  .mw { display:inline-block; padding:.22em .65em; border-radius:.35em; font-family:'JetBrains Mono',monospace; font-size:.8em; font-weight:700; background:rgba(124,58,237,.12); color:#a78bfa; border:1px solid rgba(124,58,237,.25); }
+  .ma { display:inline-block; padding:.22em .65em; border-radius:.35em; font-family:'JetBrains Mono',monospace; font-size:.8em; font-weight:700; background:rgba(16,185,129,.12); color:var(--green); border:1px solid rgba(16,185,129,.25); }
+
+  /* tags */
+  .tag { display:inline-block; padding:.18em .58em; border-radius:.3em; font-size:.76em; font-weight:700; font-family:'JetBrains Mono',monospace; margin:.12em; }
+  .tb { background:rgba(0,212,255,.1); border:1px solid rgba(0,212,255,.3); color:var(--accent); }
+  .tp { background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.3); color:#a78bfa; }
+  .tg { background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); color:var(--green); }
+  .ty { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); color:var(--yellow); }
+
+  /* quiz */
+  .qopt { background:var(--card); border:2px solid var(--border); border-radius:.5em; padding:.6em .95em; cursor:pointer; transition:all .22s; margin-bottom:.45em; display:flex; align-items:center; gap:.65em; }
+  .qopt:hover { border-color:var(--accent); background:rgba(0,212,255,.05); }
+  .qopt.correct { border-color:var(--green); background:rgba(16,185,129,.1); }
+  .qopt.wrong   { border-color:var(--danger); background:rgba(239,68,68,.1); }
+  .qalpha { width:1.55em; height:1.55em; border-radius:.38em; background:var(--border); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85em; flex-shrink:0; }
+  .qfb { margin-top:.55em; padding:.55em .85em; border-radius:.45em; font-weight:600; font-size:.88em; display:none; }
+  .qfb.show { display:block; }
+  .qfb.ok   { background:rgba(16,185,129,.15); border:1px solid var(--green); color:var(--green); }
+  .qfb.fail { background:rgba(239,68,68,.12);  border:1px solid var(--danger); color:var(--danger); }
+
+  /* think */
+  .think { background:rgba(245,158,11,.06); border-left:.22em solid var(--yellow); border-radius:0 .45em .45em 0; padding:.52em .85em; font-size:.9em; color:var(--yellow); }
+
+  /* reveal */
+  .rvbtn { background:rgba(0,212,255,.1); border:1px solid rgba(0,212,255,.3); border-radius:.42em; padding:.38em .85em; color:var(--accent); font-family:inherit; font-size:.82em; font-weight:700; cursor:pointer; transition:all .2s; margin-top:.45em; }
+  .rvbtn:hover { background:rgba(0,212,255,.2); }
+  .rvcont { display:none; margin-top:.38em; }
+  .rvcont.show { display:block; }
+
+  /* glow */
+  .glow { position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; }
+  .inner { position:relative; z-index:1; flex:1; display:flex; flex-direction:column; }
+
+  /* nav */
+  #nav { position:absolute; bottom:2.2%; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:.65em;
+         background:rgba(20,27,45,.92); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:40px; padding:.48em 1.1em; z-index:999; }
+  .nb  { width:1.9em; height:1.9em; border-radius:50%; border:1px solid var(--border); background:transparent; color:var(--text); font-size:1em; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; }
+  .nb:hover { background:var(--accent); border-color:var(--accent); color:#000; }
+  .nb:disabled { opacity:.3; cursor:default; }
+  #pbar  { width:9em; height:.2em; background:var(--border); border-radius:.1em; overflow:hidden; }
+  #pfill { height:100%; background:linear-gradient(to right,var(--accent),var(--purple)); transition:width .35s ease; }
+  #sc    { font-family:'JetBrains Mono',monospace; font-size:.72em; color:var(--muted); min-width:2.8em; text-align:center; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ══ 0: TITLE ══ -->
+<div class="slide active" id="s0">
+  <div class="glow" style="width:55%;height:55%;background:rgba(0,212,255,.06);top:-10%;right:-8%;"></div>
+  <div class="glow" style="width:45%;height:45%;background:rgba(124,58,237,.07);bottom:-8%;left:-6%;"></div>
+  <div class="inner pad fc" style="justify-content:center;gap:.75em;">
+    <div style="display:flex;align-items:center;gap:.8em;">
+      <div class="chip">2. 프로그래밍</div>
+      <span class="xs" style="color:var(--muted);">122–124쪽</span>
+    </div>
+    <h1>표준입출력과<br>파일입출력</h1>
+    <p style="max-width:62%;color:#94a3b8;font-size:1.05em;line-height:1.8;">
+      키오스크에서 음식을 주문할 때,<br>그 앱은 어떤 순서로 작동할까? 🤔
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:.38em;margin-top:.2em;">
+      <span class="tag tb">표준 입력</span>
+      <span class="tag tp">표준 출력</span>
+      <span class="tag tg">표준입출력</span>
+      <span class="tag ty">파일입출력</span>
+    </div>
+    <div class="card" style="max-width:60%;margin-top:.5em;">
+      <p class="xs" style="color:var(--muted);font-weight:700;letter-spacing:.1em;margin-bottom:.45em;">🎯 학습 목표</p>
+      <div class="li"><div class="dot"></div><p>표준입출력과 파일입출력의 <strong style="color:var(--accent);">개념과 필요성</strong>을 설명할 수 있다.</p></div>
+      <div class="li"><div class="dot p"></div><p>표준입출력과 파일입출력을 활용한 <strong style="color:#a78bfa;">프로그램을 작성</strong>할 수 있다.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 1: 생각열기 ══ -->
+<div class="slide" id="s1">
+  <div class="hdr"><div class="chip">도입</div><span style="font-weight:700;color:#fff;">생각 열기</span><div class="snum">01 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <h2>프로그램은 어떻게 작동할까?</h2>
+    <div class="think">💭 키오스크에서 음식을 주문하거나 스마트폰으로 열차를 예매할 때 — 앱은 어떤 단계를 거칠까요?</div>
+    <div class="flow" style="gap:0;margin:.8% 0;">
+      <div class="fbox a"><span class="ficon">⌨️</span><div class="flabel" style="color:var(--accent);">입력</div><div class="fsub">키보드·터치</div></div>
+      <div class="arr">→</div>
+      <div class="fbox p"><span class="ficon">⚙️</span><div class="flabel" style="color:#a78bfa;">처리</div><div class="fsub">연산·판단</div></div>
+      <div class="arr" style="color:#a78bfa;">→</div>
+      <div class="fbox g"><span class="ficon">🖥️</span><div class="flabel" style="color:var(--green);">출력</div><div class="fsub">화면·파일</div></div>
+    </div>
+    <div class="col2 f1">
+      <div class="b-b fc" style="gap:.45em;">
+        <h3>📥 표준 입력</h3>
+        <p>키보드와 같은 <strong style="color:var(--accent);">기본 입력 장치</strong>를 통해 값을 입력받는 것</p>
+        <div class="code" style="margin-top:auto;"><span class="fn">input</span>(<span class="str">'몇 살이세요? '</span>)</div>
+      </div>
+      <div class="b-p fc" style="gap:.45em;">
+        <h3 style="color:#a78bfa;">📤 표준 출력</h3>
+        <p>모니터와 같은 <strong style="color:#a78bfa;">기본 출력 장치</strong>를 통해 결과를 보여 주는 것</p>
+        <div class="code" style="margin-top:auto;"><span class="fn">print</span>(<span class="str">'안녕하세요!'</span>)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 2: print() ══ -->
+<div class="slide" id="s2">
+  <div class="hdr"><div class="chip">개념 ①</div><span style="font-weight:700;color:#fff;">표준 출력 — <span class="mono" style="color:var(--accent);">print()</span> 함수</span><div class="snum">02 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <div class="col2 f1">
+      <div class="fc" style="gap:.55em;">
+        <div class="b-b fc f1" style="gap:.32em;">
+          <h3>print() 특징</h3>
+          <div class="li"><div class="dot"></div><p>괄호 안의 내용을 화면에 출력</p></div>
+          <div class="li"><div class="dot"></div><p><strong style="color:#ffd60a;">','</strong>(콤마)로 여러 값 동시 출력 가능</p></div>
+          <div class="li"><div class="dot"></div><p>출력 후 자동으로 <strong style="color:var(--accent);">줄 바꿈</strong></p></div>
+          <div class="li"><div class="dot"></div><p>변수·수식도 함께 출력 가능</p></div>
+        </div>
+        <div class="think">🧐 <span class="mono" style="color:var(--yellow);">a * b</span>를 print에 넣으면 어떤 값이 출력될까요?</div>
+      </div>
+      <div class="fc" style="gap:.55em;">
+        <div class="code f1">
+          <div><span class="ln">1</span><span class="var">fruit</span> <span class="op">=</span> <span class="str">'청포도'</span></div>
+          <div><span class="ln">2</span><span class="fn">print</span>(<span class="str">'내가 좋아하는 과일은'</span>, <span class="var">fruit</span>, <span class="str">'입니다.'</span>)</div>
+          <div><span class="ln">3</span><span class="var">a</span> <span class="op">=</span> <span class="num">7</span></div>
+          <div><span class="ln">4</span><span class="var">b</span> <span class="op">=</span> <span class="num">5</span></div>
+          <div><span class="ln">5</span><span class="fn">print</span>(<span class="var">a</span>,<span class="str">'*'</span>,<span class="var">b</span>,<span class="str">'의 계산 결과는'</span>,<span class="var">a</span><span class="op">*</span><span class="var">b</span>,<span class="str">'입니다.'</span>)</div>
+        </div>
+        <div class="out">
+          <div class="out-label">▶ 실행 결과</div>
+          내가 좋아하는 과일은 청포도 입니다.<br>
+          7 * 5 의 계산 결과는 35 입니다.
+        </div>
+        <div class="b-g sm">💡 콤마(,)로 구분하면 자동으로 <strong style="color:var(--green);">공백 한 칸</strong>이 삽입됩니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 3: input() ══ -->
+<div class="slide" id="s3">
+  <div class="hdr"><div class="chip">개념 ②</div><span style="font-weight:700;color:#fff;">표준 입력 — <span class="mono" style="color:var(--accent);">input()</span> 함수</span><div class="snum">03 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <div class="col2 f1">
+      <div class="fc" style="gap:.55em;">
+        <div class="b-p fc f1" style="gap:.32em;">
+          <h3 style="color:#a78bfa;">input() 특징</h3>
+          <div class="li"><div class="dot p"></div><p>괄호 안 문자열을 <strong style="color:#a78bfa;">프롬프트</strong>로 표시</p></div>
+          <div class="li"><div class="dot p"></div><p>입력받은 값을 항상 <strong style="color:#ffd60a;">문자열(str)</strong>로 저장</p></div>
+          <div class="li"><div class="dot p"></div><p>반드시 <strong style="color:#a78bfa;">변수에 대입</strong>해서 사용</p></div>
+        </div>
+        <div class="b-yw sm">⚠️ input()은 항상 <strong style="color:var(--yellow);">str</strong>로 반환합니다.<br>숫자 계산 시 <span class="mono" style="color:var(--accent);">int()</span> 또는 <span class="mono" style="color:var(--accent);">float()</span>으로 형 변환!</div>
+      </div>
+      <div class="fc" style="gap:.55em;">
+        <div class="code">
+          <div><span class="ln">1</span><span class="var">age</span> <span class="op">=</span> <span class="fn">input</span>(<span class="str">'몇 살이세요?'</span>)</div>
+          <div><span class="ln">2</span><span class="fn">print</span>(<span class="str">'당신은'</span>, <span class="var">age</span>, <span class="str">'살이군요.'</span>)</div>
+        </div>
+        <div class="out">
+          <div class="out-label">▶ 실행 결과</div>
+          <span style="color:#64748b;">몇 살이세요?</span> <span style="color:#ffd60a;">19</span><br>
+          당신은 19 살이군요.
+        </div>
+        <div class="card sm">
+          <p class="xs" style="color:var(--muted);font-weight:700;margin-bottom:.38em;">📌 형 변환 예시</p>
+          <div class="mono" style="font-size:.85em;line-height:1.75;">
+            <span style="color:#8b949e;"># 정수로 변환</span><br>
+            <span style="color:#d2a8ff;">int</span>(<span style="color:#d2a8ff;">input</span>(<span style="color:#a5d6ff;">'나이: '</span>))<br>
+            <span style="color:#8b949e;"># 실수로 변환</span><br>
+            <span style="color:#d2a8ff;">float</span>(<span style="color:#d2a8ff;">input</span>(<span style="color:#a5d6ff;">'키: '</span>))
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 4: 파일입출력 개념 ══ -->
+<div class="slide" id="s4">
+  <div class="hdr"><div class="chip">개념 ③</div><span style="font-weight:700;color:#fff;">파일입출력이란?</span><div class="snum">04 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <h2 style="margin-bottom:0;">파일입출력은 왜 필요할까?</h2>
+    <div class="col2">
+      <div class="b-b">
+        <h3>💾 필요한 상황</h3>
+        <div class="li"><div class="dot"></div><p>파일로 저장된 <strong style="color:var(--accent);">대량 데이터</strong>를 읽어 올 때</p></div>
+        <div class="li"><div class="dot"></div><p>결괏값을 <strong style="color:var(--accent);">파일로 저장</strong>해서 나중에 다시 쓸 때</p></div>
+      </div>
+      <div class="b-p">
+        <h3 style="color:#a78bfa;">📂 파일 처리 3단계</h3>
+        <div style="display:flex;align-items:center;gap:.5em;margin-top:.4em;" class="mono sm">
+          <span style="color:var(--accent);">open()</span>
+          <span style="color:var(--muted);">→</span>
+          <span style="color:#a78bfa;">읽기/쓰기</span>
+          <span style="color:var(--muted);">→</span>
+          <span style="color:var(--green);">close()</span>
+        </div>
+        <p class="xs" style="color:var(--muted);margin-top:.4em;">파일을 열고 → 작업하고 → 반드시 닫는다</p>
+      </div>
+    </div>
+    <div class="code">
+      <div><span class="cmt"># 파일 열기</span></div>
+      <div><span class="var">파일변수</span> <span class="op">=</span> <span class="fn">open</span>(<span class="str">파일명</span>, <span class="str">모드</span>)</div>
+      <div style="margin-top:.4em;"><span class="cmt"># 작업 완료 후 반드시 닫기</span></div>
+      <div><span class="var">파일변수</span>.<span class="fn">close</span>()</div>
+    </div>
+    <div style="display:flex;gap:.7em;align-items:center;flex-wrap:wrap;">
+      <p class="sm" style="color:var(--muted);font-weight:700;">파일입출력 모드:</p>
+      <span class="mr">'r' — 읽기</span>
+      <span class="mw">'w' — 쓰기</span>
+      <span class="ma">'a' — 추가</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 5: 파일 처리 함수 ══ -->
+<div class="slide" id="s5">
+  <div class="hdr"><div class="chip">개념 ④</div><span style="font-weight:700;color:#fff;">파일 처리 함수 정리</span><div class="snum">05 / 11</div></div>
+  <div class="inner pad fc" style="gap:.7em;">
+    <table class="f1">
+      <thead><tr><th>모드</th><th>함수</th><th>기능 설명</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="3" style="vertical-align:middle;text-align:center;"><span class="mr">읽기<br>'r'</span></td>
+          <td class="tdm">read()</td>
+          <td>파일의 <strong>전체 내용</strong>을 하나의 문자열로 반환</td>
+        </tr>
+        <tr>
+          <td class="tdm">readline()</td>
+          <td>한 줄씩 읽고 포인터를 <strong>다음 줄</strong>로 이동</td>
+        </tr>
+        <tr>
+          <td class="tdm">readlines()</td>
+          <td>나머지 모든 줄을 읽어 <strong>리스트</strong>로 반환</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;"><span class="mw">'w'</span><br><span class="ma" style="display:inline-block;margin-top:.28em;">'a'</span></td>
+          <td class="tdm">write()</td>
+          <td>파일 포인터 현재 위치에 <strong>내용 작성</strong></td>
+        </tr>
+        <tr>
+          <td colspan="2" class="tdm" style="text-align:center;color:#6ee7b7;">close()</td>
+          <td><strong style="color:var(--yellow);">모든 모드</strong>에서 작업 후 반드시 호출!</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="b-yw sm">⚠️ <strong style="color:var(--yellow);">'w' 모드</strong>로 열면 기존 내용이 <strong>모두 삭제</strong>됩니다. 이어 쓰려면 반드시 <strong>'a' 모드</strong>를 사용하세요!</div>
+  </div>
+</div>
+
+<!-- ══ 6: 파일 쓰기/읽기 ══ -->
+<div class="slide" id="s6">
+  <div class="hdr"><div class="chip">코드 예제</div><span style="font-weight:700;color:#fff;">파일 쓰기 &amp; 읽기</span><div class="snum">06 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <div class="col2 f1">
+      <div class="fc" style="gap:.5em;">
+        <p class="xs" style="color:#a78bfa;font-weight:700;letter-spacing:.1em;">① 파일 쓰기 (w 모드)</p>
+        <div class="code f1" style="font-size:.78em;">
+          <div><span class="ln">1</span><span class="var">f</span> <span class="op">=</span> <span class="fn">open</span>(<span class="str">'연인의_곁.txt'</span>, <span class="str">'w'</span>)</div>
+          <div><span class="ln">2</span><span class="var">f</span>.<span class="fn">write</span>(<span class="str">'태양이 바다에 미광을 비추면\n'</span>)</div>
+          <div><span class="ln">3</span><span class="var">f</span>.<span class="fn">write</span>(<span class="str">'나는 그대를 생각하노라.\n'</span>)</div>
+          <div><span class="ln">4</span><span class="var">f</span>.<span class="fn">write</span>(<span class="str">'희미한 달빛이 샘물 위에 떠 있으면\n'</span>)</div>
+          <div><span class="ln">5</span><span class="var">f</span>.<span class="fn">write</span>(<span class="str">'나는 그대를 생각하노라.\n'</span>)</div>
+          <div><span class="ln">6</span><span class="var">f</span>.<span class="fn">close</span>()</div>
+        </div>
+        <div class="b-yw sm">💡 <span class="mono">\n</span>은 줄 바꿈 문자. write()는 자동 줄 바꿈이 없어요!</div>
+      </div>
+      <div class="fc" style="gap:.5em;">
+        <p class="xs" style="color:var(--accent);font-weight:700;letter-spacing:.1em;">② 파일 읽기 (r 모드)</p>
+        <div class="code">
+          <div><span class="ln">1</span><span class="var">f</span> <span class="op">=</span> <span class="fn">open</span>(<span class="str">'연인의_곁.txt'</span>, <span class="str">'r'</span>)</div>
+          <div><span class="ln">2</span><span class="var">a</span> <span class="op">=</span> <span class="var">f</span>.<span class="fn">read</span>()</div>
+          <div><span class="ln">3</span><span class="fn">print</span>(<span class="var">a</span>)</div>
+          <div><span class="ln">4</span><span class="var">f</span>.<span class="fn">close</span>()</div>
+        </div>
+        <div class="out">
+          <div class="out-label">▶ 실행 결과</div>
+          태양이 바다에 미광을 비추면<br>
+          나는 그대를 생각하노라.<br>
+          희미한 달빛이 샘물 위에 떠 있으면<br>
+          나는 그대를 생각하노라.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 7: 구현① 정사각형 ══ -->
+<div class="slide" id="s7">
+  <div class="hdr"><div class="chip g">구현 ①</div><span style="font-weight:700;color:#fff;">표준입출력 — 정사각형 넓이 계산기</span><div class="snum">07 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <div class="col2 f1">
+      <div class="fc" style="gap:.55em;">
+        <div class="think">🧩 input()으로 받은 값의 자료형은?<br><span class="mono" style="color:var(--yellow);">int(a) * int(a)</span>에서 왜 int()가 필요할까요?</div>
+        <div class="b-g fc f1" style="gap:.3em;">
+          <h3>컴퓨팅 사고 포인트</h3>
+          <div class="li"><div class="dot g"></div><p><strong>입력</strong>: 변의 길이 (문자열로 받음)</p></div>
+          <div class="li"><div class="dot g"></div><p><strong>처리</strong>: int() 형변환 후 제곱 계산</p></div>
+          <div class="li"><div class="dot g"></div><p><strong>출력</strong>: print()로 결과 출력</p></div>
+        </div>
+      </div>
+      <div class="fc" style="gap:.52em;">
+        <div class="code">
+          <div><span class="ln">1</span><span class="fn">print</span>(<span class="str">'정사각형의 넓이를 계산하겠습니다.'</span>)</div>
+          <div><span class="ln">2</span><span class="var">a</span> <span class="op">=</span> <span class="fn">input</span>(<span class="str">'한 변의 길이를 입력하세요: '</span>)</div>
+          <div><span class="ln">3</span><span class="fn">print</span>(<span class="str">'변의 길이'</span>, <span class="var">a</span>, <span class="str">'의 넓이는'</span>,</div>
+          <div><span class="ln"> </span>      <span class="fn">int</span>(<span class="var">a</span>)<span class="op">*</span><span class="fn">int</span>(<span class="var">a</span>), <span class="str">'입니다.'</span>)</div>
+        </div>
+        <div class="out">
+          <div class="out-label">▶ 실행 결과</div>
+          정사각형의 넓이를 계산하겠습니다.<br>
+          <span style="color:#64748b;">한 변의 길이를 입력하세요:</span> <span style="color:#ffd60a;">5</span><br>
+          변의 길이 5 의 넓이는 25 입니다.
+        </div>
+        <button class="rvbtn" onclick="rv('r1')">💡 int() 없이 실행하면? (클릭)</button>
+        <div class="rvcont" id="r1">
+          <div class="b-er sm mono">TypeError: can't multiply sequence by non-int of type 'str'</div>
+          <p class="sm" style="color:var(--muted);margin-top:.3em;">문자열은 * 곱셈 불가 → 반드시 int() 변환!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 8: 구현② 독서기록 ══ -->
+<div class="slide" id="s8">
+  <div class="hdr"><div class="chip g">구현 ②</div><span style="font-weight:700;color:#fff;">파일입출력 — 독서 기록 저장</span><div class="snum">08 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <div class="col2 f1">
+      <div class="fc" style="gap:.55em;">
+        <div class="b-p fc" style="gap:.38em;">
+          <h3 style="color:#a78bfa;">🔑 핵심: 'a' (추가 모드)</h3>
+          <p>새로운 기록을 추가할 때마다 기존 데이터가 <strong style="color:#a78bfa;">유지</strong>됩니다.</p>
+          <p class="sm" style="color:var(--danger);">'w'로 열면 기존 기록이 모두 삭제됩니다!</p>
+        </div>
+        <div class="think sm">🤔 이 프로그램을 여러 번 실행하면<br>bookreview.txt에는 어떻게 쌓일까요?</div>
+      </div>
+      <div class="code f1" style="font-size:.79em;">
+        <div><span class="cmt"># 텍스트 파일에 한 줄 평 저장하기</span></div>
+        <div><span class="ln">1</span><span class="var">f</span> <span class="op">=</span> <span class="fn">open</span>(<span class="str">'bookreview.txt'</span>, <span class="str">'a'</span>)</div>
+        <div><span class="ln">2</span><span class="var">date</span>   <span class="op">=</span> <span class="fn">input</span>(<span class="str">'읽은 날짜:'</span>)</div>
+        <div><span class="ln">3</span><span class="var">title</span>  <span class="op">=</span> <span class="fn">input</span>(<span class="str">'책 제목:'</span>)</div>
+        <div><span class="ln">4</span><span class="var">review</span> <span class="op">=</span> <span class="fn">input</span>(<span class="str">'한 줄 평:'</span>)</div>
+        <div><span class="ln">5</span></div>
+        <div><span class="ln">6</span><span class="var">f</span>.<span class="fn">write</span>(<span class="str">'읽은 날짜:'</span> <span class="op">+</span> <span class="var">date</span>   <span class="op">+</span> <span class="str">'\n'</span>)</div>
+        <div><span class="ln">7</span><span class="var">f</span>.<span class="fn">write</span>(<span class="str">'책 제목:'</span>  <span class="op">+</span> <span class="var">title</span>  <span class="op">+</span> <span class="str">'\n'</span>)</div>
+        <div><span class="ln">8</span><span class="var">f</span>.<span class="fn">write</span>(<span class="str">'한 줄 평:'</span> <span class="op">+</span> <span class="var">review</span> <span class="op">+</span> <span class="str">'\n'</span>)</div>
+        <div><span class="ln">9</span><span class="var">f</span>.<span class="fn">write</span>(<span class="str">'-------------------------\n'</span>)</div>
+        <div><span class="ln">10</span><span class="var">f</span>.<span class="fn">close</span>()</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 9: 응용 CSV ══ -->
+<div class="slide" id="s9">
+  <div class="hdr"><div class="chip y">응용 🚇</div><span style="font-weight:700;color:#fff;">공공 데이터 — 서울 지하철 물품보관함</span><div class="snum">09 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <div class="col2 f1">
+      <div class="fc" style="gap:.55em;">
+        <div class="b-b fc" style="gap:.38em;">
+          <h3>💡 with 구문이란?</h3>
+          <p class="sm"><span class="mono" style="color:var(--accent);">with open(...) as f:</span><br>블록이 끝나면 <strong style="color:var(--accent);">자동으로 close()</strong>가 호출됩니다!</p>
+        </div>
+        <div class="b-yw sm">📌 <span class="mono">encoding='euc-kr'</span><br>한글이 깨지지 않도록 인코딩을 명시합니다.</div>
+        <div class="card sm" style="margin-top:auto;">🗂 데이터 출처: <span style="color:var(--accent);">공공데이터포털 (data.go.kr)</span></div>
+      </div>
+      <div class="fc" style="gap:.5em;">
+        <div class="code f1" style="font-size:.77em;">
+          <div><span class="ln">1</span><span class="kw">with</span> <span class="fn">open</span>(<span class="str">'물품보관함.csv'</span>, <span class="str">'r'</span>,</div>
+          <div><span class="ln"> </span>        encoding<span class="op">=</span><span class="str">'euc-kr'</span>) <span class="kw">as</span> <span class="var">file</span>:</div>
+          <div><span class="ln">2</span>  <span class="var">file</span>.<span class="fn">readline</span>()  <span class="cmt"># 헤더 건너뜀</span></div>
+          <div><span class="ln">3</span>  <span class="var">lines</span> <span class="op">=</span> <span class="var">file</span>.<span class="fn">readlines</span>()</div>
+          <div><span class="ln">4</span>  <span class="kw">for</span> <span class="var">line</span> <span class="kw">in</span> <span class="var">lines</span>:</div>
+          <div><span class="ln">5</span>    <span class="var">cols</span> <span class="op">=</span> <span class="var">line</span>.<span class="fn">strip</span>().<span class="fn">split</span>(<span class="str">','</span>)</div>
+          <div><span class="ln">6</span>    <span class="fn">print</span>(<span class="var">cols</span>)</div>
+        </div>
+        <div class="out" style="font-size:.79em;">
+          <div class="out-label">▶ 실행 결과 (일부)</div>
+          ['1', '1', '서울역A', '1,2번 출입구']<br>
+          ['2', '1', '서울역D', '2,3번 출입구']<br>
+          <span style="color:var(--muted);">-- 생략 --</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 10: QUIZ ══ -->
+<div class="slide" id="s10">
+  <div class="hdr"><div class="chip p">형성 평가</div><span style="font-weight:700;color:#fff;">개념 확인 퀴즈</span><div class="snum">10 / 11</div></div>
+  <div class="inner pad fc" style="justify-content:center;gap:1.1em;">
+    <div id="qb1">
+      <p style="font-size:1.1em;font-weight:700;color:#fff;margin-bottom:.48em;">Q1. <span class="mono" style="color:var(--accent);">input()</span> 함수로 숫자를 입력받았을 때, 이 값의 자료형은?</p>
+      <div class="qopt" onclick="cq1(this,'b')"><div class="qalpha">A</div><span>int (정수)</span></div>
+      <div class="qopt" onclick="cq1(this,'a')"><div class="qalpha">B</div><span>str (문자열) ✅</span></div>
+      <div class="qopt" onclick="cq1(this,'c')"><div class="qalpha">C</div><span>float (실수)</span></div>
+      <div class="qopt" onclick="cq1(this,'d')"><div class="qalpha">D</div><span>bool (참/거짓)</span></div>
+      <div id="fb1" class="qfb"></div>
+    </div>
+    <div id="qb2" style="display:none;">
+      <p style="font-size:1.1em;font-weight:700;color:#fff;margin-bottom:.48em;">Q2. 기존 파일에 데이터를 <u>이어서 추가</u>하려면 어떤 모드를 써야 하나요?</p>
+      <div class="qopt" onclick="cq2(this,'x')"><div class="qalpha">A</div><span>'r' — 읽기</span></div>
+      <div class="qopt" onclick="cq2(this,'x')"><div class="qalpha">B</div><span>'w' — 쓰기</span></div>
+      <div class="qopt" onclick="cq2(this,'o')"><div class="qalpha">C</div><span>'a' — 추가 ✅</span></div>
+      <div id="fb2" class="qfb"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 11: 정리 ══ -->
+<div class="slide" id="s11">
+  <div class="hdr"><div class="chip">수업 정리</div><span style="font-weight:700;color:#fff;">오늘 배운 내용 요약</span><div class="snum">11 / 11</div></div>
+  <div class="inner pad fc" style="gap:.65em;">
+    <div class="col2 f1">
+      <div class="fc" style="gap:.55em;">
+        <div class="b-b fc f1" style="gap:.3em;">
+          <h3>📌 표준입출력</h3>
+          <div class="li"><div class="dot"></div><p><span class="mono" style="color:var(--accent);">print()</span> — 화면 출력, 콤마로 여러 값</p></div>
+          <div class="li"><div class="dot"></div><p><span class="mono" style="color:var(--accent);">input()</span> — 키보드 입력, 항상 <strong>str</strong> 반환</p></div>
+          <div class="li"><div class="dot"></div><p>숫자 계산 시 <strong style="color:var(--accent);">int() / float()</strong> 형변환 필수</p></div>
+        </div>
+        <div class="b-p fc f1" style="gap:.3em;">
+          <h3 style="color:#a78bfa;">📁 파일입출력</h3>
+          <div class="li"><div class="dot p"></div><p><span class="mono" style="color:#a78bfa;">open(파일명, 모드)</span> → 파일 열기</p></div>
+          <div class="li"><div class="dot p"></div><p>모드: <span class="mono">'r'</span> 읽기 / <span class="mono">'w'</span> 쓰기 / <span class="mono">'a'</span> 추가</p></div>
+          <div class="li"><div class="dot g"></div><p><span class="mono" style="color:var(--green);">close()</span> — 작업 후 반드시 닫기!</p></div>
+        </div>
+      </div>
+      <div class="card fc f1" style="gap:.48em;">
+        <p class="xs" style="color:var(--muted);font-weight:700;letter-spacing:.1em;">🚀 코랩 실습으로 넘어가기</p>
+        <div class="li" style="padding:.38em 0;border-bottom:1px solid var(--border);">
+          <span style="width:1.55em;height:1.55em;border-radius:.38em;background:rgba(0,212,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.82em;">1</span>
+          <p>정사각형 넓이 계산기 완성</p>
+        </div>
+        <div class="li" style="padding:.38em 0;border-bottom:1px solid var(--border);">
+          <span style="width:1.55em;height:1.55em;border-radius:.38em;background:rgba(124,58,237,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.82em;">2</span>
+          <p>나만의 독서 기록 저장 프로그램</p>
+        </div>
+        <div class="li" style="padding:.38em 0;border-bottom:1px solid var(--border);">
+          <span style="width:1.55em;height:1.55em;border-radius:.38em;background:rgba(16,185,129,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.82em;">3</span>
+          <p>공공데이터 CSV 파일 읽기</p>
+        </div>
+        <div class="li" style="padding:.38em 0;">
+          <span style="width:1.55em;height:1.55em;border-radius:.38em;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.82em;">⭐</span>
+          <p>심화: 학교 성적 파일 분석 도전!</p>
+        </div>
+        <div class="b-b sm" style="margin-top:auto;">📋 실습 후 구글 독스 활동지에 오늘 배운 내용을 정리해봅시다!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div id="nav">
+  <button class="nb" id="pb" onclick="go(-1)" disabled>◀</button>
+  <div id="pbar"><div id="pfill"></div></div>
+  <span id="sc"></span>
+  <button class="nb" id="nb" onclick="go(1)">▶</button>
+</div>
+
+</div><!-- #stage -->
+<script>
+  const stage = document.getElementById('stage');
+  function resize() {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let w, h;
+    if (vw / vh > 4/3) { h = vh; w = h * 4/3; }
+    else               { w = vw; h = w * 3/4; }
+    stage.style.width  = w + 'px';
+    stage.style.height = h + 'px';
+    // 1em ≈ w/36  →  large enough for back-row students
+    stage.style.fontSize = (w / 36) + 'px';
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const slides = document.querySelectorAll('.slide');
+  const total  = slides.length - 1;
+  let cur = 0;
+
+  function upd() {
+    document.getElementById('pb').disabled = cur === 0;
+    document.getElementById('nb').disabled = cur === slides.length - 1;
+    document.getElementById('sc').textContent = cur + ' / ' + total;
+    document.getElementById('pfill').style.width = (cur / total * 100) + '%';
+  }
+
+  function go(d) {
+    const n = cur + d;
+    if (n < 0 || n >= slides.length) return;
+    slides[cur].classList.remove('active');
+    slides[cur].classList.add('exit');
+    const p = cur; setTimeout(() => slides[p].classList.remove('exit'), 380);
+    cur = n;
+    slides[cur].style.display = 'flex';
+    slides[cur].offsetHeight;
+    slides[cur].classList.add('active');
+    upd();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight','ArrowDown',' '].includes(e.key)) go(1);
+    if (['ArrowLeft','ArrowUp'].includes(e.key)) go(-1);
+  });
+  upd();
+
+  function cq1(el, v) {
+    if (document.getElementById('fb1').classList.contains('show')) return;
+    el.parentNode.querySelectorAll('.qopt').forEach(o => o.style.pointerEvents='none');
+    const fb = document.getElementById('fb1');
+    if (v==='a') {
+      el.classList.add('correct');
+      fb.textContent = '✅ 정답! input()은 항상 문자열(str)로 반환합니다. 숫자 계산엔 int()나 float() 변환이 필요해요.';
+      fb.className = 'qfb show ok';
+      setTimeout(() => { document.getElementById('qb2').style.display='block'; }, 1400);
+    } else {
+      el.classList.add('wrong');
+      fb.textContent = '❌ 다시 생각해보세요. input()으로 받은 값은 어떤 자료형일까요?';
+      fb.className = 'qfb show fail';
+      setTimeout(() => el.parentNode.querySelectorAll('.qopt').forEach(o => o.style.pointerEvents=''), 1000);
+    }
+  }
+
+  function cq2(el, v) {
+    if (document.getElementById('fb2').classList.contains('show')) return;
+    el.parentNode.querySelectorAll('.qopt').forEach(o => o.style.pointerEvents='none');
+    const fb = document.getElementById('fb2');
+    if (v==='o') {
+      el.classList.add('correct');
+      fb.textContent = "✅ 정답! 'a'(append) 모드는 기존 내용을 유지하고 뒤에 이어 씁니다. 'w'는 기존 내용을 모두 지우니 주의!";
+      fb.className = 'qfb show ok';
+    } else {
+      el.classList.add('wrong');
+      fb.textContent = "❌ 틀렸습니다. 'r'은 읽기 전용, 'w'는 기존 내용을 지웁니다. 이어 쓰는 모드는?";
+      fb.className = 'qfb show fail';
+      setTimeout(() => el.parentNode.querySelectorAll('.qopt').forEach(o => o.style.pointerEvents=''), 1000);
+    }
+  }
+
+  function rv(id) { document.getElementById(id).classList.toggle('show'); }
+</script>
+</body>
+</html>
