@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>C7·C8 영단어 대모험! 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #e8f4ff;
+  --deep: #1a3a6b;
+  --mid: #2d5fb3;
+  --accent: #ff6b35;
+  --yellow: #ffd23f;
+  --green: #06d6a0;
+  --pink: #ff6b9d;
+  --purple: #b388ff;
+  --card-bg: #ffffff;
+  --shadow: 0 8px 32px rgba(26,58,107,0.13);
+  --radius: 22px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  height: 100%;
+  background: linear-gradient(160deg, #c9e8ff 0%, #e8f0ff 40%, #ffedf5 100%);
+  font-family: 'Noto Sans KR', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Floating clouds */
+.cloud {
+  position: fixed;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.6);
+  pointer-events: none;
+  z-index: 0;
+}
+.cloud::before, .cloud::after {
+  content: '';
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+.c1 { width: 120px; height: 40px; top: 8%; left: -20px; animation: float1 18s linear infinite; }
+.c1::before { width: 60px; height: 60px; top: -30px; left: 15px; }
+.c1::after { width: 40px; height: 40px; top: -20px; left: 50px; }
+.c2 { width: 90px; height: 30px; top: 20%; right: -10px; animation: float2 24s linear infinite; }
+.c2::before { width: 45px; height: 45px; top: -22px; left: 12px; }
+.c2::after { width: 30px; height: 30px; top: -14px; left: 38px; }
+.c3 { width: 70px; height: 25px; top: 55%; left: 5%; animation: float1 30s linear infinite reverse; }
+.c3::before { width: 35px; height: 35px; top: -17px; left: 10px; }
+@keyframes float1 { 0%{transform:translateX(-140px)} 100%{transform:translateX(110vw)} }
+@keyframes float2 { 0%{transform:translateX(110vw)} 100%{transform:translateX(-140px)} }
+
+#app {
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+  margin: 0 auto;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 20px;
+}
+
+/* ── HEADER ── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 10px;
+}
+.app-logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.3rem;
+  color: var(--deep);
+  letter-spacing: 1px;
+}
+.app-logo span { color: var(--accent); }
+.nav-tabs {
+  display: flex;
+  gap: 6px;
+}
+.nav-tab {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 50px;
+  border: 2.5px solid transparent;
+  background: rgba(255,255,255,0.6);
+  color: var(--mid);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-tab.active {
+  background: var(--deep);
+  color: #fff;
+  border-color: var(--deep);
+}
+
+/* ── SCREENS ── */
+.screen { display: none; flex-direction: column; flex: 1; padding: 6px 14px; }
+.screen.active { display: flex; }
+
+/* ── SECTION TITLE ── */
+.sec-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  color: var(--deep);
+  letter-spacing: 1px;
+  margin: 10px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── SET CARDS ── */
+.sets-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.set-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px 14px 14px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.set-card-icon {
+  font-size: 2.2rem;
+  display: block;
+  margin-bottom: 6px;
+}
+.set-card-num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.3rem;
+  color: var(--deep);
+}
+.set-card-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #888;
+  margin-top: 2px;
+}
+.set-card-count {
+  font-size: 0.7rem;
+  color: #aaa;
+  margin-top: 4px;
+  font-weight: 700;
+}
+.set-card:nth-child(1) { border-left: 5px solid var(--accent); }
+.set-card:nth-child(2) { border-left: 5px solid var(--green); }
+.set-card:nth-child(3) { border-left: 5px solid var(--pink); }
+.set-card:nth-child(4) { border-left: 5px solid var(--purple); }
+.set-card.selected {
+  border: 3px solid var(--deep) !important;
+  background: #f0f5ff;
+  transform: scale(0.97);
+}
+.set-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px; right: 10px;
+  font-size: 1.1rem;
+  color: var(--deep);
+  font-weight: 900;
+}
+.set-card:active { transform: scale(0.95); }
+
+.select-all-row {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+}
+.select-all-row span { font-size: 0.8rem; color: #888; font-weight: 700; }
+.select-all-btn {
+  background: var(--yellow);
+  border: none;
+  color: var(--deep);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 900;
+  padding: 6px 14px;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ── BIG BUTTONS ── */
+.big-btn {
+  width: 100%;
+  padding: 17px;
+  border-radius: var(--radius);
+  border: none;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.big-btn:active { transform: scale(0.97); box-shadow: none; }
+.btn-orange { background: linear-gradient(135deg, #ff6b35, #ff8c35); color: #fff; }
+.btn-green { background: linear-gradient(135deg, #06d6a0, #0bb87e); color: #fff; }
+.btn-outline { background: #fff; color: var(--deep); border: 2.5px solid var(--deep); }
+.btn-purple { background: linear-gradient(135deg, #b388ff, #7c4dff); color: #fff; }
+
+/* ── STATS ── */
+.stats-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.stat-box {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  line-height: 1;
+}
+.stat-lbl {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #aaa;
+  margin-top: 3px;
+}
+
+/* ── LEARN MODE (FLASHCARD + LISTEN) ── */
+.lrn-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.back-btn {
+  background: #fff;
+  border: 2.5px solid #dde;
+  border-radius: 12px;
+  width: 42px; height: 42px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--deep);
+}
+.progress-bar {
+  flex: 1;
+  height: 10px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--green), var(--mid));
+  transition: width 0.4s ease;
+}
+.progress-counter {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.95rem;
+  color: var(--deep);
+  flex-shrink: 0;
+}
+
+/* CARD FLIP */
+.fc-wrap {
+  perspective: 1000px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fc {
+  width: 100%;
+  min-height: 230px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+  cursor: pointer;
+}
+.fc.flipped { transform: rotateY(180deg); }
+.fc-face {
+  position: absolute;
+  width: 100%;
+  min-height: 230px;
+  background: #fff;
+  border-radius: 28px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  padding: 28px 20px;
+  box-shadow: 0 10px 40px rgba(26,58,107,0.16);
+}
+.fc-face-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(160deg, #e8f0ff 0%, #f5f0ff 100%);
+}
+.fc-emoji { font-size: 2.8rem; margin-bottom: 12px; }
+.fc-en {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.6rem;
+  color: var(--deep);
+  text-align: center;
+  line-height: 1.1;
+}
+.fc-ko {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--mid);
+  text-align: center;
+  margin-top: 6px;
+}
+.fc-tap-hint {
+  font-size: 0.72rem;
+  color: #bbb;
+  margin-top: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.fc-badge {
+  position: absolute;
+  top: 14px; left: 14px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 3px 10px;
+  border-radius: 50px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.fc-set-badge { background: rgba(45,95,179,0.12); color: var(--mid); }
+
+/* Stars animation */
+.star-burst {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999;
+  font-size: 1.8rem;
+  animation: starPop 0.7s ease forwards;
+}
+@keyframes starPop {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  60% { transform: scale(1.4) rotate(20deg); opacity: 1; }
+  100% { transform: scale(0.8) translateY(-80px) rotate(-10deg); opacity: 0; }
+}
+
+.fc-actions {
+  display: flex; gap: 10px; margin-top: 14px;
+}
+.fc-btn {
+  flex: 1; padding: 14px; border-radius: 18px;
+  border: 2.5px solid #dde;
+  background: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.fc-btn:active { transform: scale(0.95); }
+.fc-btn-know { border-color: var(--green); color: var(--green); }
+.fc-btn-dunno { border-color: var(--pink); color: var(--pink); }
+.fc-sound-btn {
+  flex: 0 0 52px;
+  border-color: var(--accent);
+  color: var(--accent);
+  font-size: 1.4rem;
+}
+
+.swipe-row {
+  display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px;
+}
+.swipe-row span { font-size: 0.7rem; color: #aaa; font-weight: 700; }
+.swipe-dot { width: 5px; height: 5px; border-radius: 50%; background: #ccc; }
+
+/* ── LISTEN MODE ── */
+.listen-card {
+  background: linear-gradient(160deg, #fff9e6 0%, #fff 100%);
+  border-radius: 28px;
+  padding: 30px 20px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(26,58,107,0.12);
+  margin-bottom: 16px;
+}
+.listen-title {
+  font-size: 0.72rem; font-weight: 700; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+}
+.listen-ko {
+  font-size: 2rem; font-weight: 900; color: var(--deep); margin-bottom: 6px;
+}
+.listen-set-tag {
+  font-size: 0.7rem; font-weight: 700; color: #bbb; letter-spacing: 1px; text-transform: uppercase;
+}
+.listen-sound-btn {
+  margin: 20px auto 0;
+  display: block;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--yellow), #ffb347);
+  border: none;
+  font-size: 2.4rem;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(255,179,71,0.4);
+  transition: all 0.15s;
+}
+.listen-sound-btn:active { transform: scale(0.92); }
+.listen-hint {
+  font-size: 0.75rem; color: #aaa; font-weight: 700; margin-top: 10px; text-align: center;
+}
+
+/* ── QUIZ ── */
+.quiz-q-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px 18px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.quiz-q-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--accent), var(--yellow), var(--green));
+}
+.quiz-q-label { font-size: 0.68rem; font-weight: 700; color: #ccc; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+.quiz-q-ko {
+  font-size: 2rem; font-weight: 900; color: var(--deep); margin-bottom: 6px;
+}
+.quiz-q-set { font-size: 0.7rem; color: #bbb; font-weight: 700; letter-spacing: 1px; }
+
+/* Letter tiles input */
+.letter-tiles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 12px;
+  min-height: 54px;
+  padding: 6px 0;
+}
+.tile {
+  width: 42px; height: 48px;
+  background: #fff;
+  border-radius: 10px;
+  border: 2.5px solid #dde;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4rem;
+  color: var(--deep);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+  transition: all 0.15s;
+  cursor: pointer;
+  user-select: none;
+}
+.tile.active { border-color: var(--mid); background: #f0f5ff; }
+.tile.wrong-tile { border-color: var(--pink); background: #fff0f5; animation: shake 0.3s ease; }
+.tile.correct-tile { border-color: var(--green); background: #f0fff8; }
+.tile.hint-tile { border-color: var(--yellow); background: #fffde8; color: var(--accent); }
+.tile.empty { border-style: dashed; border-color: #ccc; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+.quiz-input-wrap { display: flex; gap: 8px; margin-bottom: 10px; }
+.quiz-input {
+  flex: 1;
+  background: #fff;
+  border: 2.5px solid #dde;
+  border-radius: 16px;
+  padding: 15px 16px;
+  color: var(--deep);
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.3rem;
+  outline: none;
+  letter-spacing: 3px;
+  transition: all 0.2s;
+  text-transform: lowercase;
+}
+.quiz-input:focus { border-color: var(--mid); box-shadow: 0 0 0 3px rgba(45,95,179,0.1); }
+.quiz-input.correct-input { border-color: var(--green); background: #f0fff8; }
+.quiz-input.wrong-input { border-color: var(--pink); background: #fff0f5; animation: shake 0.3s ease; }
+.quiz-submit {
+  background: var(--deep);
+  border: none; border-radius: 16px;
+  padding: 15px 18px;
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 1px;
+}
+.quiz-submit:active { transform: scale(0.95); }
+.quiz-submit:disabled { opacity: 0.4; cursor: default; }
+
+.feedback-box {
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  display: none;
+  animation: popIn 0.25s ease;
+  letter-spacing: 0.5px;
+}
+.feedback-box.ok { display: block; background: rgba(6,214,160,0.12); color: #0bb87e; }
+.feedback-box.ng { display: block; background: rgba(255,107,157,0.12); color: #e8396b; }
+@keyframes popIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+
+.quiz-hint-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.hint-btn {
+  flex: 1; padding: 12px;
+  background: rgba(255,210,63,0.15);
+  border: 2px solid rgba(255,210,63,0.5);
+  border-radius: 14px;
+  color: #b88800;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.82rem; font-weight: 900;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.hint-btn:active { transform: scale(0.96); }
+.skip-btn {
+  flex: 1; padding: 12px;
+  background: #fff;
+  border: 2px solid #dde;
+  border-radius: 14px;
+  color: #aaa;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.82rem; font-weight: 900;
+  cursor: pointer; transition: all 0.15s;
+}
+.skip-btn:active { transform: scale(0.96); }
+
+.next-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--mid), var(--deep));
+  border: none; border-radius: 18px;
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  cursor: pointer; display: none;
+  animation: popIn 0.2s ease;
+  letter-spacing: 1px;
+}
+.next-btn.show { display: block; }
+.next-btn:active { transform: scale(0.97); }
+
+/* Score header */
+.score-badge {
+  background: #fff;
+  border-radius: 12px;
+  padding: 7px 14px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.9rem;
+  color: var(--deep);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.score-badge .num { color: var(--green); }
+
+/* ── RESULT ── */
+.result-wrap {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+.result-big-emoji { font-size: 5rem; margin-bottom: 12px; animation: bounce 0.6s ease; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+.result-pct {
+  font-family: 'Fredoka One', cursive;
+  font-size: 4.5rem;
+  color: var(--deep);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.result-msg { font-size: 1.1rem; font-weight: 900; color: var(--mid); margin-bottom: 20px; }
+.result-card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 18px 20px;
+  width: 100%; max-width: 280px;
+  box-shadow: var(--shadow);
+  margin-bottom: 22px;
+}
+.result-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0;
+  font-size: 0.9rem; font-weight: 700;
+  border-bottom: 1.5px solid #f0f0f5;
+}
+.result-row:last-child { border-bottom: none; }
+.result-val { font-family: 'Fredoka One', cursive; font-size: 1.2rem; }
+.result-val.ok { color: var(--green); }
+.result-val.ng { color: var(--pink); }
+
+/* ── WORD LIST ── */
+.list-filter-row {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px;
+}
+.list-filter-row::-webkit-scrollbar { display: none; }
+.filter-pill {
+  white-space: nowrap;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.75rem; font-weight: 900;
+  padding: 7px 14px;
+  border-radius: 50px;
+  border: 2px solid #dde;
+  background: #fff;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-pill.active { background: var(--deep); color: #fff; border-color: var(--deep); }
+
+.word-item {
+  background: #fff;
+  border-radius: 16px;
+  padding: 13px 14px;
+  margin-bottom: 7px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 2px 10px rgba(26,58,107,0.07);
+  border-left: 4px solid transparent;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from{transform:translateY(12px);opacity:0} to{transform:translateY(0);opacity:1} }
+.word-item:nth-child(4n+1) { border-left-color: var(--accent); }
+.word-item:nth-child(4n+2) { border-left-color: var(--green); }
+.word-item:nth-child(4n+3) { border-left-color: var(--pink); }
+.word-item:nth-child(4n+4) { border-left-color: var(--purple); }
+.word-num { font-family: 'Fredoka One', cursive; font-size: 0.75rem; color: #ccc; min-width: 18px; }
+.word-en { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: var(--deep); flex: 1; }
+.word-ko { font-size: 0.8rem; font-weight: 700; color: #888; text-align: right; }
+.word-sound {
+  background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; color: var(--accent);
+}
+
+/* ── COMBO ── */
+.combo-badge {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  color: var(--yellow);
+  text-shadow: 0 0 20px rgba(255,210,63,0.8);
+  pointer-events: none;
+  z-index: 1000;
+  animation: comboPop 0.8s ease forwards;
+  white-space: nowrap;
+}
+@keyframes comboPop {
+  0% { transform: translate(-50%,-50%) scale(0.5); opacity: 1; }
+  50% { transform: translate(-50%,-60%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%,-80%) scale(1); opacity: 0; }
+}
+
+/* Modes selection */
+.mode-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+}
+.mode-btn {
+  background: #fff;
+  border: 2.5px solid #dde;
+  border-radius: 18px;
+  padding: 18px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 3px 12px rgba(26,58,107,0.07);
+}
+.mode-btn:active { transform: scale(0.96); }
+.mode-btn-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+.mode-btn-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.95rem;
+  color: var(--deep);
+  display: block;
+}
+.mode-btn-desc { font-size: 0.68rem; color: #aaa; font-weight: 700; margin-top: 2px; display: block; }
+
+/* Listen mode extra */
+.listen-fill-wrap { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin: 14px 0; }
+.listen-fill-box {
+  min-width: 36px; height: 44px;
+  border-bottom: 3px solid var(--mid);
+  display: flex; align-items: flex-end; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4rem;
+  color: var(--deep);
+  padding-bottom: 4px;
+  transition: all 0.2s;
+}
+.listen-fill-box.revealed { border-color: var(--green); }
+
+/* Responsive tweaks */
+@media (max-height: 700px) {
+  .fc-face { min-height: 190px; }
+  .fc-en { font-size: 2.1rem; }
+}
+</style>
+</head>
+<body>
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="cloud c3"></div>
+
+<div id="app">
+  <div class="app-header">
+    <div class="app-logo">⚡ C7·<span>C8</span> 단어장</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showScreen('home')">홈</button>
+      <button class="nav-tab" onclick="showScreen('list')">단어장</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="sec-title">📚 세트 선택</div>
+    <div class="select-all-row">
+      <span>여러 세트를 골라봐요!</span>
+      <button class="select-all-btn" onclick="selectAll()">전체 선택</button>
+    </div>
+    <div class="sets-grid">
+      <div class="set-card" data-set="1" onclick="toggleSet(this,1)">
+        <span class="set-card-icon">⛏️</span>
+        <div class="set-card-num">C7 EX.7</div>
+        <div class="set-card-label">자원·복원</div>
+        <div class="set-card-count">10 단어</div>
+      </div>
+      <div class="set-card" data-set="2" onclick="toggleSet(this,2)">
+        <span class="set-card-icon">🪨</span>
+        <div class="set-card-num">C7 EX.8</div>
+        <div class="set-card-label">판·지진</div>
+        <div class="set-card-count">10 단어</div>
+      </div>
+      <div class="set-card" data-set="3" onclick="toggleSet(this,3)">
+        <span class="set-card-icon">🦠</span>
+        <div class="set-card-num">C8 EX.1</div>
+        <div class="set-card-label">장기·감염</div>
+        <div class="set-card-count">10 단어</div>
+      </div>
+      <div class="set-card" data-set="4" onclick="toggleSet(this,4)">
+        <span class="set-card-icon">🩺</span>
+        <div class="set-card-num">C8 EX.2</div>
+        <div class="set-card-label">해부·치료</div>
+        <div class="set-card-count">10 단어</div>
+      </div>
+    </div>
+
+    <div class="sec-title">🎮 학습 모드 선택</div>
+    <div class="mode-grid">
+      <div class="mode-btn" onclick="startFlashcard()">
+        <span class="mode-btn-icon">🃏</span>
+        <span class="mode-btn-name">플래시카드</span>
+        <span class="mode-btn-desc">단어 외우기</span>
+      </div>
+      <div class="mode-btn" onclick="startListen()">
+        <span class="mode-btn-icon">👂</span>
+        <span class="mode-btn-name">듣기 연습</span>
+        <span class="mode-btn-desc">발음 익히기</span>
+      </div>
+      <div class="mode-btn" onclick="startQuiz()">
+        <span class="mode-btn-icon">✏️</span>
+        <span class="mode-btn-name">스펠링 테스트</span>
+        <span class="mode-btn-desc">직접 써보기</span>
+      </div>
+      <div class="mode-btn" onclick="startHardQuiz()">
+        <span class="mode-btn-icon">🔥</span>
+        <span class="mode-btn-name">도전 모드</span>
+        <span class="mode-btn-desc">힌트 없이!</span>
+      </div>
+    </div>
+
+    <div class="sec-title">📊 나의 기록</div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" style="color:var(--mid)" id="stat-total">0</div>
+        <div class="stat-lbl">총 시도</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="color:var(--green)" id="stat-correct">0</div>
+        <div class="stat-lbl">맞은 수</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="color:var(--pink)" id="stat-wrong">0</div>
+        <div class="stat-lbl">틀린 수</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="color:var(--accent)" id="stat-pct">-</div>
+        <div class="stat-lbl">정답률</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLASHCARD -->
+  <div class="screen" id="screen-fc">
+    <div class="lrn-header">
+      <button class="back-btn" onclick="showScreen('home')">←</button>
+      <div class="progress-bar"><div class="progress-fill" id="fc-prog"></div></div>
+      <div class="progress-counter" id="fc-counter">1/10</div>
+    </div>
+    <div class="fc-wrap">
+      <div class="fc" id="fc-card" onclick="flipCard()">
+        <div class="fc-face">
+          <div class="fc-badge fc-set-badge" id="fc-badge-front">EX.1</div>
+          <div class="fc-emoji">🇺🇸</div>
+          <div class="fc-en" id="fc-word">electronics</div>
+          <div class="fc-tap-hint">탭해서 한국어 뜻 보기 👆</div>
+        </div>
+        <div class="fc-face fc-face-back">
+          <div class="fc-badge fc-set-badge" id="fc-badge-back">EX.1</div>
+          <div class="fc-emoji">🇰🇷</div>
+          <div class="fc-ko" id="fc-meaning">전자 기술</div>
+          <div class="fc-tap-hint">다시 탭하면 영어로 🔄</div>
+        </div>
+      </div>
+    </div>
+    <div class="swipe-row">
+      <span>← 스와이프: 몰라요</span>
+      <div class="swipe-dot"></div>
+      <span>스와이프: 알아요 →</span>
+    </div>
+    <div class="fc-actions" style="margin-top:12px">
+      <button class="fc-btn fc-sound-btn" onclick="speakCurrent()">🔊</button>
+      <button class="fc-btn fc-btn-dunno" onclick="fcGo(false)">😅 몰라요</button>
+      <button class="fc-btn fc-btn-know" onclick="fcGo(true)">😊 알아요!</button>
+    </div>
+  </div>
+
+  <!-- LISTEN MODE -->
+  <div class="screen" id="screen-listen">
+    <div class="lrn-header">
+      <button class="back-btn" onclick="showScreen('home')">←</button>
+      <div class="progress-bar"><div class="progress-fill" id="ls-prog"></div></div>
+      <div class="progress-counter" id="ls-counter">1/10</div>
+    </div>
+    <div class="listen-card">
+      <div class="listen-title">👂 듣고 스펠링을 생각해봐요</div>
+      <div class="listen-ko" id="ls-ko">전자 기술</div>
+      <div class="listen-set-tag" id="ls-set">EX.1</div>
+      <button class="listen-sound-btn" onclick="listenSpeak()" id="ls-sound-btn">🔊</button>
+      <div class="listen-hint">버튼을 눌러서 발음을 들어봐요!</div>
+      <div class="listen-fill-wrap" id="ls-fill"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:10px">
+      <button class="hint-btn" onclick="listenReveal()" style="flex:1">🔤 글자 보기</button>
+      <button class="skip-btn" onclick="listenNext()" style="flex:1">다음 →</button>
+    </div>
+    <button class="big-btn btn-green" onclick="listenNext()">✅ 외웠어요! 다음</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="lrn-header">
+      <button class="back-btn" onclick="showScreen('home')">←</button>
+      <div class="progress-bar"><div class="progress-fill" id="quiz-prog"></div></div>
+      <div class="score-badge"><span class="num" id="qz-correct">0</span>/<span id="qz-total">10</span></div>
+    </div>
+    <div class="quiz-q-card">
+      <div class="quiz-q-label">🇰🇷 한국어 뜻 → 🇺🇸 영어 스펠링</div>
+      <div class="quiz-q-ko" id="qz-ko">전자 기술</div>
+      <div class="quiz-q-set" id="qz-set">EX.1</div>
+    </div>
+    <!-- Letter tiles (shows typed letters) -->
+    <div class="letter-tiles" id="qz-tiles"></div>
+    <div class="quiz-input-wrap">
+      <input type="text" class="quiz-input" id="qz-input"
+        placeholder="영어 스펠링..."
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+        oninput="updateTiles()" onkeydown="if(event.key==='Enter')submitQuiz()">
+      <button class="quiz-submit" id="qz-submit" onclick="submitQuiz()">확인</button>
+    </div>
+    <div class="feedback-box" id="qz-feedback"></div>
+    <div class="quiz-hint-row">
+      <button class="hint-btn" id="qz-hint-btn" onclick="giveHint()">💡 첫 글자 힌트</button>
+      <button class="skip-btn" onclick="skipQuiz()">건너뛰기</button>
+    </div>
+    <button class="next-btn" id="qz-next" onclick="nextQuiz()">다음 단어 →</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-wrap">
+      <div class="result-big-emoji" id="res-emoji">🎉</div>
+      <div class="result-pct" id="res-pct">80%</div>
+      <div class="result-msg" id="res-msg">훌륭해요!</div>
+      <div class="result-card">
+        <div class="result-row">
+          <span>총 문제</span>
+          <span class="result-val" id="res-total">10</span>
+        </div>
+        <div class="result-row">
+          <span>✅ 정답</span>
+          <span class="result-val ok" id="res-ok">8</span>
+        </div>
+        <div class="result-row">
+          <span>❌ 오답</span>
+          <span class="result-val ng" id="res-ng">2</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px">
+        <button class="big-btn btn-orange" onclick="retryMode()">🔄 다시 도전!</button>
+        <button class="big-btn btn-outline" onclick="showScreen('home')">🏠 홈으로</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORD LIST -->
+  <div class="screen" id="screen-list">
+    <div class="list-filter-row">
+      <button class="filter-pill active" onclick="filterList('all',this)">전체 40개</button>
+      <button class="filter-pill" onclick="filterList(1,this)">⛏️ C7 EX.7</button>
+      <button class="filter-pill" onclick="filterList(2,this)">🪨 C7 EX.8</button>
+      <button class="filter-pill" onclick="filterList(3,this)">🦠 C8 EX.1</button>
+      <button class="filter-pill" onclick="filterList(4,this)">🩺 C8 EX.2</button>
+    </div>
+    <div id="list-container"></div>
+  </div>
+</div>
+
+<script>
+// ═══ VOCAB DATA ═══
+const SET_INFO = {
+  1: { icon:'⛏️', label:'C7 EX.7 자원·복원', color:'var(--accent)' },
+  2: { icon:'🪨', label:'C7 EX.8 빙하·지형', color:'var(--green)' },
+  3: { icon:'🦠', label:'C8 EX.1 장기·감염', color:'var(--pink)' },
+  4: { icon:'🩺', label:'C8 EX.2 해부·치료', color:'var(--purple)' },
+};
+const VOCAB = {
+  1: [
+    {word:'extract',      meaning:'추출하다'},
+    {word:'expose',       meaning:'노출하다'},
+    {word:'bare',         meaning:'벌거벗은'},
+    {word:'rehabilitate', meaning:'회복시키다'},
+    {word:'flatten',      meaning:'납작하게 만들다'},
+    {word:'restore',      meaning:'복원하다'},
+    {word:'enable',       meaning:'가능하게 하다'},
+    {word:'explosive',    meaning:'폭발성의, 폭발물'},
+    {word:'regulation',   meaning:'규정, 규제'},
+    {word:'miner',        meaning:'광부'},
+  ],
+  2: [
+    {word:'unsteady',     meaning:'불안정한, 떨리는'},
+    {word:'proceed',      meaning:'진행하다'},
+    {word:'head',         meaning:'향하다'},
+    {word:'quite',        meaning:'꽤'},
+    {word:'plate',        meaning:'판'},
+    {word:'combine',      meaning:'결합하다'},
+    {word:'fault',        meaning:'단층'},
+    {word:'southward',    meaning:'남쪽으로'},
+    {word:'unstable',     meaning:'불안정한'},
+    {word:'subsequently', meaning:'그 뒤에, 나중에'},
+  ],
+  3: [
+    {word:'organ',         meaning:'장기'},
+    {word:'cancer',        meaning:'암'},
+    {word:'intentionally', meaning:'의도적으로'},
+    {word:'antibiotic',    meaning:'항생제'},
+    {word:'infection',     meaning:'감염, 전염병'},
+    {word:'laboratory',    meaning:'실험실'},
+    {word:'accidental',    meaning:'우연한'},
+    {word:'particularly',  meaning:'특히'},
+    {word:'investigate',   meaning:'조사하다'},
+    {word:'mold',          meaning:'곰팡이'},
+  ],
+  4: [
+    {word:'anatomy',       meaning:'해부학'},
+    {word:'treatment',     meaning:'치료'},
+    {word:'skeptical',     meaning:'회의적인, 의심많은'},
+    {word:'comprehensive', meaning:'종합적인, 포괄적인'},
+    {word:'publication',   meaning:'출판, 발행'},
+    {word:'seek to',       meaning:'노력하다, 애쓰다'},
+    {word:'statement',     meaning:'진술, 서류'},
+    {word:'operation',     meaning:'수술'},
+    {word:'patient',       meaning:'환자'},
+    {word:'update',        meaning:'갱신하다'},
+  ],
+};
+
+// ═══ STATE ═══
+let selectedSets = new Set();
+let currentMode = 'quiz';
+let hardMode = false;
+
+let deck = [], deckIdx = 0, deckKnown = 0;
+let qzCorrect = 0, qzHintUsed = false, qzAnswered = false;
+let combo = 0;
+
+let lsIdx = 0, lsDeck = [];
+
+// Stats (session only — localStorage keeps totals)
+let totAttempts = +localStorage.getItem('c8_attempts')||0;
+let totCorrect  = +localStorage.getItem('c8_correct')||0;
+let totWrong    = +localStorage.getItem('c8_wrong')||0;
+
+// ═══ UTILS ═══
+function shuffle(arr) {
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function getVocab() {
+  let out = [];
+  const sets = selectedSets.size === 0 ? [1,2,3,4] : [...selectedSets];
+  sets.forEach(n => VOCAB[n].forEach(v => out.push({...v, set:n})));
+  return out;
+}
+function speak(txt) {
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1;
+  speechSynthesis.speak(u);
+}
+function updateStats() {
+  document.getElementById('stat-total').textContent = totAttempts;
+  document.getElementById('stat-correct').textContent = totCorrect;
+  document.getElementById('stat-wrong').textContent = totWrong;
+  document.getElementById('stat-pct').textContent = totAttempts
+    ? Math.round(totCorrect/totAttempts*100)+'%' : '-';
+}
+function saveStats() {
+  localStorage.setItem('c8_attempts', totAttempts);
+  localStorage.setItem('c8_correct',  totCorrect);
+  localStorage.setItem('c8_wrong',    totWrong);
+  updateStats();
+}
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  if(name==='home') document.querySelector('.nav-tab:nth-child(1)').classList.add('active');
+  if(name==='list') { document.querySelector('.nav-tab:nth-child(2)').classList.add('active'); renderList(); }
+}
+
+// ═══ SET SELECTION ═══
+function toggleSet(el, n) {
+  if(selectedSets.has(n)) { selectedSets.delete(n); el.classList.remove('selected'); }
+  else { selectedSets.add(n); el.classList.add('selected'); }
+}
+function selectAll() {
+  const all = selectedSets.size === 4;
+  document.querySelectorAll('.set-card').forEach((c,i) => {
+    if(all) { selectedSets.delete(i+1); c.classList.remove('selected'); }
+    else { selectedSets.add(i+1); c.classList.add('selected'); }
+  });
+}
+
+// ═══ FLASHCARD ═══
+function startFlashcard() {
+  deck = shuffle(getVocab());
+  deckIdx = 0; deckKnown = 0;
+  showScreen('fc');
+  renderFC();
+}
+function renderFC() {
+  if(deckIdx >= deck.length) {
+    alert(`🎉 완료! ${deckKnown}/${deck.length} 개 알고 있어요!`);
+    showScreen('home'); return;
+  }
+  const item = deck[deckIdx];
+  document.getElementById('fc-word').textContent = item.word;
+  document.getElementById('fc-meaning').textContent = item.meaning;
+  document.getElementById('fc-badge-front').textContent = 'EX.'+item.set;
+  document.getElementById('fc-badge-back').textContent = 'EX.'+item.set;
+  document.getElementById('fc-counter').textContent = `${deckIdx+1}/${deck.length}`;
+  document.getElementById('fc-prog').style.width = `${(deckIdx/deck.length)*100}%`;
+  const card = document.getElementById('fc-card');
+  card.classList.remove('flipped');
+}
+function flipCard() {
+  document.getElementById('fc-card').classList.toggle('flipped');
+}
+function fcGo(know) {
+  if(know) { deckKnown++; burst('⭐'); }
+  deckIdx++;
+  renderFC();
+}
+function speakCurrent() { speak(deck[deckIdx]?.word || ''); }
+
+// Swipe support for flashcard
+let fcTouchX = 0;
+document.getElementById('fc-card').addEventListener('touchstart', e => { fcTouchX = e.touches[0].clientX; }, {passive:true});
+document.getElementById('fc-card').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - fcTouchX;
+  if(Math.abs(dx) > 55) { if(dx > 0) fcGo(true); else fcGo(false); }
+}, {passive:true});
+
+// ═══ LISTEN MODE ═══
+function startListen() {
+  lsDeck = shuffle(getVocab());
+  lsIdx = 0;
+  showScreen('listen');
+  renderListen();
+}
+function renderListen() {
+  if(lsIdx >= lsDeck.length) { showScreen('home'); alert('👂 듣기 연습 완료!'); return; }
+  const item = lsDeck[lsIdx];
+  document.getElementById('ls-ko').textContent = item.meaning;
+  document.getElementById('ls-set').textContent = 'EX.'+item.set;
+  document.getElementById('ls-counter').textContent = `${lsIdx+1}/${lsDeck.length}`;
+  document.getElementById('ls-prog').style.width = `${(lsIdx/lsDeck.length)*100}%`;
+  renderFillBoxes(item.word, false);
+}
+function renderFillBoxes(word, reveal) {
+  const wrap = document.getElementById('ls-fill');
+  wrap.innerHTML = '';
+  word.split('').forEach(ch => {
+    const box = document.createElement('div');
+    box.className = 'listen-fill-box' + (reveal ? ' revealed' : '');
+    box.textContent = reveal ? ch : (ch === ' ' ? ' ' : '');
+    if(ch === ' ') box.style.width = '16px';
+    wrap.appendChild(box);
+  });
+}
+function listenSpeak() { speak(lsDeck[lsIdx]?.word || ''); }
+function listenReveal() {
+  renderFillBoxes(lsDeck[lsIdx].word, true);
+  speak(lsDeck[lsIdx].word);
+}
+function listenNext() { lsIdx++; renderListen(); }
+
+// ═══ QUIZ ═══
+let lastMode = 'quiz';
+function startQuiz() { hardMode = false; lastMode = 'quiz'; initQuiz(); }
+function startHardQuiz() { hardMode = true; lastMode = 'hard'; initQuiz(); }
+
+function initQuiz() {
+  deck = shuffle(getVocab());
+  deckIdx = 0; qzCorrect = 0; combo = 0;
+  showScreen('quiz');
+  renderQuiz();
+}
+function renderQuiz() {
+  if(deckIdx >= deck.length) { showResult(); return; }
+  const item = deck[deckIdx];
+  document.getElementById('qz-ko').textContent = item.meaning;
+  document.getElementById('qz-set').textContent = 'EX.'+item.set;
+  document.getElementById('quiz-prog').style.width = `${(deckIdx/deck.length)*100}%`;
+  document.getElementById('qz-correct').textContent = qzCorrect;
+  document.getElementById('qz-total').textContent = deck.length;
+
+  const inp = document.getElementById('qz-input');
+  inp.value = '';
+  inp.className = 'quiz-input';
+  inp.disabled = false;
+  document.getElementById('qz-feedback').className = 'feedback-box';
+  document.getElementById('qz-next').classList.remove('show');
+  document.getElementById('qz-submit').disabled = false;
+  document.getElementById('qz-hint-btn').disabled = false;
+  document.getElementById('qz-hint-btn').textContent = hardMode ? '🔥 힌트 없음!' : '💡 첫 글자 힌트';
+  qzHintUsed = false;
+  qzAnswered = false;
+  updateTiles();
+  setTimeout(() => inp.focus(), 100);
+}
+function updateTiles() {
+  const val = document.getElementById('qz-input').value;
+  const target = deck[deckIdx]?.word || '';
+  const wrap = document.getElementById('qz-tiles');
+  wrap.innerHTML = '';
+  const maxLen = Math.max(val.length, target.length);
+  for(let i=0;i<maxLen;i++){
+    const tile = document.createElement('div');
+    const ch = val[i];
+    if(!ch) {
+      tile.className = 'tile empty';
+      tile.textContent = '';
+    } else {
+      tile.className = 'tile active';
+      tile.textContent = ch;
+    }
+    wrap.appendChild(tile);
+  }
+}
+function giveHint() {
+  if(hardMode || qzAnswered) return;
+  qzHintUsed = true;
+  const word = deck[deckIdx].word;
+  document.getElementById('qz-input').value = word[0];
+  updateTiles();
+  document.getElementById('qz-hint-btn').disabled = true;
+  document.getElementById('qz-hint-btn').textContent = '💡 힌트 사용됨';
+  document.getElementById('qz-input').focus();
+}
+function submitQuiz() {
+  if(qzAnswered) return;
+  const inp = document.getElementById('qz-input');
+  const typed = inp.value.trim().toLowerCase().replace(/\s+/g,' ');
+  const correct = deck[deckIdx].word.toLowerCase().replace(/\s+/g,' ');
+  const fb = document.getElementById('qz-feedback');
+  const isOk = typed === correct;
+
+  inp.disabled = true;
+  document.getElementById('qz-submit').disabled = true;
+  qzAnswered = true;
+
+  totAttempts++;
+  if(isOk) {
+    qzCorrect++; totCorrect++; combo++;
+    inp.className = 'quiz-input correct-input';
+    fb.textContent = combo >= 3
+      ? `🔥 ${combo}연속 정답!! 대박이에요!`
+      : `🎉 정답! ${deck[deckIdx].word}`;
+    fb.className = 'feedback-box ok';
+    if(combo >= 3) showCombo(combo);
+    burst('⭐');
+    speak(deck[deckIdx].word);
+    // Mark tiles correct
+    const tiles = document.getElementById('qz-tiles').querySelectorAll('.tile');
+    tiles.forEach(t => t.className = 'tile correct-tile');
+  } else {
+    totWrong++; combo = 0;
+    inp.className = 'quiz-input wrong-input';
+    fb.textContent = `❌ 정답: ${deck[deckIdx].word}`;
+    fb.className = 'feedback-box ng';
+    speak(deck[deckIdx].word);
+    const tiles = document.getElementById('qz-tiles').querySelectorAll('.tile');
+    tiles.forEach(t => t.className = 'tile wrong-tile');
+  }
+  saveStats();
+  document.getElementById('qz-next').classList.add('show');
+}
+function nextQuiz() { deckIdx++; renderQuiz(); }
+function skipQuiz() {
+  if(qzAnswered) return;
+  totAttempts++; totWrong++; combo = 0;
+  saveStats();
+  deckIdx++;
+  renderQuiz();
+}
+
+// ═══ RESULT ═══
+function showResult() {
+  const total = deck.length;
+  const pct = Math.round(qzCorrect/total*100);
+  let emoji='', msg='';
+  if(pct===100){emoji='🏆';msg='완벽해요!! 최고!!';}
+  else if(pct>=80){emoji='🎉';msg='훌륭해요! 거의 다 맞았어요!';}
+  else if(pct>=60){emoji='👍';msg='잘 했어요! 조금 더 연습해봐요!';}
+  else if(pct>=40){emoji='📚';msg='더 연습하면 잘 할 수 있어요!';}
+  else{emoji='💪';msg='포기하지 말고 계속 도전해요!';}
+  document.getElementById('res-emoji').textContent = emoji;
+  document.getElementById('res-pct').textContent = pct+'%';
+  document.getElementById('res-msg').textContent = msg;
+  document.getElementById('res-total').textContent = total;
+  document.getElementById('res-ok').textContent = qzCorrect;
+  document.getElementById('res-ng').textContent = total-qzCorrect;
+  showScreen('result');
+}
+function retryMode() {
+  if(lastMode==='hard') startHardQuiz(); else startQuiz();
+}
+
+// ═══ WORD LIST ═══
+let listFilter = 'all';
+function filterList(f, btn) {
+  listFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderList();
+}
+function renderList() {
+  const c = document.getElementById('list-container');
+  c.innerHTML = '';
+  const sets = listFilter==='all' ? [1,2,3,4] : [listFilter];
+  sets.forEach(sn => {
+    const hdr = document.createElement('div');
+    hdr.className = 'sec-title';
+    const setLabels = {1:'C7 EX.7', 2:'C7 EX.8', 3:'C8 EX.1', 4:'C8 EX.2'};
+    hdr.textContent = SET_INFO[sn].icon+' '+setLabels[sn]+' — '+SET_INFO[sn].label.replace(/^C\d EX\.\d /,'');
+    c.appendChild(hdr);
+    VOCAB[sn].forEach((v,i) => {
+      const el = document.createElement('div');
+      el.className = 'word-item';
+      el.style.animationDelay = (i*0.03)+'s';
+      el.innerHTML = `
+        <div class="word-num">${i+1}</div>
+        <div class="word-en">${v.word}</div>
+        <div class="word-ko">${v.meaning}</div>
+        <button class="word-sound" onclick="speak('${v.word.replace(/'/g,"\\'")}')">🔊</button>
+      `;
+      c.appendChild(el);
+    });
+  });
+}
+
+// ═══ EFFECTS ═══
+function burst(emoji) {
+  const el = document.createElement('div');
+  el.className = 'star-burst';
+  el.textContent = emoji;
+  el.style.left = (30+Math.random()*40)+'%';
+  el.style.top = '40%';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+function showCombo(n) {
+  const el = document.createElement('div');
+  el.className = 'combo-badge';
+  el.textContent = `🔥 ${n}연속 정답!`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+// Init
+updateStats();
+renderList();
+</script>
+</body>
+</html>
