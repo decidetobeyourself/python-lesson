@@ -8,12 +8,12 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #0a0e1a; --card: #141b2d; --border: #1e2d45;
-    --accent: #00d4ff; --purple: #7c3aed; --green: #10b981;
-    --yellow: #f59e0b; --danger: #ef4444;
-    --text: #e2e8f0; --muted: #64748b; --code-bg: #0d1117;
+    --bg: #ffffff; --card: #f1f5f9; --border: #cbd5e1;
+    --accent: #0284c7; --purple: #7c3aed; --green: #059669;
+    --yellow: #d97706; --danger: #dc2626;
+    --text: #1e293b; --muted: #64748b; --code-bg: #0f172a;
   }
-  html, body { width:100%; height:100%; background:#111; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  html, body { width:100%; height:100%; background:#dde3ea; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 
   /* 4:3 stage */
   #stage { position:relative; background:var(--bg); overflow:hidden; }
@@ -26,23 +26,23 @@
   /* font: em-based, base set by JS */
   #stage { font-size:20px; font-family:'Noto Sans KR',sans-serif; }
 
-  h1 { font-size:2.5em; font-weight:900; line-height:1.15; letter-spacing:-.02em;
-       background:linear-gradient(135deg,#fff,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  h2 { font-size:1.65em; font-weight:800; color:#fff; margin-bottom:.4em; }
-  h3 { font-size:1.1em; font-weight:700; color:var(--accent); margin-bottom:.3em; }
-  p,li,td,th { font-size:1em; line-height:1.65; color:var(--text); }
+  h1 { font-size:2.2em; font-weight:900; line-height:1.15; letter-spacing:-.02em;
+       background:linear-gradient(135deg,#1e293b,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  h2 { font-size:1.55em; font-weight:800; color:#1e293b; margin-bottom:.25em; }
+  h3 { font-size:1.05em; font-weight:700; color:var(--accent); margin-bottom:.2em; }
+  p,li,td,th { font-size:1em; line-height:1.5; color:var(--text); }
   .sm  { font-size:.85em; }
   .xs  { font-size:.75em; }
   .mono { font-family:'JetBrains Mono',monospace; }
 
   /* layout */
-  .pad  { padding:2.5% 3.8%; }
-  .col2 { display:grid; grid-template-columns:1fr 1fr; gap:1.6%; }
+  .pad  { padding:1.6% 3.2%; }
+  .col2 { display:grid; grid-template-columns:1fr 1fr; gap:1.2%; }
   .fc   { display:flex; flex-direction:column; }
   .f1   { flex:1; }
 
   /* header */
-  .hdr { display:flex; align-items:center; gap:.7em; padding:1.6% 3.8% .5%; flex-shrink:0; }
+  .hdr { display:flex; align-items:center; gap:.7em; padding:1.0% 3.2% .3%; flex-shrink:0; }
   .chip { font-size:.68em; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:.28em .8em; border-radius:20px; border:1px solid var(--accent); color:var(--accent); }
   .chip.p { border-color:var(--purple); color:#a78bfa; }
   .chip.g { border-color:var(--green); color:var(--green); }
@@ -50,44 +50,45 @@
   .snum { margin-left:auto; font-size:.7em; color:var(--muted); font-family:'JetBrains Mono',monospace; }
 
   /* cards */
-  .card  { background:var(--card); border:1px solid var(--border); border-radius:.65em; padding:.85em 1em; }
-  .b-b   { background:rgba(0,212,255,.07);   border:1px solid rgba(0,212,255,.25);   border-radius:.65em; padding:.8em 1em; }
-  .b-p   { background:rgba(124,58,237,.09);  border:1px solid rgba(124,58,237,.3);   border-radius:.65em; padding:.8em 1em; }
-  .b-g   { background:rgba(16,185,129,.08);  border:1px solid rgba(16,185,129,.28);  border-radius:.65em; padding:.8em 1em; }
-  .b-y   { background:rgba(245,158,11,.07);  border:1px solid rgba(245,158,11,.3);   border-radius:.65em; padding:.8em 1em; }
-  .b-yw  { background:rgba(245,158,11,.08);  border-left:.22em solid var(--yellow);  border-radius:0 .5em .5em 0; padding:.65em .9em; }
-  .b-er  { background:rgba(239,68,68,.09);   border-left:.22em solid var(--danger);  border-radius:0 .5em .5em 0; padding:.65em .9em; }
+  .card  { background:var(--card); border:1px solid var(--border); border-radius:.65em; padding:.6em .85em; }
+  .b-b   { background:rgba(0,212,255,.07);   border:1px solid rgba(0,212,255,.25);   border-radius:.65em; padding:.55em .85em; }
+  .b-p   { background:rgba(124,58,237,.09);  border:1px solid rgba(124,58,237,.3);   border-radius:.65em; padding:.55em .85em; }
+  .b-g   { background:rgba(16,185,129,.08);  border:1px solid rgba(16,185,129,.28);  border-radius:.65em; padding:.55em .85em; }
+  .b-y   { background:rgba(245,158,11,.07);  border:1px solid rgba(245,158,11,.3);   border-radius:.65em; padding:.55em .85em; }
+  .b-yw  { background:rgba(245,158,11,.08);  border-left:.22em solid var(--yellow);  border-radius:0 .5em .5em 0; padding:.42em .75em; }
+  .b-er  { background:rgba(239,68,68,.09);   border-left:.22em solid var(--danger);  border-radius:0 .5em .5em 0; padding:.42em .75em; }
 
   /* code */
-  .code { background:var(--code-bg); border:1px solid #21262d; border-radius:.5em; padding:.75em .95em;
-          font-family:'JetBrains Mono',monospace; font-size:.82em; line-height:1.65; position:relative; overflow:hidden; }
+  .code { background:var(--code-bg); border:1px solid #21262d; border-radius:.5em; padding:.65em .95em;
+          font-family:'JetBrains Mono',monospace; font-size:.82em; line-height:1.6; position:relative; overflow:hidden; }
+  .code > div { white-space:nowrap; overflow:hidden; text-overflow:clip; }
   .code::before { content:''; position:absolute; top:0; left:0; width:.18em; height:100%; background:linear-gradient(to bottom,var(--accent),var(--purple)); }
   .ln  { color:#3d4f62; display:inline-block; width:1.4em; margin-right:.7em; text-align:right; }
   .kw  { color:#ff7b72; } .fn  { color:#d2a8ff; } .str { color:#a5d6ff; }
   .num { color:#79c0ff; } .cmt { color:#8b949e; font-style:italic; } .var { color:#ffa657; } .op { color:#ff7b72; }
 
   .out { background:#021116; border:1px solid var(--accent); border-left:.22em solid var(--green); border-radius:.45em;
-         padding:.55em .85em; font-family:'JetBrains Mono',monospace; font-size:.8em; color:var(--green); margin-top:.5em; }
+         padding:.4em .75em; font-family:'JetBrains Mono',monospace; font-size:.78em; color:var(--green); margin-top:.35em; }
   .out-label { font-size:.72em; font-weight:700; letter-spacing:.1em; color:var(--green); opacity:.7; margin-bottom:.25em; text-transform:uppercase; }
 
   /* list items */
-  .li  { display:flex; gap:.55em; align-items:flex-start; padding:.22em 0; }
+  .li  { display:flex; gap:.55em; align-items:flex-start; padding:.12em 0; }
   .dot { width:.42em; height:.42em; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:.6em; }
   .dot.p{background:var(--purple);} .dot.g{background:var(--green);} .dot.y{background:var(--yellow);}
 
   /* flow */
   .flow { display:flex; align-items:center; justify-content:center; }
-  .fbox { background:var(--card); border:2px solid var(--border); border-radius:.6em; padding:.65em 1.3em; text-align:center; }
+  .fbox { background:#ffffff; border:2px solid var(--border); border-radius:.6em; padding:.45em 1.1em; text-align:center; }
   .fbox.a{border-color:var(--accent);} .fbox.p{border-color:var(--purple);} .fbox.g{border-color:var(--green);}
-  .ficon { font-size:1.55em; display:block; margin-bottom:.12em; }
+  .ficon { font-size:1.3em; display:block; margin-bottom:.06em; }
   .flabel { font-size:.92em; font-weight:700; }
   .fsub   { font-size:.7em; color:var(--muted); margin-top:.08em; }
   .arr    { font-size:1.35em; color:var(--accent); margin:0 .38em; }
 
   /* table */
   table { width:100%; border-collapse:collapse; font-size:.86em; }
-  th { background:rgba(0,212,255,.12); color:var(--accent); font-weight:700; padding:.48em .75em; border:1px solid var(--border); text-align:left; font-size:.86em; letter-spacing:.04em; }
-  td { padding:.48em .75em; border:1px solid var(--border); vertical-align:top; line-height:1.5; }
+  th { background:rgba(0,212,255,.12); color:var(--accent); font-weight:700; padding:.35em .6em; border:1px solid var(--border); text-align:left; font-size:.86em; letter-spacing:.04em; }
+  td { padding:.35em .6em; border:1px solid var(--border); vertical-align:top; line-height:1.45; }
   tr:nth-child(even) td { background:rgba(255,255,255,.02); }
   .tdm { font-family:'JetBrains Mono',monospace; color:#d2a8ff; font-size:.84em; }
 
@@ -104,7 +105,7 @@
   .ty { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); color:var(--yellow); }
 
   /* quiz */
-  .qopt { background:var(--card); border:2px solid var(--border); border-radius:.5em; padding:.6em .95em; cursor:pointer; transition:all .22s; margin-bottom:.45em; display:flex; align-items:center; gap:.65em; }
+  .qopt { background:var(--card); border:2px solid var(--border); border-radius:.5em; padding:.42em .85em; cursor:pointer; transition:all .22s; margin-bottom:.32em; display:flex; align-items:center; gap:.65em; }
   .qopt:hover { border-color:var(--accent); background:rgba(0,212,255,.05); }
   .qopt.correct { border-color:var(--green); background:rgba(16,185,129,.1); }
   .qopt.wrong   { border-color:var(--danger); background:rgba(239,68,68,.1); }
@@ -115,7 +116,7 @@
   .qfb.fail { background:rgba(239,68,68,.12);  border:1px solid var(--danger); color:var(--danger); }
 
   /* think */
-  .think { background:rgba(245,158,11,.06); border-left:.22em solid var(--yellow); border-radius:0 .45em .45em 0; padding:.52em .85em; font-size:.9em; color:var(--yellow); }
+  .think { background:rgba(217,119,6,.07); border-left:.22em solid var(--yellow); border-radius:0 .45em .45em 0; padding:.38em .75em; font-size:.88em; color:var(--yellow); }
 
   /* reveal */
   .rvbtn { background:rgba(0,212,255,.1); border:1px solid rgba(0,212,255,.3); border-radius:.42em; padding:.38em .85em; color:var(--accent); font-family:inherit; font-size:.82em; font-weight:700; cursor:pointer; transition:all .2s; margin-top:.45em; }
@@ -127,15 +128,57 @@
   .glow { position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; }
   .inner { position:relative; z-index:1; flex:1; display:flex; flex-direction:column; }
 
-  /* nav */
-  #nav { position:absolute; bottom:2.2%; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:.65em;
-         background:rgba(20,27,45,.92); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:40px; padding:.48em 1.1em; z-index:999; }
-  .nb  { width:1.9em; height:1.9em; border-radius:50%; border:1px solid var(--border); background:transparent; color:var(--text); font-size:1em; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; }
-  .nb:hover { background:var(--accent); border-color:var(--accent); color:#000; }
-  .nb:disabled { opacity:.3; cursor:default; }
-  #pbar  { width:9em; height:.2em; background:var(--border); border-radius:.1em; overflow:hidden; }
-  #pfill { height:100%; background:linear-gradient(to right,var(--accent),var(--purple)); transition:width .35s ease; }
-  #sc    { font-family:'JetBrains Mono',monospace; font-size:.72em; color:var(--muted); min-width:2.8em; text-align:center; }
+  /* ── 좌우 클릭 영역 (슬라이드 절반씩) ── */
+  .click-prev, .click-next {
+    position: absolute; top: 0; width: 18%; height: 100%;
+    z-index: 90; cursor: pointer;
+    display: flex; align-items: center;
+    opacity: 0; transition: opacity .2s;
+  }
+  .click-prev { left: 0;  justify-content: flex-start; padding-left: 1.2%; }
+  .click-next { right: 0; justify-content: flex-end;   padding-right: 1.2%; }
+  .click-prev:hover, .click-next:hover { opacity: 1; }
+  .click-prev.disabled, .click-next.disabled { pointer-events: none; }
+
+  /* 화살표 아이콘 */
+  .click-prev::after, .click-next::after {
+    content: '';
+    width: 2.8em; height: 2.8em;
+    border-radius: 50%;
+    background: rgba(0,212,255,.18);
+    border: 2px solid rgba(0,212,255,.5);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  }
+  .click-prev::before { content: '◀'; position:absolute; left:1.8%; font-size:1.1em; color:var(--accent); z-index:1; pointer-events:none; }
+  .click-next::before { content: '▶'; position:absolute; right:1.8%; font-size:1.1em; color:var(--accent); z-index:1; pointer-events:none; }
+
+  /* ── 하단 진행 바 + 슬라이드 번호 ── */
+  #nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 6%;
+    display: flex; align-items: center; justify-content: center; gap: 1em;
+    background: rgba(255,255,255,.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #e2e8f0;
+    z-index: 999;
+  }
+  /* 이전/다음 버튼 (하단 바 안) */
+  .nb {
+    width: 2.2em; height: 2.2em; border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: #f8fafc;
+    color: var(--text); font-size: .9em;
+    cursor: pointer; transition: all .18s;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .nb:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: #000; transform: scale(1.12); }
+  .nb:disabled { opacity: .25; cursor: default; }
+  #pbar  { width: 12em; height: .25em; background: #e2e8f0; border-radius: .12em; overflow: hidden; }
+  #pfill { height: 100%; background: linear-gradient(to right, var(--accent), var(--purple)); transition: width .35s ease; }
+  #sc    { font-family: 'JetBrains Mono', monospace; font-size: .75em; color: var(--muted); min-width: 3.5em; text-align: center; letter-spacing:.05em; }
 </style>
 </head>
 <body>
@@ -143,7 +186,7 @@
 
 <!-- ══ 0: TITLE ══ -->
 <div class="slide active" id="s0">
-  <div class="glow" style="width:55%;height:55%;background:rgba(0,212,255,.06);top:-10%;right:-8%;"></div>
+  <div class="glow" style="width:55%;height:55%;background:rgba(2,132,199,.08);top:-10%;right:-8%;"></div>
   <div class="glow" style="width:45%;height:45%;background:rgba(124,58,237,.07);bottom:-8%;left:-6%;"></div>
   <div class="inner pad fc" style="justify-content:center;gap:.75em;">
     <div style="display:flex;align-items:center;gap:.8em;">
@@ -151,7 +194,7 @@
       <span class="xs" style="color:var(--muted);">122–124쪽</span>
     </div>
     <h1>표준입출력과<br>파일입출력</h1>
-    <p style="max-width:62%;color:#94a3b8;font-size:1.05em;line-height:1.8;">
+    <p style="max-width:62%;color:#475569;font-size:1.05em;line-height:1.8;">
       키오스크에서 음식을 주문할 때,<br>그 앱은 어떤 순서로 작동할까? 🤔
     </p>
     <div style="display:flex;flex-wrap:wrap;gap:.38em;margin-top:.2em;">
@@ -170,8 +213,8 @@
 
 <!-- ══ 1: 생각열기 ══ -->
 <div class="slide" id="s1">
-  <div class="hdr"><div class="chip">도입</div><span style="font-weight:700;color:#fff;">생각 열기</span><div class="snum">01 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip">도입</div><span style="font-weight:700;color:#1e293b;">생각 열기</span><div class="snum">01 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <h2>프로그램은 어떻게 작동할까?</h2>
     <div class="think">💭 키오스크에서 음식을 주문하거나 스마트폰으로 열차를 예매할 때 — 앱은 어떤 단계를 거칠까요?</div>
     <div class="flow" style="gap:0;margin:.8% 0;">
@@ -198,10 +241,10 @@
 
 <!-- ══ 2: print() ══ -->
 <div class="slide" id="s2">
-  <div class="hdr"><div class="chip">개념 ①</div><span style="font-weight:700;color:#fff;">표준 출력 — <span class="mono" style="color:var(--accent);">print()</span> 함수</span><div class="snum">02 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip">개념 ①</div><span style="font-weight:700;color:#1e293b;">표준 출력 — <span class="mono" style="color:var(--accent);">print()</span> 함수</span><div class="snum">02 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <div class="col2 f1">
-      <div class="fc" style="gap:.55em;">
+      <div class="fc" style="gap:.38em;">
         <div class="b-b fc f1" style="gap:.32em;">
           <h3>print() 특징</h3>
           <div class="li"><div class="dot"></div><p>괄호 안의 내용을 화면에 출력</p></div>
@@ -211,7 +254,7 @@
         </div>
         <div class="think">🧐 <span class="mono" style="color:var(--yellow);">a * b</span>를 print에 넣으면 어떤 값이 출력될까요?</div>
       </div>
-      <div class="fc" style="gap:.55em;">
+      <div class="fc" style="gap:.38em;">
         <div class="code f1">
           <div><span class="ln">1</span><span class="var">fruit</span> <span class="op">=</span> <span class="str">'청포도'</span></div>
           <div><span class="ln">2</span><span class="fn">print</span>(<span class="str">'내가 좋아하는 과일은'</span>, <span class="var">fruit</span>, <span class="str">'입니다.'</span>)</div>
@@ -232,10 +275,10 @@
 
 <!-- ══ 3: input() ══ -->
 <div class="slide" id="s3">
-  <div class="hdr"><div class="chip">개념 ②</div><span style="font-weight:700;color:#fff;">표준 입력 — <span class="mono" style="color:var(--accent);">input()</span> 함수</span><div class="snum">03 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip">개념 ②</div><span style="font-weight:700;color:#1e293b;">표준 입력 — <span class="mono" style="color:var(--accent);">input()</span> 함수</span><div class="snum">03 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <div class="col2 f1">
-      <div class="fc" style="gap:.55em;">
+      <div class="fc" style="gap:.38em;">
         <div class="b-p fc f1" style="gap:.32em;">
           <h3 style="color:#a78bfa;">input() 특징</h3>
           <div class="li"><div class="dot p"></div><p>괄호 안 문자열을 <strong style="color:#a78bfa;">프롬프트</strong>로 표시</p></div>
@@ -244,7 +287,7 @@
         </div>
         <div class="b-yw sm">⚠️ input()은 항상 <strong style="color:var(--yellow);">str</strong>로 반환합니다.<br>숫자 계산 시 <span class="mono" style="color:var(--accent);">int()</span> 또는 <span class="mono" style="color:var(--accent);">float()</span>으로 형 변환!</div>
       </div>
-      <div class="fc" style="gap:.55em;">
+      <div class="fc" style="gap:.38em;">
         <div class="code">
           <div><span class="ln">1</span><span class="var">age</span> <span class="op">=</span> <span class="fn">input</span>(<span class="str">'몇 살이세요?'</span>)</div>
           <div><span class="ln">2</span><span class="fn">print</span>(<span class="str">'당신은'</span>, <span class="var">age</span>, <span class="str">'살이군요.'</span>)</div>
@@ -270,8 +313,8 @@
 
 <!-- ══ 4: 파일입출력 개념 ══ -->
 <div class="slide" id="s4">
-  <div class="hdr"><div class="chip">개념 ③</div><span style="font-weight:700;color:#fff;">파일입출력이란?</span><div class="snum">04 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip">개념 ③</div><span style="font-weight:700;color:#1e293b;">파일입출력이란?</span><div class="snum">04 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <h2 style="margin-bottom:0;">파일입출력은 왜 필요할까?</h2>
     <div class="col2">
       <div class="b-b">
@@ -297,7 +340,7 @@
       <div style="margin-top:.4em;"><span class="cmt"># 작업 완료 후 반드시 닫기</span></div>
       <div><span class="var">파일변수</span>.<span class="fn">close</span>()</div>
     </div>
-    <div style="display:flex;gap:.7em;align-items:center;flex-wrap:wrap;">
+    <div style="display:flex;gap:.45em;align-items:center;flex-wrap:wrap;">
       <p class="sm" style="color:var(--muted);font-weight:700;">파일입출력 모드:</p>
       <span class="mr">'r' — 읽기</span>
       <span class="mw">'w' — 쓰기</span>
@@ -308,8 +351,8 @@
 
 <!-- ══ 5: 파일 처리 함수 ══ -->
 <div class="slide" id="s5">
-  <div class="hdr"><div class="chip">개념 ④</div><span style="font-weight:700;color:#fff;">파일 처리 함수 정리</span><div class="snum">05 / 11</div></div>
-  <div class="inner pad fc" style="gap:.7em;">
+  <div class="hdr"><div class="chip">개념 ④</div><span style="font-weight:700;color:#1e293b;">파일 처리 함수 정리</span><div class="snum">05 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <table class="f1">
       <thead><tr><th>모드</th><th>함수</th><th>기능 설명</th></tr></thead>
       <tbody>
@@ -343,8 +386,8 @@
 
 <!-- ══ 6: 파일 쓰기/읽기 ══ -->
 <div class="slide" id="s6">
-  <div class="hdr"><div class="chip">코드 예제</div><span style="font-weight:700;color:#fff;">파일 쓰기 &amp; 읽기</span><div class="snum">06 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip">코드 예제</div><span style="font-weight:700;color:#1e293b;">파일 쓰기 &amp; 읽기</span><div class="snum">06 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <div class="col2 f1">
       <div class="fc" style="gap:.5em;">
         <p class="xs" style="color:#a78bfa;font-weight:700;letter-spacing:.1em;">① 파일 쓰기 (w 모드)</p>
@@ -380,10 +423,10 @@
 
 <!-- ══ 7: 구현① 정사각형 ══ -->
 <div class="slide" id="s7">
-  <div class="hdr"><div class="chip g">구현 ①</div><span style="font-weight:700;color:#fff;">표준입출력 — 정사각형 넓이 계산기</span><div class="snum">07 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip g">구현 ①</div><span style="font-weight:700;color:#1e293b;">표준입출력 — 정사각형 넓이 계산기</span><div class="snum">07 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <div class="col2 f1">
-      <div class="fc" style="gap:.55em;">
+      <div class="fc" style="gap:.38em;">
         <div class="think">🧩 input()으로 받은 값의 자료형은?<br><span class="mono" style="color:var(--yellow);">int(a) * int(a)</span>에서 왜 int()가 필요할까요?</div>
         <div class="b-g fc f1" style="gap:.3em;">
           <h3>컴퓨팅 사고 포인트</h3>
@@ -396,8 +439,7 @@
         <div class="code">
           <div><span class="ln">1</span><span class="fn">print</span>(<span class="str">'정사각형의 넓이를 계산하겠습니다.'</span>)</div>
           <div><span class="ln">2</span><span class="var">a</span> <span class="op">=</span> <span class="fn">input</span>(<span class="str">'한 변의 길이를 입력하세요: '</span>)</div>
-          <div><span class="ln">3</span><span class="fn">print</span>(<span class="str">'변의 길이'</span>, <span class="var">a</span>, <span class="str">'의 넓이는'</span>,</div>
-          <div><span class="ln"> </span>      <span class="fn">int</span>(<span class="var">a</span>)<span class="op">*</span><span class="fn">int</span>(<span class="var">a</span>), <span class="str">'입니다.'</span>)</div>
+          <div><span class="ln">3</span><span class="fn">print</span>(<span class="str">'변의 길이'</span>, <span class="var">a</span>, <span class="str">'의 넓이는'</span>, <span class="fn">int</span>(<span class="var">a</span>)<span class="op">*</span><span class="fn">int</span>(<span class="var">a</span>), <span class="str">'입니다.'</span>)</div>
         </div>
         <div class="out">
           <div class="out-label">▶ 실행 결과</div>
@@ -417,10 +459,10 @@
 
 <!-- ══ 8: 구현② 독서기록 ══ -->
 <div class="slide" id="s8">
-  <div class="hdr"><div class="chip g">구현 ②</div><span style="font-weight:700;color:#fff;">파일입출력 — 독서 기록 저장</span><div class="snum">08 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip g">구현 ②</div><span style="font-weight:700;color:#1e293b;">파일입출력 — 독서 기록 저장</span><div class="snum">08 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <div class="col2 f1">
-      <div class="fc" style="gap:.55em;">
+      <div class="fc" style="gap:.38em;">
         <div class="b-p fc" style="gap:.38em;">
           <h3 style="color:#a78bfa;">🔑 핵심: 'a' (추가 모드)</h3>
           <p>새로운 기록을 추가할 때마다 기존 데이터가 <strong style="color:#a78bfa;">유지</strong>됩니다.</p>
@@ -447,10 +489,10 @@
 
 <!-- ══ 9: 응용 CSV ══ -->
 <div class="slide" id="s9">
-  <div class="hdr"><div class="chip y">응용 🚇</div><span style="font-weight:700;color:#fff;">공공 데이터 — 서울 지하철 물품보관함</span><div class="snum">09 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip y">응용 🚇</div><span style="font-weight:700;color:#1e293b;">공공 데이터 — 서울 지하철 물품보관함</span><div class="snum">09 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <div class="col2 f1">
-      <div class="fc" style="gap:.55em;">
+      <div class="fc" style="gap:.38em;">
         <div class="b-b fc" style="gap:.38em;">
           <h3>💡 with 구문이란?</h3>
           <p class="sm"><span class="mono" style="color:var(--accent);">with open(...) as f:</span><br>블록이 끝나면 <strong style="color:var(--accent);">자동으로 close()</strong>가 호출됩니다!</p>
@@ -460,8 +502,7 @@
       </div>
       <div class="fc" style="gap:.5em;">
         <div class="code f1" style="font-size:.77em;">
-          <div><span class="ln">1</span><span class="kw">with</span> <span class="fn">open</span>(<span class="str">'물품보관함.csv'</span>, <span class="str">'r'</span>,</div>
-          <div><span class="ln"> </span>        encoding<span class="op">=</span><span class="str">'euc-kr'</span>) <span class="kw">as</span> <span class="var">file</span>:</div>
+          <div><span class="ln">1</span><span class="kw">with</span> <span class="fn">open</span>(<span class="str">'물품보관함.csv'</span>, <span class="str">'r'</span>, encoding<span class="op">=</span><span class="str">'euc-kr'</span>) <span class="kw">as</span> <span class="var">file</span>:
           <div><span class="ln">2</span>  <span class="var">file</span>.<span class="fn">readline</span>()  <span class="cmt"># 헤더 건너뜀</span></div>
           <div><span class="ln">3</span>  <span class="var">lines</span> <span class="op">=</span> <span class="var">file</span>.<span class="fn">readlines</span>()</div>
           <div><span class="ln">4</span>  <span class="kw">for</span> <span class="var">line</span> <span class="kw">in</span> <span class="var">lines</span>:</div>
@@ -481,10 +522,10 @@
 
 <!-- ══ 10: QUIZ ══ -->
 <div class="slide" id="s10">
-  <div class="hdr"><div class="chip p">형성 평가</div><span style="font-weight:700;color:#fff;">개념 확인 퀴즈</span><div class="snum">10 / 11</div></div>
-  <div class="inner pad fc" style="justify-content:center;gap:1.1em;">
+  <div class="hdr"><div class="chip p">형성 평가</div><span style="font-weight:700;color:#1e293b;">개념 확인 퀴즈</span><div class="snum">10 / 11</div></div>
+  <div class="inner pad fc" style="justify-content:center;gap:.7em;">
     <div id="qb1">
-      <p style="font-size:1.1em;font-weight:700;color:#fff;margin-bottom:.48em;">Q1. <span class="mono" style="color:var(--accent);">input()</span> 함수로 숫자를 입력받았을 때, 이 값의 자료형은?</p>
+      <p style="font-size:1.1em;font-weight:700;color:#1e293b;margin-bottom:.48em;">Q1. <span class="mono" style="color:var(--accent);">input()</span> 함수로 숫자를 입력받았을 때, 이 값의 자료형은?</p>
       <div class="qopt" onclick="cq1(this,'b')"><div class="qalpha">A</div><span>int (정수)</span></div>
       <div class="qopt" onclick="cq1(this,'a')"><div class="qalpha">B</div><span>str (문자열) ✅</span></div>
       <div class="qopt" onclick="cq1(this,'c')"><div class="qalpha">C</div><span>float (실수)</span></div>
@@ -492,7 +533,7 @@
       <div id="fb1" class="qfb"></div>
     </div>
     <div id="qb2" style="display:none;">
-      <p style="font-size:1.1em;font-weight:700;color:#fff;margin-bottom:.48em;">Q2. 기존 파일에 데이터를 <u>이어서 추가</u>하려면 어떤 모드를 써야 하나요?</p>
+      <p style="font-size:1.1em;font-weight:700;color:#1e293b;margin-bottom:.48em;">Q2. 기존 파일에 데이터를 <u>이어서 추가</u>하려면 어떤 모드를 써야 하나요?</p>
       <div class="qopt" onclick="cq2(this,'x')"><div class="qalpha">A</div><span>'r' — 읽기</span></div>
       <div class="qopt" onclick="cq2(this,'x')"><div class="qalpha">B</div><span>'w' — 쓰기</span></div>
       <div class="qopt" onclick="cq2(this,'o')"><div class="qalpha">C</div><span>'a' — 추가 ✅</span></div>
@@ -503,10 +544,10 @@
 
 <!-- ══ 11: 정리 ══ -->
 <div class="slide" id="s11">
-  <div class="hdr"><div class="chip">수업 정리</div><span style="font-weight:700;color:#fff;">오늘 배운 내용 요약</span><div class="snum">11 / 11</div></div>
-  <div class="inner pad fc" style="gap:.65em;">
+  <div class="hdr"><div class="chip">수업 정리</div><span style="font-weight:700;color:#1e293b;">오늘 배운 내용 요약</span><div class="snum">11 / 11</div></div>
+  <div class="inner pad fc" style="gap:.45em;">
     <div class="col2 f1">
-      <div class="fc" style="gap:.55em;">
+      <div class="fc" style="gap:.38em;">
         <div class="b-b fc f1" style="gap:.3em;">
           <h3>📌 표준입출력</h3>
           <div class="li"><div class="dot"></div><p><span class="mono" style="color:var(--accent);">print()</span> — 화면 출력, 콤마로 여러 값</p></div>
@@ -544,7 +585,11 @@
   </div>
 </div>
 
-<!-- NAV -->
+<!-- 좌우 클릭 영역 -->
+<div class="click-prev disabled" id="cprev" onclick="go(-1)"></div>
+<div class="click-next" id="cnext" onclick="go(1)"></div>
+
+<!-- 하단 진행 바 -->
 <div id="nav">
   <button class="nb" id="pb" onclick="go(-1)" disabled>◀</button>
   <div id="pbar"><div id="pfill"></div></div>
@@ -563,7 +608,7 @@
     stage.style.width  = w + 'px';
     stage.style.height = h + 'px';
     // 1em ≈ w/36  →  large enough for back-row students
-    stage.style.fontSize = (w / 36) + 'px';
+    stage.style.fontSize = (w / 42) + 'px';
   }
   window.addEventListener('resize', resize);
   resize();
@@ -573,9 +618,13 @@
   let cur = 0;
 
   function upd() {
-    document.getElementById('pb').disabled = cur === 0;
-    document.getElementById('nb').disabled = cur === slides.length - 1;
-    document.getElementById('sc').textContent = cur + ' / ' + total;
+    const atStart = cur === 0;
+    const atEnd   = cur === slides.length - 1;
+    document.getElementById('pb').disabled = atStart;
+    document.getElementById('nb').disabled = atEnd;
+    document.getElementById('cprev').classList.toggle('disabled', atStart);
+    document.getElementById('cnext').classList.toggle('disabled', atEnd);
+    document.getElementById('sc').textContent = (cur + 1) + ' / ' + (total + 1);
     document.getElementById('pfill').style.width = (cur / total * 100) + '%';
   }
 
