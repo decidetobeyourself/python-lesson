@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인공 신경망과 딥러닝 — 인터랙티브 수업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --color-text-primary:#111;--color-text-secondary:#555;--color-text-tertiary:#999;
+  --color-background-primary:#fff;--color-background-secondary:#f4f4f2;--color-background-tertiary:#ece9e4;
+  --color-border-tertiary:rgba(0,0,0,0.12);--color-border-secondary:rgba(0,0,0,0.22);--color-border-primary:rgba(0,0,0,0.35);
+  --color-background-info:#e6f1fb;--color-text-info:#0c447c;--color-border-info:#85b7eb;
+  --color-background-success:#e1f5ee;--color-text-success:#085041;--color-border-success:#5dcaa5;
+  --color-background-warning:#faeeda;--color-text-warning:#633806;--color-border-warning:#ef9f27;
+  --color-background-danger:#fcebeb;--color-text-danger:#501313;--color-border-danger:#f09595;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'SFMono-Regular',Consolas,monospace;
+  --border-radius-md:8px;--border-radius-lg:12px;--border-radius-xl:16px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --color-text-primary:#f0f0ee;--color-text-secondary:#aaa;--color-text-tertiary:#666;
+    --color-background-primary:#1a1a18;--color-background-secondary:#242420;--color-background-tertiary:#2e2e2a;
+    --color-border-tertiary:rgba(255,255,255,0.1);--color-border-secondary:rgba(255,255,255,0.2);--color-border-primary:rgba(255,255,255,0.32);
+    --color-background-info:#042c53;--color-text-info:#b5d4f4;--color-border-info:#185fa5;
+    --color-background-success:#04342c;--color-text-success:#9fe1cb;--color-border-success:#0f6e56;
+    --color-background-warning:#412402;--color-text-warning:#fac775;--color-border-warning:#854f0b;
+    --color-background-danger:#501313;--color-text-danger:#f7c1c1;--color-border-danger:#a32d2d;
+  }
+}
+body{font-family:var(--font-sans);color:var(--color-text-primary);background:var(--color-background-tertiary);min-height:100vh;padding:2rem 1rem}
+.lesson{max-width:780px;margin:0 auto;background:var(--color-background-primary);border-radius:var(--border-radius-xl);padding:2rem;box-shadow:0 2px 16px rgba(0,0,0,0.08)}
+h1{font-size:22px;font-weight:500;margin-bottom:.25rem}
+.subtitle{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.5rem}
+.nav-tabs{display:flex;gap:4px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;overflow-x:auto;padding-bottom:0;flex-wrap:nowrap}
+.tab-btn{flex-shrink:0;padding:8px 14px;font-size:13px;font-weight:400;border:none;background:transparent;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
+.tab-btn.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500}
+.tab-btn:hover:not(.active){color:var(--color-text-primary)}
+.panel{display:none}.panel.active{display:block}
+.sec-label{font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--color-text-secondary);text-transform:uppercase;margin-bottom:.5rem}
+.sec-title{font-size:17px;font-weight:500;margin-bottom:.75rem;line-height:1.4}
+.sec-body{font-size:14px;line-height:1.75;color:var(--color-text-secondary);margin-bottom:1rem}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+.card-sm{padding:.75rem 1rem;border-radius:var(--border-radius-md)}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);font-weight:500}
+.badge-info{background:var(--color-background-info);color:var(--color-text-info)}
+.badge-success{background:var(--color-background-success);color:var(--color-text-success)}
+.badge-warn{background:var(--color-background-warning);color:var(--color-text-warning)}
+.badge-danger{background:var(--color-background-danger);color:var(--color-text-danger)}
+.result-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem;margin-top:.75rem;display:flex;align-items:center;gap:.75rem}
+.result-num{font-size:26px;font-weight:500;min-width:60px;text-align:right}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+.slider-row label{font-size:13px;min-width:36px;color:var(--color-text-secondary)}
+.slider-row input[type=range]{flex:1;accent-color:var(--color-text-primary)}
+.slider-row .val{font-size:13px;font-weight:500;min-width:36px;text-align:right}
+.svg-canvas{width:100%;overflow:visible}
+.fn-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem}
+.fn-btn{padding:5px 12px;font-size:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;color:var(--color-text-secondary);transition:.15s;font-family:var(--font-sans)}
+.fn-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500;border-color:var(--color-border-primary)}
+.fn-btn:hover:not(.active){background:var(--color-background-secondary)}
+.node-io{fill:#E6F1FB;stroke:#185FA5;stroke-width:1.5}
+.node-hidden{fill:#E1F5EE;stroke:#0F6E56;stroke-width:1.5}
+.node-out{fill:#FAEEDA;stroke:#854F0B;stroke-width:1.5}
+.node-text{font-size:11px;fill:#222;text-anchor:middle;dominant-baseline:middle;font-family:var(--font-sans)}
+.edge{stroke:#ccc;stroke-width:1.5;fill:none}
+.axis{stroke:var(--color-border-secondary);stroke-width:1}
+.axis-label{font-size:10px;fill:var(--color-text-secondary);font-family:var(--font-sans)}
+.fn-curve{fill:none;stroke-width:2.5;stroke-linecap:round}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:.5rem}
+.cmp-table th{background:var(--color-background-secondary);font-weight:500;padding:8px 10px;text-align:left;border-bottom:0.5px solid var(--color-border-tertiary)}
+.cmp-table td{padding:8px 10px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top;line-height:1.55}
+.cmp-table tr:last-child td{border-bottom:none}
+.nl-canvas{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:.75rem}
+.nl-cell{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;text-align:center}
+.nl-cell-title{font-size:12px;font-weight:500;padding:6px 8px;background:var(--color-background-secondary)}
+.callout{border-left:3px solid var(--color-border-info);background:var(--color-background-info);border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:.6rem .9rem;font-size:13px;color:var(--color-text-secondary);margin:.75rem 0;line-height:1.6}
+.callout strong{color:var(--color-text-primary);font-weight:500}
+.step-row{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.6rem}
+.step-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary)}
+.step-text{font-size:13px;line-height:1.6;color:var(--color-text-secondary);padding-top:2px}
+.deep-row{display:flex;align-items:center;gap:0;overflow-x:auto;padding:.5rem 0}
+.layer-col{display:flex;flex-direction:column;align-items:center;gap:7px}
+.d-node{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;flex-shrink:0}
+.d-node-i{background:#E6F1FB;color:#0C447C;border:1px solid #85B7EB}
+.d-node-h{background:#E1F5EE;color:#085041;border:1px solid #5DCAA5}
+.d-node-o{background:#FAEEDA;color:#633806;border:1px solid #EF9F27}
+.d-arrow{font-size:16px;color:var(--color-text-tertiary);margin:14px 4px 0;flex-shrink:0}
+.toggle-section{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;margin-bottom:.5rem}
+.toggle-header{display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;cursor:pointer;background:var(--color-background-secondary);font-size:13px;font-weight:500;user-select:none}
+.toggle-body{display:none;padding:.75rem .9rem;font-size:13px;line-height:1.65;color:var(--color-text-secondary);border-top:0.5px solid var(--color-border-tertiary)}
+.toggle-body.open{display:block}
+</style>
+</head>
+<body>
+<div class="lesson">
+<h1>인공 신경망과 딥러닝</h1>
+<p class="subtitle">Ⅱ. 인공지능과 학습 &nbsp;·&nbsp; 03단원 &nbsp;·&nbsp; 교과서 126~132쪽</p>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('perceptron',this)">퍼셉트론</button>
+  <button class="tab-btn" onclick="switchTab('activation',this)">활성화 함수</button>
+  <button class="tab-btn" onclick="switchTab('nonlinear',this)">비선형 문제</button>
+  <button class="tab-btn" onclick="switchTab('mlp',this)">다층 신경망</button>
+  <button class="tab-btn" onclick="switchTab('deep',this)">심층 신경망 &amp; 딥러닝</button>
+  <button class="tab-btn" onclick="switchTab('playground',this)">플레이그라운드 준비</button>
+</div>
+
+<!-- TAB 1: 퍼셉트론 -->
+<div id="tab-perceptron" class="panel active">
+  <div class="sec-label">핵심 개념 1</div>
+  <div class="sec-title">퍼셉트론 — 인공 신경망의 기본 단위</div>
+  <div class="sec-body">퍼셉트론은 여러 입력값(x)에 각각 가중치(w)를 곱한 뒤 모두 더해 가중합을 구하고, 그 합이 임곗값(θ)을 넘으면 1, 그렇지 않으면 0을 출력합니다. 슬라이더를 움직여 직접 확인해 보세요.</div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div>
+        <div class="sec-label">입력값과 가중치 설정</div>
+        <div class="slider-row"><label>x₁</label><input type="range" min="-2" max="2" step="0.1" value="1.0" id="x1" oninput="updatePerceptron()"><span class="val" id="x1v">1.0</span></div>
+        <div class="slider-row"><label>w₁</label><input type="range" min="-2" max="2" step="0.1" value="0.5" id="w1" oninput="updatePerceptron()"><span class="val" id="w1v">0.5</span></div>
+        <div style="height:8px"></div>
+        <div class="slider-row"><label>x₂</label><input type="range" min="-2" max="2" step="0.1" value="1.0" id="x2" oninput="updatePerceptron()"><span class="val" id="x2v">1.0</span></div>
+        <div class="slider-row"><label>w₂</label><input type="range" min="-2" max="2" step="0.1" value="0.5" id="w2" oninput="updatePerceptron()"><span class="val" id="w2v">0.5</span></div>
+        <div style="height:8px"></div>
+        <div class="slider-row"><label>x₃</label><input type="range" min="-2" max="2" step="0.1" value="1.0" id="x3" oninput="updatePerceptron()"><span class="val" id="x3v">1.0</span></div>
+        <div class="slider-row"><label>w₃</label><input type="range" min="-2" max="2" step="0.1" value="0.5" id="w3" oninput="updatePerceptron()"><span class="val" id="w3v">0.5</span></div>
+        <div style="height:8px"></div>
+        <div class="slider-row"><label style="min-width:80px">임곗값 θ</label><input type="range" min="-3" max="3" step="0.1" value="1.0" id="theta" oninput="updatePerceptron()"><span class="val" id="thetav">1.0</span></div>
+      </div>
+      <div>
+        <div class="sec-label">시각화</div>
+        <svg class="svg-canvas" viewBox="0 0 220 200" id="psvg">
+          <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#888780"/></marker></defs>
+          <line id="e1" x1="46" y1="38" x2="126" y2="95" class="edge"/>
+          <line id="e2" x1="46" y1="100" x2="126" y2="100" class="edge"/>
+          <line id="e3" x1="46" y1="162" x2="126" y2="105" class="edge"/>
+          <line x1="162" y1="100" x2="200" y2="100" stroke="#888780" stroke-width="1.5" marker-end="url(#arr)"/>
+          <circle cx="36" cy="38" r="22" class="node-io"/>
+          <text class="node-text" x="36" y="38">x₁</text>
+          <circle cx="36" cy="100" r="22" class="node-io"/>
+          <text class="node-text" x="36" y="100">x₂</text>
+          <circle cx="36" cy="162" r="22" class="node-io"/>
+          <text class="node-text" x="36" y="162">x₃</text>
+          <text class="axis-label" id="wl1" x="74" y="62">w₁=0.5</text>
+          <text class="axis-label" id="wl2" x="74" y="96">w₂=0.5</text>
+          <text class="axis-label" id="wl3" x="74" y="140">w₃=0.5</text>
+          <circle cx="144" cy="100" r="26" id="sumnode" class="node-hidden"/>
+          <text class="node-text" x="144" y="96">Σ</text>
+          <text class="node-text" x="144" y="108" id="sumval" style="font-size:9px">0.00</text>
+          <circle cx="208" cy="100" r="14" id="outnode" class="node-io"/>
+          <text class="node-text" x="208" y="100" id="outval">?</text>
+        </svg>
+        <div class="result-box" id="pcalc">
+          <div style="flex:1">
+            <div style="font-size:12px;color:var(--color-text-secondary)">가중합 = x₁w₁ + x₂w₂ + x₃w₃</div>
+            <div style="font-size:13px;font-weight:500;margin-top:2px" id="pcalc-formula">= 0.50 + 0.50 + 0.50 = 1.50</div>
+          </div>
+          <div>
+            <span class="badge badge-info" id="pcalc-cmp">1.50 ≥ 1.0</span><br>
+            <span style="font-size:20px;font-weight:500;display:block;text-align:center;margin-top:4px" id="pcalc-out">출력: 1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:.5rem">
+      <strong>계산 흐름</strong>: 가중합 = Σ(xᵢ × wᵢ) → 활성화 함수(임곗값 비교) → 임곗값 이상이면 1, 미만이면 0 출력. 가중치가 클수록 해당 입력이 출력에 더 큰 영향을 줍니다.
+    </div>
+  </div>
+  <div class="sec-label" style="margin-top:1rem">AND / OR 논리 게이트 체험</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem">
+    <button class="fn-btn" onclick="loadGate('AND')">AND 게이트 불러오기</button>
+    <button class="fn-btn" onclick="loadGate('OR')">OR 게이트 불러오기</button>
+  </div>
+  <div id="gate-info" class="callout" style="display:none"></div>
+  <div id="gate-table" style="display:none">
+    <table class="cmp-table">
+      <thead><tr><th>x₁</th><th>x₂</th><th>가중합</th><th>출력</th></tr></thead>
+      <tbody id="gate-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB 2: 활성화 함수 -->
+<div id="tab-activation" class="panel">
+  <div class="sec-label">핵심 개념 2</div>
+  <div class="sec-title">활성화 함수 — 비선형성의 핵심</div>
+  <div class="sec-body">활성화 함수는 퍼셉트론 내부에서 가중합을 받아 비선형적으로 변환해 출력합니다. 활성화 함수가 없다면 아무리 층을 쌓아도 전체 신경망은 단순 선형 변환에 불과합니다. 각 함수를 선택해 그래프와 특성을 비교해 보세요.</div>
+  <div class="fn-btns">
+    <button class="fn-btn active" id="fn-step" onclick="showFn('step',this)">계단 함수</button>
+    <button class="fn-btn" id="fn-sigmoid" onclick="showFn('sigmoid',this)">시그모이드</button>
+    <button class="fn-btn" id="fn-tanh" onclick="showFn('tanh',this)">하이퍼볼릭 탄젠트</button>
+    <button class="fn-btn" id="fn-relu" onclick="showFn('relu',this)">ReLU</button>
+    <button class="fn-btn" id="fn-leaky" onclick="showFn('leaky',this)">Leaky ReLU</button>
+    <button class="fn-btn" id="fn-softmax" onclick="showFn('softmax',this)">소프트맥스</button>
+  </div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+      <div>
+        <svg class="svg-canvas" viewBox="0 0 200 160" id="afsvg">
+          <line x1="20" y1="10" x2="20" y2="148" class="axis"/>
+          <line x1="12" y1="80" x2="192" y2="80" class="axis"/>
+          <text class="axis-label" x="194" y="83">z</text>
+          <text class="axis-label" x="22" y="10">f(z)</text>
+          <line x1="17" y1="80" x2="20" y2="80" class="axis"/><text class="axis-label" x="4" y="83">0</text>
+          <line x1="17" y1="45" x2="20" y2="45" class="axis"/><text class="axis-label" x="4" y="48">1</text>
+          <line x1="17" y1="115" x2="20" y2="115" class="axis"/><text class="axis-label" x="-2" y="118">-1</text>
+          <line x1="106" y1="78" x2="106" y2="82" class="axis"/><text class="axis-label" x="103" y="92">1</text>
+          <line x1="149" y1="78" x2="149" y2="82" class="axis"/><text class="axis-label" x="146" y="92">3</text>
+          <line x1="63" y1="78" x2="63" y2="82" class="axis"/><text class="axis-label" x="58" y="92">-1</text>
+          <path id="af-curve" class="fn-curve" stroke="#185FA5" d=""/>
+          <circle id="af-marker" cx="106" cy="80" r="4" fill="#D85A30"/>
+          <line id="af-vline" x1="106" y1="80" x2="106" y2="80" stroke="#D85A30" stroke-width="1" stroke-dasharray="3,2"/>
+        </svg>
+        <div class="slider-row" style="margin-top:.5rem">
+          <label style="min-width:24px;font-size:12px">z =</label>
+          <input type="range" min="-4" max="4" step="0.1" value="1" id="af-z" oninput="updateAFMarker()">
+          <span class="val" id="af-zv">1.0</span>
+        </div>
+        <div class="result-box">
+          <div style="flex:1;font-size:12px;color:var(--color-text-secondary)">f(z) =</div>
+          <div class="result-num" id="af-out">0.73</div>
+        </div>
+      </div>
+      <div id="fn-desc"></div>
+    </div>
+  </div>
+  <div class="sec-label" style="margin-top:1rem">어떤 함수를 언제 쓰나요?</div>
+  <table class="cmp-table">
+    <thead><tr><th>함수</th><th>출력 범위</th><th>주 사용처</th><th>특징</th></tr></thead>
+    <tbody>
+      <tr><td>계단 함수</td><td>0 또는 1</td><td>초기 퍼셉트론</td><td>미분 불가 → 학습 불가</td></tr>
+      <tr><td>시그모이드</td><td>(0, 1)</td><td>이진 분류 출력층</td><td>기울기 소실 문제</td></tr>
+      <tr><td>tanh</td><td>(-1, 1)</td><td>은닉층(과거)</td><td>시그모이드보다 기울기 소실 덜함</td></tr>
+      <tr><td>ReLU</td><td>[0, ∞)</td><td>은닉층 (현재 표준)</td><td>빠른 계산, 기울기 소실 크게 줄임</td></tr>
+      <tr><td>Leaky ReLU</td><td>(-∞, ∞)</td><td>은닉층</td><td>죽은 뉴런 문제 보완</td></tr>
+      <tr><td>소프트맥스</td><td>(0,1), 합=1</td><td>다중 분류 출력층</td><td>출력 합 = 1 → 확률 해석 가능</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- TAB 3: 비선형 문제 -->
+<div id="tab-nonlinear" class="panel">
+  <div class="sec-label">핵심 개념 3</div>
+  <div class="sec-title">선형 vs 비선형 분류 문제</div>
+  <div class="sec-body">퍼셉트론(은닉층 없음)은 직선 하나로 두 클래스를 나누는 선형 분류만 가능합니다. 직선으로 나눌 수 없는 문제가 비선형 분류이며, 은닉층이 있어야 해결할 수 있습니다.</div>
+  <div class="nl-canvas">
+    <div class="nl-cell">
+      <div class="nl-cell-title">AND — 선형 분리 가능 <span class="badge badge-success">퍼셉트론 O</span></div>
+      <canvas id="cnv-and" width="200" height="160" style="display:block;margin:0 auto"></canvas>
+    </div>
+    <div class="nl-cell">
+      <div class="nl-cell-title">OR — 선형 분리 가능 <span class="badge badge-success">퍼셉트론 O</span></div>
+      <canvas id="cnv-or" width="200" height="160" style="display:block;margin:0 auto"></canvas>
+    </div>
+    <div class="nl-cell">
+      <div class="nl-cell-title">XOR — 비선형 <span class="badge badge-danger">퍼셉트론 X</span></div>
+      <canvas id="cnv-xor" width="200" height="160" style="display:block;margin:0 auto"></canvas>
+    </div>
+    <div class="nl-cell">
+      <div class="nl-cell-title">원형 경계 — 비선형 <span class="badge badge-danger">퍼셉트론 X</span></div>
+      <canvas id="cnv-circle" width="200" height="160" style="display:block;margin:0 auto"></canvas>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:.75rem">
+    <strong>왜 비선형 문제는 은닉층이 필요한가?</strong> 은닉층의 활성화 함수가 비선형 변환을 만들어 냅니다. 층을 쌓을수록 더 복잡한 결정 경계를 표현할 수 있습니다. XOR처럼 직선 하나로는 절대 분리할 수 없는 패턴도 은닉층 하나면 해결됩니다.
+  </div>
+  <div class="card" style="margin-top:.75rem">
+    <div class="sec-label">XOR을 다층 신경망이 푸는 원리</div>
+    <svg class="svg-canvas" viewBox="0 0 400 140">
+      <rect x="0" y="0" width="400" height="140" fill="transparent"/>
+      <rect x="10" y="20" width="110" height="100" rx="6" fill="none" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+      <text font-size="9" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="65" y="15" text-anchor="middle">원본 공간 (XOR 데이터)</text>
+      <line x1="15" y1="75" x2="68" y2="42" stroke="#185FA5" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <line x1="15" y1="100" x2="115" y2="60" stroke="#185FA5" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <circle cx="25" cy="110" r="5" fill="#185FA5" opacity=".7"/>
+      <circle cx="100" cy="30" r="5" fill="#185FA5" opacity=".7"/>
+      <circle cx="25" cy="30" r="5" fill="#D85A30" opacity=".7"/>
+      <circle cx="100" cy="110" r="5" fill="#D85A30" opacity=".7"/>
+      <text font-size="8" fill="var(--color-text-tertiary)" font-family="var(--font-sans)" x="65" y="128" text-anchor="middle">직선으로 분리 불가</text>
+      <text font-size="18" fill="var(--color-text-tertiary)" x="128" y="80" text-anchor="middle">→</text>
+      <rect x="140" y="20" width="110" height="100" rx="6" fill="none" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+      <text font-size="9" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="195" y="15" text-anchor="middle">은닉층 출력 (새 특징 공간)</text>
+      <line x1="145" y1="65" x2="245" y2="65" stroke="#0F6E56" stroke-width="1.5"/>
+      <circle cx="160" cy="35" r="5" fill="#185FA5" opacity=".7"/>
+      <circle cx="235" cy="35" r="5" fill="#D85A30" opacity=".7"/>
+      <circle cx="160" cy="100" r="5" fill="#D85A30" opacity=".7"/>
+      <circle cx="235" cy="100" r="5" fill="#185FA5" opacity=".7"/>
+      <text font-size="8" fill="var(--color-text-tertiary)" font-family="var(--font-sans)" x="195" y="128" text-anchor="middle">직선 하나로 분리 가능!</text>
+      <text font-size="18" fill="var(--color-text-tertiary)" x="268" y="80" text-anchor="middle">→</text>
+      <rect x="278" y="20" width="110" height="100" rx="6" fill="none" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+      <text font-size="9" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="333" y="15" text-anchor="middle">출력층 결과</text>
+      <circle cx="305" cy="65" r="24" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <text font-size="22" fill="#0F6E56" font-family="var(--font-sans)" x="305" y="72" text-anchor="middle" font-weight="500">✓</text>
+      <text font-size="9" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="355" y="55">XOR</text>
+      <text font-size="9" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="355" y="67">분류</text>
+      <text font-size="9" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="355" y="79">성공</text>
+    </svg>
+  </div>
+</div>
+
+<!-- TAB 4: 다층 신경망 -->
+<div id="tab-mlp" class="panel">
+  <div class="sec-label">핵심 개념 4</div>
+  <div class="sec-title">다층 신경망 (MLP) — 신호 흐름 따라가기</div>
+  <div class="sec-body">입력층에서 출력층까지 신호가 어떻게 흘러가는지 "재생" 버튼으로 확인해 보세요. 각 층의 역할도 함께 표시됩니다.</div>
+  <div class="card">
+    <svg class="svg-canvas" viewBox="0 0 500 220" id="mlp-svg">
+      <defs><marker id="arr2" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#888780"/></marker></defs>
+      <text font-size="10" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="38" y="18" text-anchor="middle">입력층</text>
+      <text font-size="9" fill="var(--color-text-tertiary)" font-family="var(--font-sans)" x="38" y="28" text-anchor="middle">input</text>
+      <text font-size="10" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="178" y="18" text-anchor="middle">은닉층 1</text>
+      <text font-size="9" fill="var(--color-text-tertiary)" font-family="var(--font-sans)" x="178" y="28" text-anchor="middle">hidden 1</text>
+      <text font-size="10" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="318" y="18" text-anchor="middle">은닉층 2</text>
+      <text font-size="9" fill="var(--color-text-tertiary)" font-family="var(--font-sans)" x="318" y="28" text-anchor="middle">hidden 2</text>
+      <text font-size="10" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="458" y="18" text-anchor="middle">출력층</text>
+      <text font-size="9" fill="var(--color-text-tertiary)" font-family="var(--font-sans)" x="458" y="28" text-anchor="middle">output</text>
+      <g id="edges-0-1" opacity=".25">
+        <line x1="55" y1="60" x2="162" y2="60" stroke="#888" stroke-width="1"/>
+        <line x1="55" y1="60" x2="162" y2="100" stroke="#888" stroke-width="1"/>
+        <line x1="55" y1="60" x2="162" y2="140" stroke="#888" stroke-width="1"/>
+        <line x1="55" y1="100" x2="162" y2="60" stroke="#888" stroke-width="1"/>
+        <line x1="55" y1="100" x2="162" y2="100" stroke="#888" stroke-width="1"/>
+        <line x1="55" y1="100" x2="162" y2="140" stroke="#888" stroke-width="1"/>
+        <line x1="55" y1="140" x2="162" y2="60" stroke="#888" stroke-width="1"/>
+        <line x1="55" y1="140" x2="162" y2="100" stroke="#888" stroke-width="1"/>
+        <line x1="55" y1="140" x2="162" y2="140" stroke="#888" stroke-width="1"/>
+      </g>
+      <g id="edges-1-2" opacity=".25">
+        <line x1="194" y1="60" x2="302" y2="70" stroke="#888" stroke-width="1"/>
+        <line x1="194" y1="60" x2="302" y2="110" stroke="#888" stroke-width="1"/>
+        <line x1="194" y1="60" x2="302" y2="150" stroke="#888" stroke-width="1"/>
+        <line x1="194" y1="100" x2="302" y2="70" stroke="#888" stroke-width="1"/>
+        <line x1="194" y1="100" x2="302" y2="110" stroke="#888" stroke-width="1"/>
+        <line x1="194" y1="100" x2="302" y2="150" stroke="#888" stroke-width="1"/>
+        <line x1="194" y1="140" x2="302" y2="70" stroke="#888" stroke-width="1"/>
+        <line x1="194" y1="140" x2="302" y2="110" stroke="#888" stroke-width="1"/>
+        <line x1="194" y1="140" x2="302" y2="150" stroke="#888" stroke-width="1"/>
+      </g>
+      <g id="edges-2-3" opacity=".25">
+        <line x1="334" y1="70" x2="442" y2="80" stroke="#888" stroke-width="1"/>
+        <line x1="334" y1="70" x2="442" y2="120" stroke="#888" stroke-width="1"/>
+        <line x1="334" y1="110" x2="442" y2="80" stroke="#888" stroke-width="1"/>
+        <line x1="334" y1="110" x2="442" y2="120" stroke="#888" stroke-width="1"/>
+        <line x1="334" y1="150" x2="442" y2="80" stroke="#888" stroke-width="1"/>
+        <line x1="334" y1="150" x2="442" y2="120" stroke="#888" stroke-width="1"/>
+      </g>
+      <circle id="mlp-i0" cx="38" cy="60" r="16" class="node-io" opacity=".4"/><text class="node-text" x="38" y="60">x₁</text>
+      <circle id="mlp-i1" cx="38" cy="100" r="16" class="node-io" opacity=".4"/><text class="node-text" x="38" y="100">x₂</text>
+      <circle id="mlp-i2" cx="38" cy="140" r="16" class="node-io" opacity=".4"/><text class="node-text" x="38" y="140">x₃</text>
+      <circle id="mlp-h10" cx="178" cy="60" r="16" class="node-hidden" opacity=".4"/><text class="node-text" x="178" y="60">h</text>
+      <circle id="mlp-h11" cx="178" cy="100" r="16" class="node-hidden" opacity=".4"/><text class="node-text" x="178" y="100">h</text>
+      <circle id="mlp-h12" cx="178" cy="140" r="16" class="node-hidden" opacity=".4"/><text class="node-text" x="178" y="140">h</text>
+      <circle id="mlp-h20" cx="318" cy="70" r="16" class="node-hidden" opacity=".4"/><text class="node-text" x="318" y="70">h</text>
+      <circle id="mlp-h21" cx="318" cy="110" r="16" class="node-hidden" opacity=".4"/><text class="node-text" x="318" y="110">h</text>
+      <circle id="mlp-h22" cx="318" cy="150" r="16" class="node-hidden" opacity=".4"/><text class="node-text" x="318" y="150">h</text>
+      <circle id="mlp-o0" cx="458" cy="80" r="16" class="node-out" opacity=".4"/><text class="node-text" x="458" y="80">y₁</text>
+      <circle id="mlp-o1" cx="458" cy="120" r="16" class="node-out" opacity=".4"/><text class="node-text" x="458" y="120">y₂</text>
+      <rect x="5" y="170" width="66" height="38" rx="4" fill="#E6F1FB" opacity=".5"/>
+      <text font-size="8.5" fill="#0C447C" font-family="var(--font-sans)" x="38" y="183" text-anchor="middle">데이터 입력</text>
+      <text font-size="8" fill="#185FA5" font-family="var(--font-sans)" x="38" y="198" text-anchor="middle">가공 없이 전달</text>
+      <rect x="145" y="170" width="66" height="38" rx="4" fill="#E1F5EE" opacity=".5"/>
+      <text font-size="8.5" fill="#085041" font-family="var(--font-sans)" x="178" y="183" text-anchor="middle">비선형 변환</text>
+      <text font-size="8" fill="#0F6E56" font-family="var(--font-sans)" x="178" y="198" text-anchor="middle">활성화 함수 적용</text>
+      <rect x="285" y="170" width="66" height="38" rx="4" fill="#E1F5EE" opacity=".5"/>
+      <text font-size="8.5" fill="#085041" font-family="var(--font-sans)" x="318" y="183" text-anchor="middle">복합 특징 추출</text>
+      <text font-size="8" fill="#0F6E56" font-family="var(--font-sans)" x="318" y="198" text-anchor="middle">더 깊은 패턴</text>
+      <rect x="425" y="170" width="66" height="38" rx="4" fill="#FAEEDA" opacity=".5"/>
+      <text font-size="8.5" fill="#633806" font-family="var(--font-sans)" x="458" y="183" text-anchor="middle">최종 예측</text>
+      <text font-size="8" fill="#854F0B" font-family="var(--font-sans)" x="458" y="198" text-anchor="middle">소프트맥스 등</text>
+    </svg>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:.5rem">
+      <button class="fn-btn" id="mlp-play-btn" onclick="mlpAnimate()">재생</button>
+      <button class="fn-btn" onclick="mlpReset()">초기화</button>
+      <span id="mlp-stage-label" style="font-size:13px;color:var(--color-text-secondary)">재생 버튼을 눌러 신호 흐름을 확인하세요.</span>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>순전파(Forward Propagation)</strong>: 입력 데이터가 입력층 → 은닉층 → 출력층 방향으로 차례로 흘러가는 과정. 학습 시에는 출력 오차를 역방향으로 전파하는 <strong>역전파(Backpropagation)</strong>로 가중치를 업데이트합니다.
+  </div>
+</div>
+
+<!-- TAB 5: 심층 신경망 & 딥러닝 -->
+<div id="tab-deep" class="panel">
+  <div class="sec-label">핵심 개념 5</div>
+  <div class="sec-title">심층 신경망(DNN) vs 다층 신경망(MLP) vs 딥러닝</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1rem">
+    <div class="card card-sm">
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-info);margin-bottom:.4rem">다층 신경망 MLP</div>
+      <div class="deep-row" style="justify-content:center">
+        <div class="layer-col"><div class="d-node d-node-i">x</div><div class="d-node d-node-i">x</div></div>
+        <div class="d-arrow">→</div>
+        <div class="layer-col"><div class="d-node d-node-h">h</div><div class="d-node d-node-h">h</div></div>
+        <div class="d-arrow">→</div>
+        <div class="layer-col"><div class="d-node d-node-o">y</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:.5rem;line-height:1.5">은닉층 1~2개<br>비선형 분류 가능<br>비교적 단순 문제</div>
+    </div>
+    <div class="card card-sm" style="border-color:var(--color-border-success)">
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-success);margin-bottom:.4rem">심층 신경망 DNN</div>
+      <div class="deep-row" style="justify-content:center">
+        <div class="layer-col"><div class="d-node d-node-i" style="width:20px;height:20px;font-size:8px">x</div><div class="d-node d-node-i" style="width:20px;height:20px;font-size:8px">x</div></div>
+        <div class="d-arrow" style="font-size:12px;margin:10px 2px 0">→</div>
+        <div class="layer-col"><div class="d-node d-node-h" style="width:20px;height:20px;font-size:8px">h</div><div class="d-node d-node-h" style="width:20px;height:20px;font-size:8px">h</div></div>
+        <div class="d-arrow" style="font-size:12px;margin:10px 2px 0">→</div>
+        <div class="layer-col"><div class="d-node d-node-h" style="width:20px;height:20px;font-size:8px">h</div><div class="d-node d-node-h" style="width:20px;height:20px;font-size:8px">h</div></div>
+        <div class="d-arrow" style="font-size:12px;margin:10px 2px 0">→</div>
+        <div class="layer-col"><div class="d-node d-node-h" style="width:20px;height:20px;font-size:8px">h</div><div class="d-node d-node-h" style="width:20px;height:20px;font-size:8px">h</div></div>
+        <div class="d-arrow" style="font-size:12px;margin:10px 2px 0">→</div>
+        <div class="layer-col"><div class="d-node d-node-o" style="width:20px;height:20px;font-size:8px">y</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:.5rem;line-height:1.5">은닉층 여러 개<br>복잡한 비선형 문제<br>구조(architecture)의 개념</div>
+    </div>
+    <div class="card card-sm">
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-warning);margin-bottom:.4rem">딥러닝 Deep Learning</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:.25rem;line-height:1.6">DNN을 포함해 CNN, RNN, Transformer 등 심층 구조를 활용하는 기계학습의 한 분야.<br><br>구조(architecture)가 아닌 <strong>방법론(approach)</strong>의 개념.</div>
+    </div>
+  </div>
+  <div class="callout" style="border-left-color:var(--color-border-warning);background:var(--color-background-warning)">
+    <strong>포함 관계</strong>: 인공지능 ⊃ 기계학습 ⊃ 딥러닝 ⊃ DNN 활용. DNN은 심층 신경망이라는 구조, 딥러닝은 그 구조를 사용하는 학습 방법론입니다.
+  </div>
+  <div class="sec-label" style="margin-top:1rem">층이 깊어질수록 무엇을 배우나? (이미지 인식 예시)</div>
+  <div class="card" style="margin-top:.5rem">
+    <svg class="svg-canvas" viewBox="0 0 500 100">
+      <rect x="2" y="18" width="80" height="60" rx="4" fill="var(--color-background-secondary)" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+      <text font-size="8.5" fill="var(--color-text-secondary)" font-family="var(--font-sans)" x="42" y="44" text-anchor="middle">픽셀값</text>
+      <text font-size="8" fill="var(--color-text-tertiary)" font-family="var(--font-sans)" x="42" y="58" text-anchor="middle">입력 이미지</text>
+      <text font-size="14" fill="var(--color-text-tertiary)" x="84" y="54" text-anchor="middle">→</text>
+      <rect x="90" y="18" width="80" height="60" rx="4" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+      <text font-size="8.5" fill="#0C447C" font-family="var(--font-sans)" x="130" y="44" text-anchor="middle">에지·선</text>
+      <text font-size="8" fill="#185FA5" font-family="var(--font-sans)" x="130" y="56" text-anchor="middle">초기 은닉층</text>
+      <text font-size="14" fill="var(--color-text-tertiary)" x="174" y="54" text-anchor="middle">→</text>
+      <rect x="180" y="18" width="80" height="60" rx="4" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+      <text font-size="8.5" fill="#085041" font-family="var(--font-sans)" x="220" y="44" text-anchor="middle">형태·질감</text>
+      <text font-size="8" fill="#0F6E56" font-family="var(--font-sans)" x="220" y="56" text-anchor="middle">중간 은닉층</text>
+      <text font-size="14" fill="var(--color-text-tertiary)" x="264" y="54" text-anchor="middle">→</text>
+      <rect x="270" y="18" width="80" height="60" rx="4" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+      <text font-size="8.5" fill="#633806" font-family="var(--font-sans)" x="310" y="44" text-anchor="middle">부위·특징</text>
+      <text font-size="8" fill="#854F0B" font-family="var(--font-sans)" x="310" y="56" text-anchor="middle">깊은 은닉층</text>
+      <text font-size="14" fill="var(--color-text-tertiary)" x="354" y="54" text-anchor="middle">→</text>
+      <rect x="360" y="18" width="80" height="60" rx="4" fill="#FAECE7" stroke="#F0997B" stroke-width="0.5"/>
+      <text font-size="8.5" fill="#4A1B0C" font-family="var(--font-sans)" x="400" y="44" text-anchor="middle">"고양이"</text>
+      <text font-size="8" fill="#993C1D" font-family="var(--font-sans)" x="400" y="56" text-anchor="middle">출력층</text>
+    </svg>
+  </div>
+  <div class="sec-label" style="margin-top:1rem">딥러닝 대표 구조</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="toggle-section" onclick="toggleSection(this)">
+      <div class="toggle-header"><span>CNN — 합성곱 신경망</span><i class="ti ti-chevron-down"></i></div>
+      <div class="toggle-body">이미지 데이터에 특화. 합성곱(Convolution) 연산으로 이미지의 지역적 특징(에지, 형태)을 자동 추출. 이미지 분류, 객체 감지, 의료 영상 분석에 활용.</div>
+    </div>
+    <div class="toggle-section" onclick="toggleSection(this)">
+      <div class="toggle-header"><span>RNN / LSTM — 순환 신경망</span><i class="ti ti-chevron-down"></i></div>
+      <div class="toggle-body">순서가 있는 시퀀스 데이터(텍스트, 음성, 시계열)에 특화. 이전 단계의 출력을 현재 입력으로 피드백. LSTM은 장기 의존성 문제를 개선한 RNN.</div>
+    </div>
+    <div class="toggle-section" onclick="toggleSection(this)">
+      <div class="toggle-header"><span>Transformer — 어텐션 기반</span><i class="ti ti-chevron-down"></i></div>
+      <div class="toggle-body">자연어 처리 분야를 혁신한 구조. 어텐션(Attention) 메커니즘으로 입력 전체를 동시에 참고. GPT, BERT 등 현재 대형 언어 모델의 핵심 구조.</div>
+    </div>
+    <div class="toggle-section" onclick="toggleSection(this)">
+      <div class="toggle-header"><span>GAN — 생성적 적대 신경망</span><i class="ti ti-chevron-down"></i></div>
+      <div class="toggle-body">생성자(Generator)와 판별자(Discriminator)가 경쟁하며 학습. 생성자는 진짜 같은 데이터를 만들고, 판별자는 진짜와 가짜를 구별. 이미지 생성에 활용.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 6: 플레이그라운드 준비 -->
+<div id="tab-playground" class="panel">
+  <div class="sec-label">탐구 활동 7 준비</div>
+  <div class="sec-title">텐서플로 플레이그라운드 핵심 개념 정리</div>
+  <div class="sec-body">플레이그라운드를 열기 전에 화면에 나오는 용어를 미리 정리합니다.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+    <div class="card card-sm"><div style="font-size:12px;font-weight:500;margin-bottom:.4rem">Epoch (에포크)</div><div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">전체 학습 데이터를 한 번 모두 사용해 학습한 횟수. 숫자가 올라갈수록 모델이 데이터를 더 많이 학습한 것. 플레이그라운드 좌측 상단에 표시됨.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:500;margin-bottom:.4rem">Loss (손실)</div><div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">모델의 예측값과 실제 정답의 차이. <strong>낮을수록 좋음</strong>. 학습이 진행될수록 손실이 줄어들어야 정상. 플레이그라운드 우측 상단에 표시됨.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:500;margin-bottom:.4rem">Learning rate (학습률)</div><div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">가중치를 얼마나 크게 업데이트할지 결정하는 값. 너무 크면 발산, 너무 작으면 학습이 느림. 처음에는 0.03 정도 권장.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:500;margin-bottom:.4rem">Hidden layers / Neurons</div><div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">은닉층의 수와 각 층의 뉴런(노드) 수. + 버튼으로 층·뉴런 추가. 복잡한 문제일수록 층과 뉴런이 많이 필요.</div></div>
+  </div>
+  <div class="sec-label">데이터 종류 (플레이그라운드 좌측)</div>
+  <svg class="svg-canvas" viewBox="0 0 500 90" style="margin-bottom:.75rem">
+    <rect x="2" y="10" width="110" height="70" rx="6" fill="var(--color-background-secondary)" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+    <text font-size="10" font-weight="500" fill="var(--color-text-primary)" font-family="var(--font-sans)" x="57" y="24" text-anchor="middle">Circle</text>
+    <circle cx="57" cy="55" r="16" fill="none" stroke="#888780" stroke-width="1" stroke-dasharray="3,2"/>
+    <circle cx="57" cy="55" r="5" fill="#185FA5" opacity=".7"/>
+    <circle cx="37" cy="40" r="4" fill="#D85A30" opacity=".7"/><circle cx="77" cy="40" r="4" fill="#D85A30" opacity=".7"/>
+    <circle cx="37" cy="70" r="4" fill="#D85A30" opacity=".7"/><circle cx="77" cy="70" r="4" fill="#D85A30" opacity=".7"/>
+    <text font-size="8.5" fill="var(--color-text-success)" font-family="var(--font-sans)" x="57" y="88" text-anchor="middle">비선형 — 층 필요</text>
+    <rect x="130" y="10" width="110" height="70" rx="6" fill="var(--color-background-secondary)" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+    <text font-size="10" font-weight="500" fill="var(--color-text-primary)" font-family="var(--font-sans)" x="185" y="24" text-anchor="middle">Exclusive OR (XOR)</text>
+    <circle cx="155" cy="42" r="5" fill="#D85A30" opacity=".7"/><circle cx="215" cy="42" r="5" fill="#185FA5" opacity=".7"/>
+    <circle cx="155" cy="72" r="5" fill="#185FA5" opacity=".7"/><circle cx="215" cy="72" r="5" fill="#D85A30" opacity=".7"/>
+    <text font-size="8.5" fill="var(--color-text-success)" font-family="var(--font-sans)" x="185" y="88" text-anchor="middle">비선형 — 층 필요</text>
+    <rect x="258" y="10" width="110" height="70" rx="6" fill="var(--color-background-secondary)" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+    <text font-size="10" font-weight="500" fill="var(--color-text-primary)" font-family="var(--font-sans)" x="313" y="24" text-anchor="middle">Gaussian</text>
+    <circle cx="295" cy="57" r="4" fill="#185FA5" opacity=".7"/><circle cx="305" cy="50" r="4" fill="#185FA5" opacity=".7"/>
+    <circle cx="318" cy="55" r="4" fill="#185FA5" opacity=".7"/>
+    <circle cx="330" cy="60" r="4" fill="#D85A30" opacity=".7"/><circle cx="345" cy="50" r="4" fill="#D85A30" opacity=".7"/>
+    <line x1="258" y1="57" x2="368" y2="48" stroke="#888780" stroke-width="1" stroke-dasharray="3,2"/>
+    <text font-size="8.5" fill="var(--color-text-info)" font-family="var(--font-sans)" x="313" y="88" text-anchor="middle">선형 분리 가능</text>
+    <rect x="386" y="10" width="110" height="70" rx="6" fill="var(--color-background-secondary)" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+    <text font-size="10" font-weight="500" fill="var(--color-text-primary)" font-family="var(--font-sans)" x="441" y="24" text-anchor="middle">Spiral</text>
+    <path d="M441,57 Q451,42 441,35 Q431,28 421,42 Q411,56 425,68 Q439,80 455,65" fill="none" stroke="#185FA5" stroke-width="2" opacity=".6"/>
+    <path d="M441,57 Q431,72 441,79 Q451,86 461,72 Q471,58 457,46 Q443,34 427,49" fill="none" stroke="#D85A30" stroke-width="2" opacity=".6"/>
+    <text font-size="8.5" fill="var(--color-text-success)" font-family="var(--font-sans)" x="441" y="88" text-anchor="middle">고도 비선형</text>
+  </svg>
+  <div class="sec-label">실험 체크리스트</div>
+  <div class="card" style="margin-top:.5rem">
+    <div id="checklist">
+      <div class="step-row" onclick="toggleCheck(this)" style="cursor:pointer"><div class="step-num" id="ck0">1</div><div class="step-text">활성화 함수 <strong>ReLU</strong> 선택, 문제 유형 <strong>Classification</strong></div></div>
+      <div class="step-row" onclick="toggleCheck(this)" style="cursor:pointer"><div class="step-num" id="ck1">2</div><div class="step-text">데이터 <strong>Exclusive OR</strong> 선택 — 주황·파랑 두 클래스</div></div>
+      <div class="step-row" onclick="toggleCheck(this)" style="cursor:pointer"><div class="step-num" id="ck2">3</div><div class="step-text">은닉층 <strong>0개</strong>로 설정 후 ▶ 실행 → Loss 값과 분류 결과 관찰</div></div>
+      <div class="step-row" onclick="toggleCheck(this)" style="cursor:pointer"><div class="step-num" id="ck3">4</div><div class="step-text">은닉층을 <strong>1개 → 2개 → 3개</strong>로 늘리며 각각 실행 → Loss 비교</div></div>
+      <div class="step-row" onclick="toggleCheck(this)" style="cursor:pointer"><div class="step-num" id="ck4">5</div><div class="step-text">은닉층 없이 분리 가능한 데이터(Gaussian)도 테스트</div></div>
+    </div>
+    <a href="https://playground.tensorflow.org/" target="_blank"><button class="fn-btn" style="margin-top:.75rem">텐서플로 플레이그라운드 열기 ↗</button></a>
+  </div>
+  <div class="callout" style="margin-top:.75rem">
+    <strong>예상 결과</strong>: 은닉층 0개 → XOR 분류 실패(Loss 높음). 은닉층 추가 → Loss 감소, 분류 성공. 은닉층이 많을수록 복잡한 결정 경계 형성 가능. 단, 너무 많으면 과적합(overfitting) 발생에 주의.
+  </div>
+</div>
+
+</div>
+
+<script>
+function switchTab(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='nonlinear')drawNonlinear();
+  if(name==='activation'){currentFn='step';showFn('step',document.getElementById('fn-step'));}
+}
+function updatePerceptron(){
+  const x1=+document.getElementById('x1').value,x2=+document.getElementById('x2').value,x3=+document.getElementById('x3').value;
+  const w1=+document.getElementById('w1').value,w2=+document.getElementById('w2').value,w3=+document.getElementById('w3').value;
+  const theta=+document.getElementById('theta').value;
+  ['x1','x2','x3','w1','w2','w3','theta'].forEach(id=>{document.getElementById(id+'v').textContent=(+document.getElementById(id).value).toFixed(1);});
+  const ws=x1*w1+x2*w2+x3*w3,out=ws>=theta?1:0;
+  document.getElementById('wl1').textContent='w₁='+w1.toFixed(1);
+  document.getElementById('wl2').textContent='w₂='+w2.toFixed(1);
+  document.getElementById('wl3').textContent='w₃='+w3.toFixed(1);
+  document.getElementById('sumval').textContent=ws.toFixed(2);
+  document.getElementById('outval').textContent=out;
+  const sn=document.getElementById('sumnode'),on=document.getElementById('outnode');
+  sn.style.fill=ws>=theta?'#9FE1CB':'#F1EFE8';
+  on.style.fill=out===1?'#9FE1CB':'#FAECE7';
+  on.style.stroke=out===1?'#0F6E56':'#993C1D';
+  document.getElementById('pcalc-formula').textContent='= '+(x1*w1).toFixed(2)+' + '+(x2*w2).toFixed(2)+' + '+(x3*w3).toFixed(2)+' = '+ws.toFixed(2);
+  const cmp=document.getElementById('pcalc-cmp');
+  cmp.textContent=ws.toFixed(2)+(ws>=theta?' ≥ ':' < ')+theta.toFixed(1);
+  cmp.className='badge '+(ws>=theta?'badge-success':'badge-danger');
+  document.getElementById('pcalc-out').textContent='출력: '+out;
+}
+updatePerceptron();
+function loadGate(type){
+  const cfg={AND:{w1:0.5,w2:0.5,theta:0.8,info:'AND 게이트: 두 입력이 모두 1일 때만 출력 1. w₁=w₂=0.5, θ=0.8',rows:[[0,0,0,0],[0,1,0.5,0],[1,0,0.5,0],[1,1,1.0,1]]},OR:{w1:0.5,w2:0.5,theta:0.4,info:'OR 게이트: 두 입력 중 하나라도 1이면 출력 1. w₁=w₂=0.5, θ=0.4',rows:[[0,0,0,0],[0,1,0.5,1],[1,0,0.5,1],[1,1,1.0,1]]}}[type];
+  document.getElementById('w1').value=cfg.w1;document.getElementById('w1v').textContent=cfg.w1.toFixed(1);
+  document.getElementById('w2').value=cfg.w2;document.getElementById('w2v').textContent=cfg.w2.toFixed(1);
+  document.getElementById('theta').value=cfg.theta;document.getElementById('thetav').textContent=cfg.theta.toFixed(1);
+  document.getElementById('x1').value=1;document.getElementById('x1v').textContent='1.0';
+  document.getElementById('x2').value=1;document.getElementById('x2v').textContent='1.0';
+  updatePerceptron();
+  const info=document.getElementById('gate-info');info.style.display='block';info.textContent=cfg.info;
+  document.getElementById('gate-tbody').innerHTML=cfg.rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2].toFixed(1)}</td><td><span class="badge ${r[3]?'badge-success':'badge-danger'}">${r[3]}</span></td></tr>`).join('');
+  document.getElementById('gate-table').style.display='block';
+}
+let currentFn='step';
+const fnDefs={
+  step:{color:'#185FA5',f:z=>z>=0?1:0,desc:'<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.4rem">계단 함수</div><div style="font-family:var(--font-mono);font-size:13px;margin-bottom:.5rem">f(z) = 1 if z≥0, else 0</div><p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary)">가중합이 0 이상이면 1, 미만이면 0을 출력. 미분이 불가능해 경사하강법으로 학습시킬 수 없습니다.</p><div class="callout" style="margin-top:.5rem"><strong>문제점</strong>: 기울기가 항상 0이라 역전파 불가 → 실제 학습에 사용 불가.</div>'},
+  sigmoid:{color:'#0F6E56',f:z=>1/(1+Math.exp(-z)),desc:'<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.4rem">시그모이드</div><div style="font-family:var(--font-mono);font-size:13px;margin-bottom:.5rem">f(z) = 1 / (1 + e⁻ᶻ)</div><p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary)">출력이 0~1 사이. 확률로 해석 가능해 이진 분류 출력층에 적합.</p><div class="callout" style="margin-top:.5rem"><strong>문제점</strong>: z가 크거나 작으면 기울기≈0 → 기울기 소실(vanishing gradient) 발생.</div>'},
+  tanh:{color:'#854F0B',f:z=>Math.tanh(z),desc:'<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.4rem">하이퍼볼릭 탄젠트</div><div style="font-family:var(--font-mono);font-size:13px;margin-bottom:.5rem">f(z) = (eᶻ − e⁻ᶻ) / (eᶻ + e⁻ᶻ)</div><p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary)">출력 범위 -1~1. 출력 평균이 0에 가까워 학습이 안정적. 시그모이드보다 기울기 소실이 덜함.</p>'},
+  relu:{color:'#A32D2D',f:z=>Math.max(0,z),desc:'<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.4rem">ReLU</div><div style="font-family:var(--font-mono);font-size:13px;margin-bottom:.5rem">f(z) = max(0, z)</div><p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary)">현재 은닉층의 표준 활성화 함수. z>0 구간 기울기=1이라 기울기 소실 거의 없고 계산이 빠름.</p><div class="callout" style="margin-top:.5rem"><strong>문제점</strong>: z≤0 뉴런이 완전히 비활성화되는 죽은 뉴런(dying ReLU) 현상.</div>'},
+  leaky:{color:'#993556',f:z=>z>0?z:0.1*z,desc:'<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.4rem">Leaky ReLU</div><div style="font-family:var(--font-mono);font-size:13px;margin-bottom:.5rem">f(z) = z if z>0, else 0.1z</div><p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary)">z≤0 구간에서 작은 기울기(0.1)를 허용해 죽은 뉴런 문제를 완화한 ReLU 변형.</p>'},
+  softmax:{color:'#3B6D11',f:null,desc:'<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.4rem">소프트맥스</div><div style="font-family:var(--font-mono);font-size:13px;margin-bottom:.5rem">f(zₖ) = eᶻₖ / Σeᶻᵢ</div><p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary)">출력값들의 합이 항상 1이 되도록 변환. 각 출력을 해당 클래스일 확률로 해석 가능. 다중 분류 출력층 전용.</p><div class="callout" style="margin-top:.5rem"><strong>주의</strong>: 소프트맥스는 출력 벡터 전체를 동시에 정규화하므로 단일 z값 그래프가 없습니다.</div>'}
+};
+function showFn(name,btn){
+  document.querySelectorAll('.fn-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');currentFn=name;drawAF(name);
+  document.getElementById('fn-desc').innerHTML=fnDefs[name].desc;
+  updateAFMarker();
+}
+function drawAF(name){
+  const def=fnDefs[name],path=document.getElementById('af-curve');
+  path.style.stroke=def.color;
+  if(name==='softmax'){path.setAttribute('d','');return;}
+  const pts=[];
+  for(let i=-4;i<=4;i+=0.05){
+    const x=20+(i+4)*(172/8),y=80-def.f(i)*35;
+    pts.push((pts.length===0?'M':'L')+x.toFixed(1)+' '+Math.max(10,Math.min(148,y)).toFixed(1));
+  }
+  path.setAttribute('d',pts.join(' '));
+}
+function updateAFMarker(){
+  const z=+document.getElementById('af-z').value;
+  document.getElementById('af-zv').textContent=z.toFixed(1);
+  if(currentFn==='softmax'){document.getElementById('af-out').textContent='N/A';return;}
+  const fz=fnDefs[currentFn].f(z),x=20+(z+4)*(172/8),y=Math.max(10,Math.min(148,80-fz*35));
+  document.getElementById('af-marker').setAttribute('cx',x.toFixed(1));
+  document.getElementById('af-marker').setAttribute('cy',y.toFixed(1));
+  document.getElementById('af-vline').setAttribute('x1',x.toFixed(1));document.getElementById('af-vline').setAttribute('y1',80);
+  document.getElementById('af-vline').setAttribute('x2',x.toFixed(1));document.getElementById('af-vline').setAttribute('y2',y.toFixed(1));
+  document.getElementById('af-out').textContent=fz.toFixed(4);
+}
+showFn('step',document.getElementById('fn-step'));
+function drawNonlinear(){
+  const bg=getComputedStyle(document.documentElement).getPropertyValue('--color-background-secondary')||'#f4f4f2';
+  [['cnv-and',[[30,140,0],[140,140,0],[30,40,0],[140,40,1]],[[10,165,165,10]]],
+   ['cnv-or', [[30,140,0],[140,140,1],[30,40,1],[140,40,1]],[[10,130,130,10]]],
+   ['cnv-xor',[[30,140,0],[140,140,1],[30,40,1],[140,40,0]],null],
+   ['cnv-circle',null,null]].forEach(([id,pts,line])=>{
+    const c=document.getElementById(id);if(!c)return;
+    const ctx=c.getContext('2d');ctx.clearRect(0,0,200,160);
+    ctx.fillStyle=bg.trim()||'#f4f4f2';ctx.fillRect(0,0,200,160);
+    if(id==='cnv-circle'){
+      for(let i=0;i<150;i++){
+        const a=Math.random()*Math.PI*2,r=Math.random()*70;
+        const isIn=r<35,x=100+Math.cos(a)*r*1.1,y=80+Math.sin(a)*r*0.9;
+        ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+        ctx.fillStyle=isIn?'#378ADD':'#D85A30';ctx.globalAlpha=0.75;ctx.fill();ctx.globalAlpha=1;
+      }
+      ctx.beginPath();ctx.arc(100,80,38,0,Math.PI*2);
+      ctx.strokeStyle='#888780';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+      return;
+    }
+    if(line){
+      ctx.beginPath();ctx.moveTo(line[0][0],line[0][1]);ctx.lineTo(line[0][2],line[0][3]);
+      ctx.strokeStyle='#888780';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
+    }
+    pts.forEach(([x,y,cls])=>{
+      ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);
+      ctx.fillStyle=cls===0?'#378ADD':'#D85A30';ctx.globalAlpha=0.8;ctx.fill();ctx.globalAlpha=1;
+      ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke();
+    });
+    if(!line&&id==='cnv-xor'){
+      ctx.font='10px sans-serif';ctx.fillStyle='#A32D2D';ctx.textAlign='center';
+      ctx.fillText('직선 불가 — 은닉층 필요',100,155);
+    }
+  });
+}
+let mlpTimer=null,mlpStep=0;
+const mlpStages=[
+  {ids:['mlp-i0','mlp-i1','mlp-i2'],edges:'edges-0-1',label:'입력층: 데이터를 그대로 받아들입니다.'},
+  {ids:['mlp-h10','mlp-h11','mlp-h12'],edges:'edges-1-2',label:'은닉층 1: 가중합 후 활성화 함수(ReLU) 적용 → 비선형 변환.'},
+  {ids:['mlp-h20','mlp-h21','mlp-h22'],edges:'edges-2-3',label:'은닉층 2: 더 복잡한 패턴(특징)을 추출합니다.'},
+  {ids:['mlp-o0','mlp-o1'],edges:null,label:'출력층: 최종 예측값 출력. 소프트맥스로 확률 변환.'}
+];
+function mlpReset(){
+  clearInterval(mlpTimer);mlpTimer=null;mlpStep=0;
+  ['mlp-i0','mlp-i1','mlp-i2','mlp-h10','mlp-h11','mlp-h12','mlp-h20','mlp-h21','mlp-h22','mlp-o0','mlp-o1'].forEach(id=>{const e=document.getElementById(id);if(e)e.setAttribute('opacity','0.4');});
+  ['edges-0-1','edges-1-2','edges-2-3'].forEach(id=>{const e=document.getElementById(id);if(e)e.setAttribute('opacity','0.25');});
+  document.getElementById('mlp-stage-label').textContent='재생 버튼을 눌러 신호 흐름을 확인하세요.';
+  document.getElementById('mlp-play-btn').textContent='재생';
+}
+function mlpAnimate(){
+  if(mlpTimer){clearInterval(mlpTimer);mlpTimer=null;document.getElementById('mlp-play-btn').textContent='재생';return;}
+  mlpReset();document.getElementById('mlp-play-btn').textContent='일시정지';
+  mlpTimer=setInterval(()=>{
+    if(mlpStep>=mlpStages.length){clearInterval(mlpTimer);mlpTimer=null;document.getElementById('mlp-play-btn').textContent='재생';return;}
+    const s=mlpStages[mlpStep];
+    s.ids.forEach(id=>{const e=document.getElementById(id);if(e)e.setAttribute('opacity','1');});
+    if(s.edges){const e=document.getElementById(s.edges);if(e)e.setAttribute('opacity','0.8');}
+    document.getElementById('mlp-stage-label').textContent=s.label;
+    mlpStep++;
+  },900);
+}
+function toggleSection(el){el.querySelector('.toggle-body').classList.toggle('open');}
+function toggleCheck(row){
+  const num=row.querySelector('.step-num');
+  if(num.textContent==='✓'){num.textContent=num.dataset.orig;num.style.background='';num.style.color='';}
+  else{num.dataset.orig=num.textContent;num.textContent='✓';num.style.background='var(--color-background-success)';num.style.color='var(--color-text-success)';}
+}
+drawNonlinear();
+</script>
+</body>
+</html>

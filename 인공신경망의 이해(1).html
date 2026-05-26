@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인공 신경망의 이해 - 인터랙티브 수업</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --navy: #0D1B2A;
+    --deep: #1B2A3B;
+    --teal: #00C9A7;
+    --cyan: #48CAE4;
+    --orange: #FF6B35;
+    --gold: #FFB347;
+    --white: #F0F4F8;
+    --gray: #8899AA;
+    --card: rgba(255,255,255,0.05);
+    --border: rgba(0,201,167,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── 슬라이드 컨테이너 ── */
+  .slideshow {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+
+  /* ── 공통 헤더 바 ── */
+  .slide-header {
+    background: linear-gradient(90deg, #00C9A7 0%, #48CAE4 100%);
+    padding: 10px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .slide-header .chapter {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--navy);
+    opacity: 0.7;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .slide-header .title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-left: auto;
+  }
+
+  /* ── 슬라이드 본문 ── */
+  .slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 30px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 80px;
+    font-weight: 700;
+    color: rgba(0,201,167,0.06);
+    position: absolute;
+    bottom: 10px;
+    right: 40px;
+    line-height: 1;
+  }
+
+  h1.main-title {
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  h1.main-title .accent { color: var(--teal); }
+
+  h2.section-title {
+    font-size: clamp(20px, 2.5vw, 32px);
+    font-weight: 700;
+    color: var(--teal);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h2.section-title::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 32px;
+    background: linear-gradient(180deg, var(--teal), var(--cyan));
+    border-radius: 3px;
+  }
+
+  p.body-text {
+    font-size: clamp(13px, 1.4vw, 17px);
+    line-height: 1.85;
+    color: rgba(240,244,248,0.88);
+    max-width: 900px;
+  }
+  p.body-text + p.body-text { margin-top: 12px; }
+
+  .keyword {
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .keyword-teal { color: var(--teal); font-weight: 700; }
+
+  /* ── 카드 그리드 ── */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .card-grid.cols2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card-grid.cols4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--teal), var(--cyan));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .card:hover { border-color: var(--teal); transform: translateY(-2px); }
+  .card:hover::before { opacity: 1; }
+
+  .card .card-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  .card .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+  .card .card-desc {
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: rgba(240,244,248,0.78);
+  }
+
+  /* ── 신경망 시각화 ── */
+  .nn-viz {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 16px 0;
+    position: relative;
+  }
+  .nn-layer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+  }
+  .nn-layer-label {
+    font-size: 11px;
+    color: var(--gray);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .nn-node {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--teal);
+    background: var(--deep);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    color: var(--teal);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .nn-node:hover, .nn-node.active {
+    background: var(--teal);
+    color: var(--navy);
+    box-shadow: 0 0 16px rgba(0,201,167,0.6);
+    transform: scale(1.15);
+  }
+  .nn-node.input-node { border-color: var(--cyan); }
+  .nn-node.input-node:hover { background: var(--cyan); }
+  .nn-node.output-node { border-color: var(--orange); }
+  .nn-node.output-node:hover { background: var(--orange); }
+
+  .nn-connector {
+    width: 60px; height: 2px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .nn-connector svg {
+    width: 100%; height: 80px; overflow: visible;
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+  }
+
+  /* ── 퍼셉트론 다이어그램 ── */
+  .perceptron-box {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 16px 0;
+  }
+
+  /* ── 비교 테이블 ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 13.5px;
+  }
+  .compare-table th {
+    background: linear-gradient(90deg, var(--teal), var(--cyan));
+    color: var(--navy);
+    font-weight: 700;
+    padding: 12px 20px;
+    text-align: center;
+  }
+  .compare-table th:first-child { border-radius: 8px 0 0 0; }
+  .compare-table th:last-child { border-radius: 0 8px 0 0; }
+  .compare-table td {
+    padding: 11px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    color: rgba(240,244,248,0.85);
+    text-align: center;
+    vertical-align: middle;
+  }
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  .compare-table tr:hover td { background: rgba(0,201,167,0.06); }
+
+  /* ── 퀴즈 ── */
+  .quiz-box {
+    background: linear-gradient(135deg, rgba(0,201,167,0.08), rgba(72,202,228,0.08));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-top: 16px;
+  }
+  .quiz-question {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .quiz-option {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 13px 18px;
+    cursor: pointer;
+    font-size: 13.5px;
+    transition: all 0.25s;
+    text-align: left;
+    color: var(--white);
+  }
+  .quiz-option:hover { border-color: var(--teal); background: rgba(0,201,167,0.1); }
+  .quiz-option.correct { border-color: var(--teal); background: rgba(0,201,167,0.2); color: var(--teal); font-weight: 700; }
+  .quiz-option.wrong { border-color: #FF4444; background: rgba(255,68,68,0.12); color: #FF8888; }
+  .quiz-feedback {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: rgba(0,201,167,0.15); border-left: 4px solid var(--teal); }
+  .quiz-feedback.no { background: rgba(255,68,68,0.12); border-left: 4px solid #FF4444; }
+
+  /* ── 단계별 설명 (탐구 활동) ── */
+  .steps-list {
+    list-style: none;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .steps-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .steps-list li:hover { border-color: var(--teal); background: rgba(0,201,167,0.06); }
+  .step-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--cyan));
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-text { font-size: 13.5px; line-height: 1.7; color: rgba(240,244,248,0.88); }
+
+  /* ── 딥러닝 활용 분야 ── */
+  .app-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .app-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--teal), var(--cyan));
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 14px;
+  }
+  .app-card:hover::after { opacity: 0.08; }
+  .app-card .app-icon { font-size: 36px; margin-bottom: 10px; }
+  .app-card .app-title { font-size: 16px; font-weight: 700; color: var(--teal); margin-bottom: 6px; }
+  .app-card .app-sub { font-size: 12px; color: var(--gray); margin-bottom: 10px; }
+  .app-card .app-detail { font-size: 12.5px; line-height: 1.7; color: rgba(240,244,248,0.78); display: none; }
+  .app-card.expanded .app-detail { display: block; }
+  .app-card.expanded { border-color: var(--teal); }
+  .app-card .expand-hint { font-size: 11px; color: var(--gray); margin-top: 8px; }
+
+  /* ── 타이틀 슬라이드 ── */
+  .title-slide {
+    background: radial-gradient(ellipse at 30% 50%, rgba(0,201,167,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(72,202,228,0.08) 0%, transparent 50%),
+                var(--navy);
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px 80px;
+  }
+  .title-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,201,167,0.12);
+    border: 1px solid var(--teal);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--teal);
+    margin-bottom: 28px;
+    font-family: 'Space Mono', monospace;
+  }
+  .title-mega {
+    font-size: clamp(36px, 5.5vw, 72px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .title-mega .line1 { color: var(--white); }
+  .title-mega .line2 {
+    background: linear-gradient(90deg, var(--teal), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .title-sub {
+    font-size: 17px;
+    color: var(--gray);
+    margin-bottom: 40px;
+    line-height: 1.7;
+  }
+  .title-objectives {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .obj-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: rgba(240,244,248,0.8);
+    line-height: 1.6;
+  }
+  .obj-dot {
+    flex-shrink: 0;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-top: 6px;
+  }
+
+  /* ── 내비게이션 ── */
+  .nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(13,27,42,0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 10px 20px;
+    z-index: 100;
+  }
+  .nav-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 24px;
+    color: var(--white);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 7px 18px;
+    transition: all 0.25s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .nav-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-counter {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--gray);
+    min-width: 52px;
+    text-align: center;
+  }
+
+  /* 진행 바 */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    z-index: 200;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--cyan));
+    transition: width 0.4s ease;
+  }
+
+  /* 슬라이드 섹션 구분자 */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .section-badge {
+    background: linear-gradient(135deg, var(--orange), var(--gold));
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,107,53,0.4), transparent);
+  }
+
+  /* 두 컬럼 레이아웃 */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+  .two-col.wide-left { grid-template-columns: 3fr 2fr; }
+
+  /* 인포 박스 */
+  .info-box {
+    background: rgba(255,179,71,0.08);
+    border: 1px solid rgba(255,179,71,0.3);
+    border-left: 4px solid var(--gold);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(240,244,248,0.85);
+    margin-top: 14px;
+  }
+  .info-box .info-title {
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* 애니메이션 */
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .slide.active .slide-body > * {
+    animation: fadeSlideIn 0.5s ease forwards;
+  }
+  .slide.active .slide-body > *:nth-child(2) { animation-delay: 0.08s; opacity: 0; }
+  .slide.active .slide-body > *:nth-child(3) { animation-delay: 0.16s; opacity: 0; }
+  .slide.active .slide-body > *:nth-child(4) { animation-delay: 0.24s; opacity: 0; }
+
+  /* 층 설명 */
+  .layer-explain {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .layer-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .layer-item:hover { background: rgba(255,255,255,0.04); border-color: var(--border); }
+  .layer-dot {
+    flex-shrink: 0;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    margin-top: 4px;
+  }
+  .layer-name { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+  .layer-desc { font-size: 13px; line-height: 1.65; color: rgba(240,244,248,0.78); }
+
+  /* 생각열기 슬라이드 */
+  .think-box {
+    background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,179,71,0.06));
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-top: 16px;
+  }
+  .think-title { font-size: 16px; font-weight: 700; color: var(--orange); margin-bottom: 12px; }
+  .think-q { font-size: 20px; font-weight: 700; line-height: 1.5; }
+
+  /* DNN 시각화 */
+  .dnn-viz {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 10px 0;
+  }
+  .dnn-layer-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .dnn-label { font-size: 10px; color: var(--gray); font-family: 'Space Mono', monospace; text-align: center; }
+  .dnn-node {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .dnn-node:hover { transform: scale(1.2); }
+  .dnn-node.i { border-color: var(--cyan); color: var(--cyan); background: rgba(72,202,228,0.08); }
+  .dnn-node.h { border-color: var(--teal); color: var(--teal); background: rgba(0,201,167,0.08); }
+  .dnn-node.o { border-color: var(--orange); color: var(--orange); background: rgba(255,107,53,0.08); }
+  .dnn-arrow {
+    font-size: 16px;
+    color: var(--gray);
+    flex-shrink: 0;
+    margin: 20px 2px 0;
+  }
+
+  /* 수업 진행 정보 태그 */
+  .page-ref {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--gray);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="slideshow" id="slideshow">
+
+  <!-- 슬라이드 1: 타이틀 -->
+  <div class="slide active" id="slide-1">
+    <div class="slide-body title-slide">
+      <div class="title-badge">⬡ Ⅱ. 인공지능과 학습 &nbsp;·&nbsp; 03단원</div>
+      <div class="title-mega">
+        <div class="line1">인공 신경망과</div>
+        <div class="line2">딥러닝</div>
+      </div>
+      <p class="title-sub">1. 인공 신경망의 이해 &nbsp;|&nbsp; 교과서 126~132쪽</p>
+      <div class="title-objectives">
+        <div class="obj-item"><div class="obj-dot"></div><span>인공 신경망과 딥러닝의 특성에 대한 이해를 바탕으로 활용 분야를 탐색할 수 있다.</span></div>
+        <div class="obj-item"><div class="obj-dot"></div><span>딥러닝을 활용하여 실생활 및 다양한 학문 분야의 문제를 해결하고 성능을 평가할 수 있다.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 2: 생각 열기 -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">인공 신경망의 이해 <span class="page-ref">126쪽</span></span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">생각 열기</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">딥러닝은 왜 특별할까?</h2>
+      <div class="think-box">
+        <div class="think-title">🤔 생각해 봅시다</div>
+        <div class="think-q">딥러닝 전후로 무엇이 달라졌을까?<br>여러분이 경험한 AI 기술에는 어떤 것들이 있나요?</div>
+      </div>
+      <div class="card-grid cols3" style="margin-top:20px">
+        <div class="card" onclick="this.style.borderColor='var(--teal)'">
+          <div class="card-icon">🎤</div>
+          <div class="card-title">음성 인식</div>
+          <div class="card-desc">시리, 빅스비, 클로바 같은 음성 AI — 딥러닝 덕에 실용적 수준으로 발전</div>
+        </div>
+        <div class="card" onclick="this.style.borderColor='var(--teal)'">
+          <div class="card-icon">🖼️</div>
+          <div class="card-title">이미지 인식</div>
+          <div class="card-desc">사진에서 얼굴·사물 인식 — 사람과 비슷하거나 뛰어넘는 수준 달성</div>
+        </div>
+        <div class="card" onclick="this.style.borderColor='var(--teal)'">
+          <div class="card-icon">💬</div>
+          <div class="card-title">자연어 처리</div>
+          <div class="card-desc">ChatGPT, 번역기 — 자연스러운 언어 이해·생성이 가능해짐</div>
+        </div>
+      </div>
+      <div class="slide-number">02</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 3: 인공 신경망이란? -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">1. 인공 신경망의 이해 <span class="page-ref">126~132쪽</span></span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">핵심 개념 1</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">인공 신경망이란?</h2>
+      <div class="two-col wide-left">
+        <div>
+          <p class="body-text"><span class="keyword">인공 신경망(ANN; Artificial Neural Network)</span>은 인간의 뇌가 주변 정보를 인식하고 학습하는 방식을 모방한 인공지능 모델입니다.</p>
+          <p class="body-text" style="margin-top:14px">인간의 뇌는 수많은 <span class="keyword-teal">뉴런(neuron)</span>으로 구성되어 있으며, <span class="keyword-teal">시냅스(synapse)</span>로 연결되어 정보를 처리하고 전달합니다.</p>
+          <p class="body-text" style="margin-top:14px">뉴런은 입력 신호를 받아들이고, <span class="keyword">가중치(weight)</span>를 적용한 출력 신호를 다른 뉴런에게 전달합니다.</p>
+        </div>
+        <div>
+          <div class="card" style="text-align:center; padding: 24px 16px;">
+            <div style="font-size:13px; color:var(--gray); margin-bottom:10px; font-family:'Space Mono',monospace;">뇌 → 인공 신경망</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                <span style="flex:1; color:var(--cyan); text-align:right;">뉴런</span>
+                <span style="color:var(--gray);">→</span>
+                <span style="flex:1; color:var(--teal); text-align:left;">노드(퍼셉트론)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                <span style="flex:1; color:var(--cyan); text-align:right;">시냅스</span>
+                <span style="color:var(--gray);">→</span>
+                <span style="flex:1; color:var(--teal); text-align:left;">가중치(연결)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+                <span style="flex:1; color:var(--cyan); text-align:right;">뇌의 학습</span>
+                <span style="color:var(--gray);">→</span>
+                <span style="flex:1; color:var(--teal); text-align:left;">가중치 업데이트</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-box">
+            <div class="info-title">💡 시냅스란?</div>
+            뉴런과 뉴런 사이의 <strong>접속 부위</strong>를 의미합니다. 인공 신경망에서는 노드 사이의 연결 강도를 뜻합니다.
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">03</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 4: 퍼셉트론 -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">1. 인공 신경망의 이해 <span class="page-ref">126~132쪽</span></span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">핵심 개념 2</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">(1) 퍼셉트론 (Perceptron)</h2>
+      <div class="two-col">
+        <div>
+          <p class="body-text"><span class="keyword">퍼셉트론</span>은 인공 신경망의 가장 기본적인 구성 요소로, 다수의 신호를 입력받아 하나의 신호로 출력합니다.</p>
+          <div class="layer-explain">
+            <div class="layer-item">
+              <div class="layer-dot" style="background:var(--cyan)"></div>
+              <div>
+                <div class="layer-name" style="color:var(--cyan)">① 입력값 × 가중치</div>
+                <div class="layer-desc">각 입력값에 중요도를 나타내는 가중치를 곱합니다.</div>
+              </div>
+            </div>
+            <div class="layer-item">
+              <div class="layer-dot" style="background:var(--teal)"></div>
+              <div>
+                <div class="layer-name" style="color:var(--teal)">② 가중합 계산</div>
+                <div class="layer-desc">가중치가 적용된 값들을 모두 더합니다.</div>
+              </div>
+            </div>
+            <div class="layer-item">
+              <div class="layer-dot" style="background:var(--orange)"></div>
+              <div>
+                <div class="layer-name" style="color:var(--orange)">③ 활성화 함수 적용</div>
+                <div class="layer-desc"><span class="keyword">임곗값</span>을 넘으면 1, 그렇지 않으면 0 출력 → <span class="keyword">활성화 함수</span>는 가중합을 비선형적으로 변환합니다.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <!-- SVG 퍼셉트론 시각화 -->
+          <svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-height:200px;">
+            <!-- 연결선 -->
+            <line x1="60" y1="50" x2="160" y2="110" stroke="#48CAE4" stroke-width="1.5" stroke-opacity="0.5"/>
+            <line x1="60" y1="110" x2="160" y2="110" stroke="#48CAE4" stroke-width="1.5" stroke-opacity="0.5"/>
+            <line x1="60" y1="170" x2="160" y2="110" stroke="#48CAE4" stroke-width="1.5" stroke-opacity="0.5"/>
+            <line x1="200" y1="110" x2="250" y2="110" stroke="#FF6B35" stroke-width="2"/>
+            <!-- 입력 노드 -->
+            <circle cx="45" cy="50" r="22" fill="rgba(72,202,228,0.1)" stroke="#48CAE4" stroke-width="1.5"/>
+            <text x="45" y="55" text-anchor="middle" fill="#48CAE4" font-size="11" font-family="Space Mono">x₁</text>
+            <circle cx="45" cy="110" r="22" fill="rgba(72,202,228,0.1)" stroke="#48CAE4" stroke-width="1.5"/>
+            <text x="45" y="115" text-anchor="middle" fill="#48CAE4" font-size="11" font-family="Space Mono">x₂</text>
+            <circle cx="45" cy="170" r="22" fill="rgba(72,202,228,0.1)" stroke="#48CAE4" stroke-width="1.5"/>
+            <text x="45" y="175" text-anchor="middle" fill="#48CAE4" font-size="11" font-family="Space Mono">x₃</text>
+            <!-- 가중치 텍스트 -->
+            <text x="98" y="74" fill="#FFB347" font-size="10" font-family="Space Mono">w₁</text>
+            <text x="106" y="105" fill="#FFB347" font-size="10" font-family="Space Mono">w₂</text>
+            <text x="98" y="150" fill="#FFB347" font-size="10" font-family="Space Mono">w₃</text>
+            <!-- 합산 노드 -->
+            <circle cx="180" cy="110" r="28" fill="rgba(0,201,167,0.12)" stroke="#00C9A7" stroke-width="2"/>
+            <text x="180" y="106" text-anchor="middle" fill="#00C9A7" font-size="10">Σ</text>
+            <text x="180" y="120" text-anchor="middle" fill="#00C9A7" font-size="9">가중합</text>
+            <!-- 출력 화살표 -->
+            <polygon points="248,107 258,110 248,113" fill="#FF6B35"/>
+            <text x="262" y="108" fill="#FF6B35" font-size="11" font-family="Space Mono">0</text>
+            <text x="256" y="120" fill="#FF6B35" font-size="11" font-family="Space Mono">or</text>
+            <text x="262" y="132" fill="#FF6B35" font-size="11" font-family="Space Mono">1</text>
+            <!-- 활성화 함수 텍스트 -->
+            <text x="180" y="155" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">활성화 함수</text>
+            <text x="180" y="167" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="9">(임곗값 비교)</text>
+          </svg>
+          <div class="info-box">
+            <div class="info-title">💡 임곗값</div>
+            출력을 결정하는 기준값. 가중합이 임곗값보다 크면 뉴런이 <strong>"활성화"</strong>됩니다.
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">04</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 5: 다층 신경망 -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">1. 인공 신경망의 이해 <span class="page-ref">126~132쪽</span></span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">핵심 개념 3</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">(2) 다층 신경망 (MLP)</h2>
+      <div class="two-col">
+        <div>
+          <p class="body-text">퍼셉트론 하나로는 <span class="keyword">선형 분류</span>만 가능하며, <span class="keyword">비선형 문제</span>를 해결할 수 없다는 한계가 있습니다.</p>
+          <p class="body-text" style="margin-top:12px"><span class="keyword">다층 신경망(MLP; Multi-Layer Perceptron)</span>은 입력층과 출력층 사이에 은닉층을 추가하여 비선형 분류를 가능하게 합니다.</p>
+          <div class="layer-explain" style="margin-top:14px">
+            <div class="layer-item">
+              <div class="layer-dot" style="background:var(--cyan)"></div>
+              <div>
+                <div class="layer-name" style="color:var(--cyan)">입력층 (Input Layer)</div>
+                <div class="layer-desc">데이터를 입력받는 층</div>
+              </div>
+            </div>
+            <div class="layer-item">
+              <div class="layer-dot" style="background:var(--teal)"></div>
+              <div>
+                <div class="layer-name" style="color:var(--teal)">은닉층 (Hidden Layer)</div>
+                <div class="layer-desc">들어온 값에 활성화 함수를 적용해 다음 층에 전달 — 비선형 변환 담당</div>
+              </div>
+            </div>
+            <div class="layer-item">
+              <div class="layer-dot" style="background:var(--orange)"></div>
+              <div>
+                <div class="layer-name" style="color:var(--orange)">출력층 (Output Layer)</div>
+                <div class="layer-desc">신경망의 최종 예측값을 출력</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <!-- MLP 시각화 -->
+          <svg viewBox="0 0 240 220" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-height:210px;">
+            <!-- 연결선들 -->
+            <g stroke="#00C9A7" stroke-width="0.8" stroke-opacity="0.3">
+              <line x1="40" y1="55" x2="120" y2="60"/>
+              <line x1="40" y1="55" x2="120" y2="100"/>
+              <line x1="40" y1="55" x2="120" y2="140"/>
+              <line x1="40" y1="95" x2="120" y2="60"/>
+              <line x1="40" y1="95" x2="120" y2="100"/>
+              <line x1="40" y1="95" x2="120" y2="140"/>
+              <line x1="40" y1="135" x2="120" y2="60"/>
+              <line x1="40" y1="135" x2="120" y2="100"/>
+              <line x1="40" y1="135" x2="120" y2="140"/>
+              <line x1="160" y1="60" x2="210" y2="80"/>
+              <line x1="160" y1="60" x2="210" y2="130"/>
+              <line x1="160" y1="100" x2="210" y2="80"/>
+              <line x1="160" y1="100" x2="210" y2="130"/>
+              <line x1="160" y1="140" x2="210" y2="80"/>
+              <line x1="160" y1="140" x2="210" y2="130"/>
+            </g>
+            <!-- 입력층 -->
+            <circle cx="40" cy="55" r="18" fill="rgba(72,202,228,0.12)" stroke="#48CAE4" stroke-width="1.5"/>
+            <text x="40" y="59" text-anchor="middle" fill="#48CAE4" font-size="10">x₁</text>
+            <circle cx="40" cy="95" r="18" fill="rgba(72,202,228,0.12)" stroke="#48CAE4" stroke-width="1.5"/>
+            <text x="40" y="99" text-anchor="middle" fill="#48CAE4" font-size="10">x₂</text>
+            <circle cx="40" cy="135" r="18" fill="rgba(72,202,228,0.12)" stroke="#48CAE4" stroke-width="1.5"/>
+            <text x="40" y="139" text-anchor="middle" fill="#48CAE4" font-size="10">x₃</text>
+            <text x="40" y="168" text-anchor="middle" fill="rgba(72,202,228,0.7)" font-size="9">입력층</text>
+            <!-- 은닉층 -->
+            <circle cx="140" cy="60" r="18" fill="rgba(0,201,167,0.15)" stroke="#00C9A7" stroke-width="1.5"/>
+            <text x="140" y="64" text-anchor="middle" fill="#00C9A7" font-size="10">h</text>
+            <circle cx="140" cy="100" r="18" fill="rgba(0,201,167,0.15)" stroke="#00C9A7" stroke-width="1.5"/>
+            <text x="140" y="104" text-anchor="middle" fill="#00C9A7" font-size="10">h</text>
+            <circle cx="140" cy="140" r="18" fill="rgba(0,201,167,0.15)" stroke="#00C9A7" stroke-width="1.5"/>
+            <text x="140" y="144" text-anchor="middle" fill="#00C9A7" font-size="10">h</text>
+            <text x="140" y="168" text-anchor="middle" fill="rgba(0,201,167,0.7)" font-size="9">은닉층</text>
+            <!-- 출력층 -->
+            <circle cx="210" cy="80" r="18" fill="rgba(255,107,53,0.12)" stroke="#FF6B35" stroke-width="1.5"/>
+            <text x="210" y="84" text-anchor="middle" fill="#FF6B35" font-size="10">y₁</text>
+            <circle cx="210" cy="130" r="18" fill="rgba(255,107,53,0.12)" stroke="#FF6B35" stroke-width="1.5"/>
+            <text x="210" y="134" text-anchor="middle" fill="#FF6B35" font-size="10">y₂</text>
+            <text x="210" y="168" text-anchor="middle" fill="rgba(255,107,53,0.7)" font-size="9">출력층</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-number">05</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 6: 심층 신경망과 딥러닝 -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">1. 인공 신경망의 이해 <span class="page-ref">126~132쪽</span></span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">핵심 개념 4</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">(3) 심층 신경망 & (4) 딥러닝</h2>
+      <div class="card-grid cols2">
+        <div class="card">
+          <div class="card-title">🏗️ 심층 신경망 (DNN)</div>
+          <div class="card-desc" style="font-size:13px; line-height:1.75">
+            <span class="keyword">심층 신경망(DNN; Deep Neural Network)</span>은 <strong>많은 수의 은닉층</strong>을 가진 구조입니다.<br><br>
+            복잡한 비선형 문제를 해결할 수 있으며, 은닉층이 많을수록 신경망이 <span class="keyword-teal">"깊다(Deep)"</span>고 표현합니다.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🚀 딥러닝 (Deep Learning)</div>
+          <div class="card-desc" style="font-size:13px; line-height:1.75">
+            <span class="keyword">딥러닝</span>은 심층 신경망을 사용하여 입력 데이터의 복잡한 패턴을 학습하는 분야입니다.<br><br>
+            이미지 인식, 음성 인식, 자연어 처리 등 기존 기계학습으로 어려웠던 문제들에서 <span class="keyword-teal">획기적인 성능 향상</span>을 보입니다.
+          </div>
+        </div>
+      </div>
+      <!-- DNN 시각화 -->
+      <div class="dnn-viz" style="margin-top:20px; gap:3px;">
+        <div class="dnn-layer-col">
+          <div class="dnn-label">입력층</div>
+          <div class="dnn-node i">x</div>
+          <div class="dnn-node i">x</div>
+          <div class="dnn-node i">x</div>
+        </div>
+        <div class="dnn-arrow">→</div>
+        <div class="dnn-layer-col">
+          <div class="dnn-label">은닉1</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+        </div>
+        <div class="dnn-arrow">→</div>
+        <div class="dnn-layer-col">
+          <div class="dnn-label">은닉2</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+        </div>
+        <div class="dnn-arrow">→</div>
+        <div class="dnn-layer-col">
+          <div class="dnn-label">은닉3</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+        </div>
+        <div class="dnn-arrow">→</div>
+        <div class="dnn-layer-col">
+          <div class="dnn-label">은닉4</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+          <div class="dnn-node h">h</div>
+        </div>
+        <div class="dnn-arrow">→</div>
+        <div class="dnn-layer-col">
+          <div class="dnn-label">출력층</div>
+          <div class="dnn-node o">y</div>
+          <div class="dnn-node o">y</div>
+        </div>
+      </div>
+      <p style="text-align:center; font-size:12px; color:var(--gray); margin-top:8px; font-family:'Space Mono',monospace;">← 은닉층이 많을수록 더 복잡한 패턴 학습 가능 →</p>
+      <div class="slide-number">06</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 7: 퀴즈 -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">확인 퀴즈 — 인공 신경망 개념</span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">퀴즈</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">개념을 확인해 봅시다!</h2>
+      <div class="quiz-box">
+        <div id="quizContainer">
+          <!-- 퀴즈 1 -->
+          <div class="quiz-question" id="qText">Q1. 인공 신경망에서 입력값에 중요도를 부여하는 것을 무엇이라고 하나요?</div>
+          <div class="quiz-options" id="qOptions">
+            <button class="quiz-option" onclick="checkAnswer(this, false)">① 임곗값(Threshold)</button>
+            <button class="quiz-option" onclick="checkAnswer(this, true)">② 가중치(Weight)</button>
+            <button class="quiz-option" onclick="checkAnswer(this, false)">③ 활성화 함수</button>
+            <button class="quiz-option" onclick="checkAnswer(this, false)">④ 은닉층</button>
+          </div>
+          <div class="quiz-feedback" id="qFeedback"></div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-top:16px; gap:10px;">
+          <span id="qProgress" style="font-family:'Space Mono',monospace; font-size:12px; color:var(--gray); align-self:center;">1 / 4</span>
+          <button class="nav-btn" id="nextQBtn" onclick="nextQuestion()" style="display:none;">다음 문제 →</button>
+        </div>
+      </div>
+      <div class="slide-number">07</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 8: 탐구활동 — 텐서플로 플레이그라운드 -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">탐구활동 7 — 은닉층과 노드의 역할 <span class="page-ref">128~130쪽</span></span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">탐구 활동 7</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">신경망 모델에서 은닉층과 노드의 역할 알아보기</h2>
+      <p class="body-text">🔗 <strong>텐서플로 플레이그라운드</strong>를 이용하여 은닉층이 어떤 역할을 하는지 알아봅시다.</p>
+      <p style="font-size:13px; color:var(--teal); margin-top:4px; font-family:'Space Mono',monospace;">https://playground.tensorflow.org/</p>
+      <ol class="steps-list" style="margin-top:14px">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-text">활성화 함수 <strong>ReLU</strong>, 문제 유형 <strong>Classification(분류)</strong> 선택</div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-text">데이터 <strong>'Exclusive OR(XOR)'</strong> 선택 — 주황·파랑 두 클래스로 구분되는 비선형 데이터</div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div class="step-text">은닉층 수 <strong>0</strong>으로 설정 후 학습 실행 → 비선형 분류가 <span style="color:#FF8888">되지 않음</span>을 확인</div>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <div class="step-text">은닉층 수와 노드 개수를 <strong>늘려가며</strong> 학습 → 은닉층이 많을수록 <span style="color:var(--teal)">더 복잡한 패턴</span>을 표현함을 확인</div>
+        </li>
+      </ol>
+      <div class="info-box" style="margin-top:12px">
+        <div class="info-title">🔎 하나 더 해보기</div>
+        은닉층 없이 분류 가능한 데이터 찾기 / 다른 데이터로 신경망 모델 만들어보기
+      </div>
+      <div class="slide-number">08</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 9: 딥러닝 활용 분야 -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">2. 딥러닝 활용 분야 <span class="page-ref">131~132쪽</span></span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">핵심 개념 5</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">딥러닝 활용 분야</h2>
+      <p class="body-text" style="margin-bottom:14px">딥러닝은 컴퓨터 비전, 자연어 처리, 음성 인식, 생성 등 다양한 분야에서 활용됩니다. 각 카드를 클릭하면 자세한 내용을 볼 수 있어요!</p>
+      <div class="card-grid cols4">
+        <div class="app-card" onclick="toggleApp(this)">
+          <div class="app-icon">👁️</div>
+          <div class="app-title">컴퓨터 비전</div>
+          <div class="app-sub">Computer Vision</div>
+          <div class="app-detail">이미지·영상에서 객체를 인식·분석하는 분야. 딥러닝으로 성능 획기적 향상.<br><br>예) 자율주행 차량, 의료 영상 판독, 얼굴 인식, CCTV 분석</div>
+          <div class="expand-hint">클릭하여 자세히 보기</div>
+        </div>
+        <div class="app-card" onclick="toggleApp(this)">
+          <div class="app-icon">💬</div>
+          <div class="app-title">자연어 처리</div>
+          <div class="app-sub">NLP</div>
+          <div class="app-detail">컴퓨터가 사람의 언어를 이해하고 처리하는 분야.<br><br>예) ChatGPT, 기계 번역, 챗봇, 감성 분석</div>
+          <div class="expand-hint">클릭하여 자세히 보기</div>
+        </div>
+        <div class="app-card" onclick="toggleApp(this)">
+          <div class="app-icon">🎙️</div>
+          <div class="app-title">음성 인식</div>
+          <div class="app-sub">Speech Recognition</div>
+          <div class="app-detail">음성 입력을 텍스트로 변환 후 자연어 처리 기술로 분석.<br><br>예) AI 스피커(클로바·시리·빅스비), 통화 자동 녹취</div>
+          <div class="expand-hint">클릭하여 자세히 보기</div>
+        </div>
+        <div class="app-card" onclick="toggleApp(this)">
+          <div class="app-icon">✨</div>
+          <div class="app-title">생성형 AI</div>
+          <div class="app-sub">Generative AI</div>
+          <div class="app-detail">텍스트·이미지·음성·영상 등 콘텐츠를 생성하거나 변환.<br><br>예) DALL·E, Stable Diffusion, Sora, 음성 합성</div>
+          <div class="expand-hint">클릭하여 자세히 보기</div>
+        </div>
+      </div>
+      <div class="slide-number">09</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 10: 탐구활동 8 — 미디어파이프 -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">탐구활동 8 — 딥러닝 기술 경험하기 <span class="page-ref">132쪽</span></span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">탐구 활동 8</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">딥러닝 기술 경험하기 (MediaPipe)</h2>
+      <div class="two-col">
+        <div>
+          <p class="body-text"><span class="keyword">미디어파이프(MediaPipe)</span>는 컴퓨터 비전, 자연어 처리, 음성 인식 기술을 직접 체험할 수 있는 사이트입니다.</p>
+          <p style="font-size:13px; color:var(--teal); margin:6px 0; font-family:'Space Mono',monospace;">🔗 mediapipe-studio.webapps.google.com</p>
+          <ol class="steps-list" style="margin-top:12px">
+            <li>
+              <div class="step-num">1</div>
+              <div class="step-text">크롬에서 <strong>구글 개인 계정</strong>으로 로그인</div>
+            </li>
+            <li>
+              <div class="step-num">2</div>
+              <div class="step-text">미디어파이프 사이트에 접속</div>
+            </li>
+            <li>
+              <div class="step-num">3</div>
+              <div class="step-text">딥러닝 기술 선택 후 [See demo] 클릭하여 체험</div>
+            </li>
+            <li>
+              <div class="step-num">4</div>
+              <div class="step-text">체험한 기술로 해결할 수 있는 <strong>실생활 문제 사례</strong> 찾아보기 및 발표</div>
+            </li>
+          </ol>
+        </div>
+        <div>
+          <div class="card" style="text-align:center; padding:20px;">
+            <div style="font-size:13px; color:var(--gray); margin-bottom:14px;">체험 가능한 기술</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div class="card" style="padding:12px; text-align:left; background:rgba(72,202,228,0.06); border-color:rgba(72,202,228,0.3)">
+                <span style="color:var(--cyan); font-weight:700; font-size:13px;">👁️ 얼굴/손/자세 감지</span>
+                <div style="font-size:12px; color:var(--gray); margin-top:4px;">컴퓨터 비전 — 실시간 객체 인식</div>
+              </div>
+              <div class="card" style="padding:12px; text-align:left; background:rgba(0,201,167,0.06); border-color:rgba(0,201,167,0.3)">
+                <span style="color:var(--teal); font-weight:700; font-size:13px;">💬 텍스트 분류/감성 분석</span>
+                <div style="font-size:12px; color:var(--gray); margin-top:4px;">자연어 처리 — 텍스트 이해</div>
+              </div>
+              <div class="card" style="padding:12px; text-align:left; background:rgba(255,107,53,0.06); border-color:rgba(255,107,53,0.3)">
+                <span style="color:var(--orange); font-weight:700; font-size:13px;">🎙️ 음성 → 텍스트 변환</span>
+                <div style="font-size:12px; color:var(--gray); margin-top:4px;">음성 인식 — 실시간 받아쓰기</div>
+              </div>
+            </div>
+          </div>
+          <div class="info-box">
+            <div class="info-title">💡 발표 예시</div>
+            인공지능 스피커, 인공지능 CCTV, 실시간 번역 서비스 등
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">10</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 11: 정리 -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="chapter">Ⅱ-03</span>
+      <span class="title">단원 정리</span>
+    </div>
+    <div class="slide-body">
+      <div class="section-divider">
+        <span class="section-badge">정리</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title">인공 신경망과 딥러닝 — 핵심 정리</h2>
+      <div class="card-grid cols3" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-title">① 인공 신경망 (ANN)</div>
+          <div class="card-desc">인간 뇌의 뉴런·시냅스를 모방. 입력 → 가중치 → 가중합 → 활성화 함수 → 출력</div>
+        </div>
+        <div class="card">
+          <div class="card-title">② 다층 신경망 (MLP)</div>
+          <div class="card-desc">입력층 + 은닉층(들) + 출력층. 은닉층이 비선형 문제 해결을 가능하게 함</div>
+        </div>
+        <div class="card">
+          <div class="card-title">③ 심층 신경망 & 딥러닝</div>
+          <div class="card-desc">은닉층이 많을수록 "깊은" 신경망 → 복잡한 패턴 학습 → 딥러닝</div>
+        </div>
+      </div>
+      <compare-table-placeholder></compare-table-placeholder>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>구분</th><th>퍼셉트론</th><th>다층 신경망(MLP)</th><th>심층 신경망(DNN)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>은닉층 수</td><td>0</td><td>1개 이상</td><td>많은 수</td>
+          </tr>
+          <tr>
+            <td>분류 능력</td><td>선형만 가능</td><td>비선형 가능</td><td>복잡한 비선형</td>
+          </tr>
+          <tr>
+            <td>대표 활용</td><td>단순 논리 회로</td><td>이미지·문자 분류</td><td>딥러닝 전반</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="slide-number">11</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 내비게이션 -->
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>← 이전</button>
+  <span class="nav-counter" id="navCounter">1 / 11</span>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">다음 →</button>
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = 11;
+
+  // 퀴즈 데이터
+  const quizzes = [
+    {
+      q: "Q1. 인공 신경망에서 입력값에 중요도를 부여하는 것을 무엇이라고 하나요?",
+      options: ["임곗값(Threshold)", "가중치(Weight)", "활성화 함수", "은닉층"],
+      correct: 1,
+      feedback: "✅ 정답! 가중치(Weight)는 각 입력 신호가 얼마나 중요한지를 나타내는 값입니다."
+    },
+    {
+      q: "Q2. 퍼셉트론 하나로 해결할 수 없는 문제는?",
+      options: ["AND 문제", "OR 문제", "XOR(배타적 논리합) 문제", "NOT 문제"],
+      correct: 2,
+      feedback: "✅ 정답! XOR은 비선형 문제이기 때문에 단층 퍼셉트론으로는 분류할 수 없습니다. 은닉층이 필요합니다."
+    },
+    {
+      q: "Q3. 다층 신경망(MLP)에서 입력층과 출력층 사이에 위치하며 비선형 변환을 담당하는 층은?",
+      options: ["입력층", "출력층", "은닉층", "가중층"],
+      correct: 2,
+      feedback: "✅ 정답! 은닉층(Hidden Layer)은 입력값에 활성화 함수를 적용하여 비선형 변환을 수행합니다."
+    },
+    {
+      q: "Q4. 딥러닝(Deep Learning)의 '딥(Deep)'은 무엇을 의미하나요?",
+      options: ["데이터의 양이 많다", "학습 시간이 길다", "은닉층의 수가 많다", "컴퓨터 성능이 높다"],
+      correct: 2,
+      feedback: "✅ 정답! 딥러닝의 '딥(Deep)'은 신경망의 은닉층이 여러 개라는 의미입니다."
+    }
+  ];
+  let currentQ = 0;
+  let answered = false;
+
+  function checkAnswer(btn, isCorrect) {
+    if (answered) return;
+    answered = true;
+    const options = document.querySelectorAll('.quiz-option');
+    options.forEach((opt, i) => {
+      if (i === quizzes[currentQ].correct) opt.classList.add('correct');
+      else opt.classList.add('wrong');
+      opt.style.cursor = 'default';
+    });
+    const fb = document.getElementById('qFeedback');
+    if (isCorrect) {
+      fb.textContent = quizzes[currentQ].feedback;
+      fb.className = 'quiz-feedback show ok';
+    } else {
+      fb.textContent = '❌ 틀렸어요. ' + quizzes[currentQ].feedback;
+      fb.className = 'quiz-feedback show no';
+    }
+    if (currentQ < quizzes.length - 1) {
+      document.getElementById('nextQBtn').style.display = 'inline-block';
+    } else {
+      fb.textContent += '  🎉 모든 문제를 완료했습니다!';
+    }
+  }
+
+  function nextQuestion() {
+    currentQ++;
+    answered = false;
+    const q = quizzes[currentQ];
+    document.getElementById('qText').textContent = q.q;
+    const opts = document.querySelectorAll('.quiz-option');
+    opts.forEach((opt, i) => {
+      opt.textContent = `${['①','②','③','④'][i]} ${q.options[i]}`;
+      opt.className = 'quiz-option';
+      opt.style.cursor = 'pointer';
+      const isC = (i === q.correct);
+      opt.onclick = function() { checkAnswer(this, isC); };
+    });
+    document.getElementById('qFeedback').className = 'quiz-feedback';
+    document.getElementById('nextQBtn').style.display = 'none';
+    document.getElementById('qProgress').textContent = `${currentQ + 1} / ${quizzes.length}`;
+  }
+
+  // 초기 퀴즈 세팅
+  (function initQuiz() {
+    const q = quizzes[0];
+    const opts = document.querySelectorAll('.quiz-option');
+    opts.forEach((opt, i) => {
+      const isC = (i === q.correct);
+      opt.onclick = function() { checkAnswer(this, isC); };
+    });
+  })();
+
+  function toggleApp(card) {
+    card.classList.toggle('expanded');
+  }
+
+  function changeSlide(dir) {
+    const slides = document.querySelectorAll('.slide');
+    slides[currentSlide - 1].classList.remove('active');
+    currentSlide += dir;
+    slides[currentSlide - 1].classList.add('active');
+    document.getElementById('prevBtn').disabled = currentSlide === 1;
+    document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+    document.getElementById('navCounter').textContent = `${currentSlide} / ${totalSlides}`;
+    document.getElementById('progressFill').style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+
+  // 키보드 내비게이션
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      if (currentSlide < totalSlides) changeSlide(1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      if (currentSlide > 1) changeSlide(-1);
+    }
+  });
+
+  // 초기 진행바
+  document.getElementById('progressFill').style.width = `${(1 / totalSlides) * 100}%`;
+</script>
+</body>
+</html>
