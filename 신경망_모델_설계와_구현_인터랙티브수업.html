@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>신경망 모델 설계와 구현 과정</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --primary: #58a6ff;
+    --primary-dim: #1f6feb;
+    --accent: #3fb950;
+    --accent2: #f78166;
+    --accent3: #d2a8ff;
+    --accent4: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #656d76;
+    --highlight: #fffb0022;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ──────────────── HEADER ──────────────── */
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .subject-badge {
+    background: var(--primary-dim);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .header h1 { font-size: 15px; font-weight: 700; color: var(--text); }
+  .header-meta { font-size: 12px; color: var(--text-muted); }
+
+  .timer-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .timer-display {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 700;
+    min-width: 60px;
+    text-align: center;
+  }
+  .timer-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all .15s;
+  }
+  .timer-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* ──────────────── LAYOUT ──────────────── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* ──────────────── TIMELINE ──────────────── */
+  .timeline-section {
+    margin-bottom: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .timeline {
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .tl-block {
+    flex: 0 0 auto;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all .2s;
+    border: 1.5px solid transparent;
+    min-width: 80px;
+    text-align: center;
+  }
+  .tl-block:hover { transform: translateY(-2px); }
+  .tl-block.active { border-color: var(--primary) !important; }
+  .tl-time { font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  .tl-label { font-size: 11px; margin-top: 3px; line-height: 1.3; }
+
+  .tl-intro   { background: #1f2d1f; border-color: #2ea04322; } .tl-intro .tl-time { color: var(--accent); }
+  .tl-concept { background: #1a2233; border-color: #58a6ff22; } .tl-concept .tl-time { color: var(--primary); }
+  .tl-code    { background: #2a1f10; border-color: #ffa65722; } .tl-code .tl-time { color: var(--accent4); }
+  .tl-practice{ background: #211526; border-color: #d2a8ff22; } .tl-practice .tl-time { color: var(--accent3); }
+  .tl-debrief { background: #241414; border-color: #f7816622; } .tl-debrief .tl-time { color: var(--accent2); }
+
+  /* ──────────────── PHASE CARDS ──────────────── */
+  .phase { display: none; }
+  .phase.active { display: block; }
+
+  .phase-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .phase-num {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .phase-title-wrap h2 {
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+  .phase-title-wrap p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Color variants */
+  .color-green .phase-num  { background: #1f3626; color: var(--accent); }
+  .color-green .phase-title-wrap h2 { color: #7ee787; }
+  .color-blue  .phase-num  { background: #1a2d4a; color: var(--primary); }
+  .color-blue  .phase-title-wrap h2 { color: var(--primary); }
+  .color-orange.phase-num, .color-orange .phase-num  { background: #3d2312; color: var(--accent4); }
+  .color-orange .phase-title-wrap h2 { color: var(--accent4); }
+  .color-purple .phase-num  { background: #2a1f40; color: var(--accent3); }
+  .color-purple .phase-title-wrap h2 { color: var(--accent3); }
+  .color-red   .phase-num  { background: #3d1414; color: var(--accent2); }
+  .color-red   .phase-title-wrap h2 { color: var(--accent2); }
+
+  /* ──────────────── CARDS ──────────────── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .card h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .card p, .card li { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+  .card ul { padding-left: 16px; }
+
+  .card.accent-green { border-top: 3px solid var(--accent); }
+  .card.accent-blue  { border-top: 3px solid var(--primary); }
+  .card.accent-orange{ border-top: 3px solid var(--accent4); }
+  .card.accent-purple{ border-top: 3px solid var(--accent3); }
+  .card.accent-red   { border-top: 3px solid var(--accent2); }
+
+  /* ──────────────── TEACHER SCRIPT ──────────────── */
+  .teacher-box {
+    background: #11221a;
+    border: 1px solid #2ea04355;
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .teacher-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .teacher-box p { font-size: 13.5px; line-height: 1.8; color: var(--text); }
+  .teacher-box p + p { margin-top: 8px; }
+
+  /* ──────────────── CODE BLOCK ──────────────── */
+  .code-wrapper { margin: 16px 0; }
+  .code-tabs { display: flex; gap: 2px; margin-bottom: -1px; }
+  .code-tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all .15s;
+  }
+  .code-tab.active { background: #161b22; color: var(--text); border-color: var(--border); }
+  .code-panel { display: none; }
+  .code-panel.active { display: block; }
+  pre {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 0 8px 8px 8px;
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .kw  { color: #ff7b72; }
+  .fn  { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .num { color: #79c0ff; }
+  .cm  { color: #8b949e; font-style: italic; }
+  .imp { color: var(--accent); }
+  .param { color: var(--accent4); }
+
+  /* ──────────────── ARCHITECTURE DIAGRAM ──────────────── */
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  .arch-title {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+  .layers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: nowrap;
+    min-width: 600px;
+  }
+  .layer-group { text-align: center; flex-shrink: 0; }
+  .layer-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 10px;
+  }
+  .nodes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .node {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    transition: transform .15s;
+    cursor: default;
+  }
+  .node:hover { transform: scale(1.15); }
+  .node.input-node  { border-color: var(--primary); background: #1a2d4a; color: var(--primary); }
+  .node.hidden-node { border-color: var(--accent4); background: #3d2312; color: var(--accent4); }
+  .node.output-node { border-color: var(--accent3); background: #2a1f40; color: var(--accent3); }
+  .arrow {
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .arrow svg { opacity: .4; }
+  .layer-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+  .layer-fn {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ──────────────── PROCESS FLOW ──────────────── */
+  .flow-steps { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .flow-step::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--border);
+    transition: all .2s;
+  }
+  .flow-step:hover::before, .flow-step.highlight::before { background: var(--primary); }
+  .flow-step:hover, .flow-step.highlight { border-color: var(--primary); background: #1a2d4a22; }
+  .step-num {
+    width: 28px; height: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    color: var(--primary);
+  }
+  .step-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .step-content p  { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+  .step-expand { display: none; }
+  .step-expand.show { display: block; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .step-expand p { font-size: 12px; color: var(--text-muted); }
+
+  /* ──────────────── QUIZ ──────────────── */
+  .quiz-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+  .quiz-q {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .quiz-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all .2s;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .quiz-opt:hover { border-color: var(--primary); background: #1a2d4a33; }
+  .quiz-opt.correct { border-color: var(--accent) !important; background: #1f3626 !important; color: #7ee787; }
+  .quiz-opt.wrong   { border-color: var(--accent2) !important; background: #3d141422 !important; color: #f78166; }
+  .quiz-opt.disabled { pointer-events: none; }
+  .opt-marker {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1.5px solid var(--text-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .quiz-feedback {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.7;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: #1f3626; color: #7ee787; border: 1px solid #2ea04355; }
+  .quiz-feedback.no { background: #3d1414; color: #f78166; border: 1px solid #f7816655; }
+
+  /* ──────────────── CONCEPT FLIP CARDS ──────────────── */
+  .flip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+  .flip-card-wrapper { perspective: 1000px; height: 140px; cursor: pointer; }
+  .flip-card-inner {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform .45s;
+  }
+  .flip-card-wrapper.flipped .flip-card-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 10px;
+    backface-visibility: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px; text-align: center;
+  }
+  .flip-front {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+  }
+  .flip-front h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .flip-front span { font-size: 11px; color: var(--text-muted); }
+  .flip-back {
+    background: #1a2d4a;
+    border: 1.5px solid var(--primary);
+    transform: rotateY(180deg);
+  }
+  .flip-back p { font-size: 12px; line-height: 1.6; color: var(--text); }
+
+  /* ──────────────── FILL BLANKS ──────────────── */
+  .fill-blank {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+  .blank-q { font-size: 14px; line-height: 2.2; margin-bottom: 16px; }
+  .blank-input {
+    display: inline-block;
+    width: 110px;
+    border: none;
+    border-bottom: 2px solid var(--primary);
+    background: transparent;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    text-align: center;
+    padding: 2px 4px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .blank-input:focus { border-bottom-color: var(--accent); }
+  .blank-input.correct { border-bottom-color: var(--accent); color: var(--accent); }
+  .blank-input.wrong   { border-bottom-color: var(--accent2); color: var(--accent2); }
+  .check-btn {
+    background: var(--primary-dim);
+    color: var(--primary);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    margin-top: 8px;
+  }
+  .check-btn:hover { background: var(--primary); color: #0d1117; }
+
+  /* ──────────────── NAV BUTTONS ──────────────── */
+  .phase-nav {
+    display: flex;
+    gap: 10px;
+    margin-top: 32px;
+    justify-content: flex-end;
+  }
+  .nav-btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+  }
+  .nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .nav-btn.primary { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
+  .nav-btn.primary:hover { background: var(--primary); color: #0d1117; }
+
+  /* ──────────────── PROGRESS BAR ──────────────── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 2px;
+    transition: width .4s ease;
+  }
+
+  /* ──────────────── BADGE ──────────────── */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .badge-time { background: #1a2d4a; color: var(--primary); }
+  .badge-tip  { background: #1f3626; color: var(--accent); }
+
+  /* ──────────────── HIGHLIGHT BOX ──────────────── */
+  .highlight-box {
+    background: var(--highlight);
+    border: 1px solid #fffb0055;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: #e5c55e;
+  }
+
+  /* ──────────────── MINI TABLE ──────────────── */
+  .mini-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  .mini-table th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .mini-table code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent4); }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .header-inner { flex-direction: column; align-items: flex-start; }
+    .arch-diagram { padding: 16px 10px; }
+    .layers { gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <span class="subject-badge">정보 · 딥러닝</span>
+      <div>
+        <div class="header h1" style="font-size:15px;font-weight:700;">Ⅱ-03-2 신경망 모델 설계와 구현 과정</div>
+        <div class="header-meta">교과서 133~142쪽 · 50분 수업</div>
+      </div>
+    </div>
+    <div class="timer-bar">
+      <span>수업 타이머</span>
+      <div class="timer-display" id="timerDisplay">50:00</div>
+      <button class="timer-btn" onclick="startTimer()">▶ 시작</button>
+      <button class="timer-btn" onclick="resetTimer()">↺ 초기화</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- PROGRESS -->
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+
+  <!-- ────── TIMELINE NAV ────── -->
+  <div class="timeline-section">
+    <div class="section-title">⏱ 50분 수업 흐름</div>
+    <div class="timeline">
+      <div class="tl-block tl-intro active" onclick="showPhase(0)">
+        <div class="tl-time">0~5분</div>
+        <div class="tl-label">도입<br>동기유발</div>
+      </div>
+      <div style="display:flex;align-items:center;color:var(--border);font-size:18px;padding:0 2px;">›</div>
+      <div class="tl-block tl-concept" onclick="showPhase(1)">
+        <div class="tl-time">5~20분</div>
+        <div class="tl-label">모델 설계<br>개념 학습</div>
+      </div>
+      <div style="display:flex;align-items:center;color:var(--border);font-size:18px;padding:0 2px;">›</div>
+      <div class="tl-block tl-code" onclick="showPhase(2)">
+        <div class="tl-time">20~35분</div>
+        <div class="tl-label">케라스<br>코드 실습</div>
+      </div>
+      <div style="display:flex;align-items:center;color:var(--border);font-size:18px;padding:0 2px;">›</div>
+      <div class="tl-block tl-practice" onclick="showPhase(3)">
+        <div class="tl-time">35~47분</div>
+        <div class="tl-label">MNIST<br>적용실습</div>
+      </div>
+      <div style="display:flex;align-items:center;color:var(--border);font-size:18px;padding:0 2px;">›</div>
+      <div class="tl-block tl-debrief" onclick="showPhase(4)">
+        <div class="tl-time">47~50분</div>
+        <div class="tl-label">정리 &amp;<br>평가</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 0  도입·동기유발
+  ══════════════════════════════════════ -->
+  <div class="phase active" id="phase-0">
+    <div class="phase-header color-green">
+      <span class="phase-num">0~5분</span>
+      <div class="phase-title-wrap">
+        <h2>도입 · 동기유발</h2>
+        <p>학습 목표 제시 &amp; AI가 숫자를 어떻게 인식하는지 질문으로 시작</p>
+      </div>
+    </div>
+
+    <div class="teacher-box">
+      <div class="teacher-label">🎙 교사 발문 스크립트</div>
+      <p>"여러분 스마트폰에서 손글씨 숫자를 쓰면 AI가 읽어주는 경험 해봤나요? 오늘은 그 원리를 직접 코드로 구현해봅니다. 신경망 모델을 <strong style="color:var(--accent)">설계 → 생성 → 학습 → 평가</strong>하는 4단계를 따라가 보죠."</p>
+      <p style="margin-top:8px;">🔑 <em>"AI가 숫자 1과 7을 헷갈리지 않으려면 내부에서 어떤 구조가 필요할까요?"</em> — 1분 짝 토의 후 2~3모둠 발표.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card accent-green">
+        <h3>🎯 학습 목표</h3>
+        <ul>
+          <li>신경망 모델 설계 방법(층·노드·활성화 함수)을 설명할 수 있다</li>
+          <li>케라스(Keras)로 신경망 모델을 구현하고 학습시킬 수 있다</li>
+          <li>모델 성능을 평가하고 결과를 해석할 수 있다</li>
+        </ul>
+      </div>
+      <div class="card accent-blue">
+        <h3>📚 오늘 다루는 핵심 코드</h3>
+        <ul>
+          <li><code style="color:var(--accent4)">Sequential</code> — 층 순차 연결</li>
+          <li><code style="color:var(--accent4)">Dense</code> — 완전 연결 계층</li>
+          <li><code style="color:var(--accent4)">model.compile()</code> — 환경 설정</li>
+          <li><code style="color:var(--accent4)">model.fit()</code> — 학습</li>
+          <li><code style="color:var(--accent4)">model.evaluate()</code> — 평가</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-nav">
+      <button class="nav-btn primary" onclick="showPhase(1)">다음: 모델 설계 개념 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 1  모델 설계 개념 학습
+  ══════════════════════════════════════ -->
+  <div class="phase" id="phase-1">
+    <div class="phase-header color-blue">
+      <span class="phase-num">5~20분</span>
+      <div class="phase-title-wrap">
+        <h2>신경망 모델 설계 개념</h2>
+        <p>구현 4단계 흐름 이해 + 층·노드·활성화 함수 개념 정립</p>
+      </div>
+    </div>
+
+    <div class="teacher-box">
+      <div class="teacher-label">🎙 교사 안내</div>
+      <p>"신경망 모델을 만들려면 설계도가 필요해요. 먼저 '어떤 층을 몇 개로 쌓을지', '각 층에 노드를 몇 개 둘지', '활성화 함수는 무엇을 쓸지' 결정해야 합니다."</p>
+    </div>
+
+    <!-- 구현 4단계 -->
+    <div style="margin-bottom:8px;font-size:12px;color:var(--text-muted);">👆 각 단계를 클릭하면 자세한 설명이 펼쳐집니다</div>
+    <div class="flow-steps">
+      <div class="flow-step" onclick="toggleStep(this)">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>데이터 준비 &amp; 특징·타깃 선정</h4>
+          <p>데이터프레임 생성 → 특징(X: sweet, crunchy), 타깃(y: class) 분리</p>
+          <div class="step-expand">
+            <p>입력 특징 수 = 입력층 노드 수. 이 예제는 2개 특징 → 입력층 2개 노드.<br>
+            타깃 클래스 수 = 출력층 노드 수. 과일/단백질/채소 3개 → 출력층 3개 노드.</p>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step" onclick="toggleStep(this)">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>신경망 모델 생성 (설계 → 구현)</h4>
+          <p>층 수·노드 수·활성화 함수 결정 → Sequential + Dense로 구현</p>
+          <div class="step-expand">
+            <p>은닉층 노드 수는 데이터 복잡도에 따라 조정. 이 예제: 32 → 16.<br>
+            은닉층 활성화 함수: <strong style="color:var(--accent4)">ReLU</strong>(음수 → 0, 양수 → 그대로)<br>
+            출력층 활성화 함수: <strong style="color:var(--accent3)">Softmax</strong>(확률값 합 = 1)</p>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step" onclick="toggleStep(this)">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>모델 환경 설정 (compile)</h4>
+          <p>손실함수 + 최적화 함수 + 평가 지표 설정</p>
+          <div class="step-expand">
+            <p><strong style="color:var(--primary)">손실함수</strong>: 예측값과 실젯값의 차이 측정<br>
+            → 다중 분류: <code>sparse_categorical_crossentropy</code><br>
+            <strong style="color:var(--primary)">최적화 함수</strong>: 손실 최소화 방향으로 가중치 조정<br>
+            → 기본 선택: <code>adam</code></p>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step" onclick="toggleStep(this)">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>모델 학습 → 평가 → 예측</h4>
+          <p>fit() 으로 학습 → evaluate()로 성능 확인 → predict()로 예측</p>
+          <div class="step-expand">
+            <p><strong style="color:var(--accent)">순전파</strong>: 입력 → 예측값 출력<br>
+            <strong style="color:var(--accent)">역전파</strong>: 예측값 - 실젯값 오차 → 가중치 업데이트<br>
+            이 과정을 epochs 수만큼 반복. 반복할수록 loss↓ accuracy↑</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 신경망 구조 다이어그램 -->
+    <div class="arch-diagram">
+      <div class="arch-title">🧠 식품 분류 신경망 구조 (2 → 32 → 16 → 3)</div>
+      <div class="layers">
+        <!-- INPUT -->
+        <div class="layer-group">
+          <div class="layer-label" style="color:var(--primary)">입력층</div>
+          <div class="nodes">
+            <div class="node input-node" title="sweet">S</div>
+            <div class="node input-node" title="crunchy">C</div>
+          </div>
+          <div class="layer-sub">노드 2개</div>
+          <div class="layer-fn">2 특징</div>
+        </div>
+        <div class="arrow"><svg width="32" height="16"><path d="M0 8 H26 M20 3 L28 8 L20 13" stroke="#58a6ff" stroke-width="1.5" fill="none"/></svg></div>
+        <!-- HIDDEN 1 -->
+        <div class="layer-group">
+          <div class="layer-label" style="color:var(--accent4)">은닉층 1</div>
+          <div class="nodes">
+            <div class="node hidden-node">H</div>
+            <div class="node hidden-node">H</div>
+            <div class="node hidden-node" style="opacity:.6">···</div>
+            <div class="node hidden-node">H</div>
+          </div>
+          <div class="layer-sub">노드 32개</div>
+          <div class="layer-fn">ReLU</div>
+        </div>
+        <div class="arrow"><svg width="32" height="16"><path d="M0 8 H26 M20 3 L28 8 L20 13" stroke="#ffa657" stroke-width="1.5" fill="none"/></svg></div>
+        <!-- HIDDEN 2 -->
+        <div class="layer-group">
+          <div class="layer-label" style="color:var(--accent4)">은닉층 2</div>
+          <div class="nodes">
+            <div class="node hidden-node">H</div>
+            <div class="node hidden-node">H</div>
+            <div class="node hidden-node" style="opacity:.6">···</div>
+          </div>
+          <div class="layer-sub">노드 16개</div>
+          <div class="layer-fn">ReLU</div>
+        </div>
+        <div class="arrow"><svg width="32" height="16"><path d="M0 8 H26 M20 3 L28 8 L20 13" stroke="#d2a8ff" stroke-width="1.5" fill="none"/></svg></div>
+        <!-- OUTPUT -->
+        <div class="layer-group">
+          <div class="layer-label" style="color:var(--accent3)">출력층</div>
+          <div class="nodes">
+            <div class="node output-node" title="과일">🍎</div>
+            <div class="node output-node" title="단백질">🥩</div>
+            <div class="node output-node" title="채소">🥦</div>
+          </div>
+          <div class="layer-sub">노드 3개</div>
+          <div class="layer-fn">Softmax</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 개념 플립 카드 -->
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text-muted);">💡 카드를 클릭해서 개념 확인하기</div>
+    <div class="flip-grid">
+      <div class="flip-card-wrapper" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front"><h4>ReLU 함수</h4><span>클릭해서 뒤집기 →</span></div>
+          <div class="flip-back"><p>입력값이 <strong>음수 → 0</strong><br>입력값이 <strong>양수 → 그대로 출력</strong><br>은닉층에서 주로 사용.<br>계산이 빠르고 효과적.</p></div>
+        </div>
+      </div>
+      <div class="flip-card-wrapper" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front"><h4>Softmax 함수</h4><span>클릭해서 뒤집기 →</span></div>
+          <div class="flip-back"><p>출력값을 <strong>0~1 사이 확률</strong>로 변환.<br>모든 출력 확률의 합 = 1.<br>다중 분류 출력층에서 사용.</p></div>
+        </div>
+      </div>
+      <div class="flip-card-wrapper" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front"><h4>손실함수</h4><span>클릭해서 뒤집기 →</span></div>
+          <div class="flip-back"><p><strong>예측값과 실젯값의 차이</strong>를 수치로 측정.<br>다중 분류: sparse_categorical<br>_crossentropy 사용.</p></div>
+        </div>
+      </div>
+      <div class="flip-card-wrapper" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front"><h4>Adam 옵티마이저</h4><span>클릭해서 뒤집기 →</span></div>
+          <div class="flip-back"><p>손실함수 값을 <strong>최소화</strong>하는 방향으로<br>가중치를 빠르게 조정.<br>딥러닝에서 가장 많이 쓰이는 최적화 알고리즘.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-nav">
+      <button class="nav-btn" onclick="showPhase(0)">← 이전</button>
+      <button class="nav-btn primary" onclick="showPhase(2)">다음: 코드 실습 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 2  케라스 코드 실습
+  ══════════════════════════════════════ -->
+  <div class="phase" id="phase-2">
+    <div class="phase-header color-orange">
+      <span class="phase-num" style="background:#3d2312;color:var(--accent4);">20~35분</span>
+      <div class="phase-title-wrap">
+        <h2>케라스(Keras) 코드 실습</h2>
+        <p>식품 분류 신경망 — 단계별 코드 따라 치기 (Google Colab)</p>
+      </div>
+    </div>
+
+    <div class="teacher-box">
+      <div class="teacher-label">🎙 실습 안내</div>
+      <p>"Google Colab을 열고 탭을 순서대로 따라치세요. 각 탭에서 코드를 실행(Shift+Enter)해 결과를 확인합니다. 단, 직접 입력하지 않으면 기억에 남지 않아요!"</p>
+    </div>
+
+    <div class="code-wrapper">
+      <div class="code-tabs">
+        <div class="code-tab active" onclick="switchTab(0)">① 데이터 준비</div>
+        <div class="code-tab" onclick="switchTab(1)">② 모델 설계</div>
+        <div class="code-tab" onclick="switchTab(2)">③ compile</div>
+        <div class="code-tab" onclick="switchTab(3)">④ 학습·평가</div>
+        <div class="code-tab" onclick="switchTab(4)">⑤ 예측</div>
+      </div>
+
+      <div class="code-panel active" id="tab-0">
+        <pre><span class="cm"># ① 데이터 준비 — 식품 데이터프레임 생성</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+data = {
+    <span class="str">'sweet'</span>:   [<span class="num">9</span>, <span class="num">3</span>, <span class="num">8</span>, <span class="num">2</span>, <span class="num">7</span>, <span class="num">1</span>, <span class="num">4</span>, <span class="num">6</span>],
+    <span class="str">'crunchy'</span>: [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">9</span>, <span class="num">2</span>, <span class="num">7</span>, <span class="num">8</span>, <span class="num">4</span>],
+    <span class="str">'class'</span>:   [<span class="num">0</span>, <span class="num">1</span>, <span class="num">0</span>, <span class="num">2</span>, <span class="num">0</span>, <span class="num">2</span>, <span class="num">2</span>, <span class="num">1</span>]
+    <span class="cm"># 0=과일, 1=단백질, 2=채소</span>
+}
+df = pd.<span class="fn">DataFrame</span>(data)
+
+<span class="cm"># 특징(X)과 타깃(y) 분리</span>
+X = df[[<span class="str">'sweet'</span>, <span class="str">'crunchy'</span>]].<span class="fn">values</span>
+y = df[<span class="str">'class'</span>].<span class="fn">values</span>
+
+<span class="fn">print</span>(X.shape)  <span class="cm"># (8, 2) — 8행 2열</span>
+<span class="fn">print</span>(y)        <span class="cm"># [0 1 0 2 0 2 2 1]</span></pre>
+        <div class="highlight-box">💡 <strong>X.shape = (8, 2)</strong> → 입력층 노드 수 = <strong>2</strong>개 (sweet, crunchy)</div>
+      </div>
+
+      <div class="code-panel" id="tab-1">
+        <pre><span class="cm"># ② 신경망 모델 설계 (Sequential + Dense)</span>
+<span class="kw">from</span> tensorflow.keras.models <span class="kw">import</span> <span class="imp">Sequential</span>
+<span class="kw">from</span> tensorflow.keras.layers <span class="kw">import</span> <span class="imp">Dense</span>
+
+model = <span class="fn">Sequential</span>()  <span class="cm"># 층을 순차적으로 쌓는 모델</span>
+
+<span class="cm"># 첫 번째 은닉층 — 노드 32개, 활성화 함수 ReLU</span>
+<span class="cm"># input_dim: 입력층 노드 수 (특징 수와 동일)</span>
+model.<span class="fn">add</span>(<span class="fn">Dense</span>(<span class="num">32</span>, <span class="param">activation</span>=<span class="str">'relu'</span>, <span class="param">input_dim</span>=<span class="num">2</span>))
+
+<span class="cm"># 두 번째 은닉층 — 노드 16개, 활성화 함수 ReLU</span>
+model.<span class="fn">add</span>(<span class="fn">Dense</span>(<span class="num">16</span>, <span class="param">activation</span>=<span class="str">'relu'</span>))
+
+<span class="cm"># 출력층 — 노드 3개 (클래스 수), 활성화 함수 Softmax</span>
+model.<span class="fn">add</span>(<span class="fn">Dense</span>(<span class="num">3</span>,  <span class="param">activation</span>=<span class="str">'softmax'</span>))
+
+model.<span class="fn">summary</span>()  <span class="cm"># 모델 구조 확인</span></pre>
+        <div class="highlight-box">💡 <strong>출력층 노드 수 = 클래스 수</strong> (과일0, 단백질1, 채소2 → 3개)</div>
+      </div>
+
+      <div class="code-panel" id="tab-2">
+        <pre><span class="cm"># ③ 모델 환경 설정 (compile)</span>
+model.<span class="fn">compile</span>(
+    <span class="param">loss</span>    = <span class="str">'sparse_categorical_crossentropy'</span>,
+    <span class="cm"># 정수 라벨(0,1,2)을 그대로 쓸 때 사용하는 손실함수</span>
+
+    <span class="param">optimizer</span> = <span class="str">'adam'</span>,
+    <span class="cm"># 가중치를 빠르게 업데이트하는 최적화 알고리즘</span>
+
+    <span class="param">metrics</span> = [<span class="str">'accuracy'</span>]
+    <span class="cm"># 학습 과정에서 정확도를 측정·출력</span>
+)</pre>
+        <div class="highlight-box">💡 compile = <strong>설계도에 엔진 장착</strong>. 아직 학습이 시작된 게 아니에요!</div>
+      </div>
+
+      <div class="code-panel" id="tab-3">
+        <pre><span class="cm"># ④ 모델 학습 (fit)</span>
+history = model.<span class="fn">fit</span>(
+    X, y,
+    <span class="param">epochs</span> = <span class="num">100</span>,  <span class="cm"># 전체 데이터를 100번 반복 학습</span>
+    <span class="param">verbose</span> = <span class="num">1</span>   <span class="cm"># 학습 진행 상황 출력</span>
+)
+
+<span class="cm"># 학습 과정: loss가 줄고 accuracy가 올라가는지 확인!</span>
+<span class="cm"># Epoch 1/100: loss=1.1 accuracy=0.375</span>
+<span class="cm"># Epoch 50/100: loss=0.5 accuracy=0.875</span>
+
+<span class="cm"># 모델 평가 (evaluate)</span>
+loss, acc = model.<span class="fn">evaluate</span>(X, y)
+<span class="fn">print</span>(<span class="str">f"손실값: </span>{loss:.4f}<span class="str">, 정확도: </span>{acc:.4f}<span class="str">"</span>)</pre>
+        <div class="highlight-box">💡 <strong>epochs가 많을수록</strong> 학습 반복 횟수 ↑ → loss ↓, accuracy ↑ (단, 과적합 주의!)</div>
+      </div>
+
+      <div class="code-panel" id="tab-4">
+        <pre><span class="cm"># ⑤ 새 데이터 예측 (predict)</span>
+new_food = np.<span class="fn">array</span>([[<span class="num">8</span>, <span class="num">2</span>]])  <span class="cm"># sweet=8, crunchy=2</span>
+
+proba = model.<span class="fn">predict</span>(new_food)
+<span class="fn">print</span>(<span class="str">"클래스별 확률:"</span>, proba)
+<span class="cm"># 예: [[0.82, 0.10, 0.08]] → 과일(0)일 확률 82%</span>
+
+predicted_class = np.<span class="fn">argmax</span>(proba)  <span class="cm"># 가장 높은 확률의 인덱스</span>
+labels = [<span class="str">'과일'</span>, <span class="str">'단백질'</span>, <span class="str">'채소'</span>]
+<span class="fn">print</span>(<span class="str">f"예측 결과: </span>{labels[predicted_class]}<span class="str">"</span>)</pre>
+        <div class="highlight-box">💡 predict()는 각 클래스의 <strong>확률</strong>을 출력. argmax()로 가장 높은 확률 클래스를 선택!</div>
+      </div>
+    </div>
+
+    <!-- 핵심 API 정리 표 -->
+    <div class="card" style="margin-top:20px;">
+      <h3 style="margin-bottom:12px;">📋 Keras 핵심 함수 요약</h3>
+      <table class="mini-table">
+        <thead><tr><th>함수</th><th>역할</th><th>주요 파라미터</th></tr></thead>
+        <tbody>
+          <tr><td><code>Sequential()</code></td><td>층을 순차 연결하는 모델 생성</td><td>—</td></tr>
+          <tr><td><code>Dense(n, activation, input_dim)</code></td><td>완전 연결 계층 추가</td><td>n=노드수, activation, input_dim</td></tr>
+          <tr><td><code>model.compile()</code></td><td>학습 환경 설정</td><td>loss, optimizer, metrics</td></tr>
+          <tr><td><code>model.fit()</code></td><td>모델 학습</td><td>X, y, epochs</td></tr>
+          <tr><td><code>model.evaluate()</code></td><td>모델 성능 평가</td><td>X, y → loss, accuracy</td></tr>
+          <tr><td><code>model.predict()</code></td><td>새 데이터 예측</td><td>new_X → 클래스별 확률</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="phase-nav">
+      <button class="nav-btn" onclick="showPhase(1)">← 이전</button>
+      <button class="nav-btn primary" onclick="showPhase(3)">다음: MNIST 실습 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 3  MNIST 적용 실습
+  ══════════════════════════════════════ -->
+  <div class="phase" id="phase-3">
+    <div class="phase-header color-purple">
+      <span class="phase-num">35~47분</span>
+      <div class="phase-title-wrap">
+        <h2>MNIST 손글씨 숫자 분류</h2>
+        <p>실제 데이터셋으로 신경망 모델 구현 + 내가 쓴 숫자 인식 실습</p>
+      </div>
+    </div>
+
+    <div class="teacher-box">
+      <div class="teacher-label">🎙 교사 안내</div>
+      <p>"이제 실제 데이터셋인 MNIST로 실습합니다. MNIST는 0~9 손글씨 숫자 이미지 70,000장입니다. 한 이미지는 28×28 픽셀, 총 784개 값을 가집니다."</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card accent-purple">
+        <h3>📊 MNIST 데이터셋 특성</h3>
+        <ul>
+          <li>이미지 크기: <strong style="color:var(--accent3)">28 × 28 픽셀 = 784개 입력값</strong></li>
+          <li>픽셀값: 0(검은색) ~ 255(흰색)</li>
+          <li>클래스: 0~9 숫자 → 출력층 <strong style="color:var(--accent3)">10개</strong> 노드</li>
+          <li>전처리: 픽셀값 ÷ 255 → <strong>0~1 정규화</strong></li>
+          <li>flatten: 28×28 → 784 1차원 배열</li>
+        </ul>
+      </div>
+      <div class="card accent-blue">
+        <h3>🏗️ MNIST 모델 구조</h3>
+        <ul>
+          <li>입력층: 784개 노드 (28×28 flatten)</li>
+          <li>은닉층 1: 128개 노드, ReLU</li>
+          <li>은닉층 2: 64개 노드, ReLU</li>
+          <li>출력층: <strong style="color:var(--primary)">10개 노드</strong>, Softmax</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-wrapper" style="margin-top:16px;">
+      <div class="code-tabs">
+        <div class="code-tab active" onclick="switchTab2(0)">① 데이터 로드</div>
+        <div class="code-tab" onclick="switchTab2(1)">② 전처리</div>
+        <div class="code-tab" onclick="switchTab2(2)">③ 모델 구성</div>
+        <div class="code-tab" onclick="switchTab2(3)">④ 학습·저장</div>
+      </div>
+
+      <div class="code-panel2 active" id="tab2-0">
+        <pre><span class="cm"># ① MNIST 데이터 로드</span>
+<span class="kw">from</span> tensorflow.keras.datasets <span class="kw">import</span> <span class="imp">mnist</span>
+
+(X_train, y_train), (X_test, y_test) = mnist.<span class="fn">load_data</span>()
+
+<span class="fn">print</span>(X_train.shape)  <span class="cm"># (60000, 28, 28)</span>
+<span class="fn">print</span>(X_test.shape)   <span class="cm"># (10000, 28, 28)</span>
+<span class="fn">print</span>(y_train[:5])    <span class="cm"># [5 0 4 1 9] — 실제 정답 레이블</span></pre>
+      </div>
+
+      <div class="code-panel2" id="tab2-1">
+        <pre><span class="cm"># ② 데이터 전처리</span>
+<span class="cm"># 28×28 이미지 → 784 1차원 배열로 flatten</span>
+X_train = X_train.<span class="fn">reshape</span>(<span class="num">-1</span>, <span class="num">784</span>)
+X_test  = X_test.<span class="fn">reshape</span>(<span class="num">-1</span>, <span class="num">784</span>)
+
+<span class="cm"># 픽셀값 0~255 → 0.0~1.0 정규화</span>
+X_train = X_train / <span class="num">255.0</span>
+X_test  = X_test  / <span class="num">255.0</span>
+
+<span class="fn">print</span>(X_train.shape)  <span class="cm"># (60000, 784)</span></pre>
+      </div>
+
+      <div class="code-panel2" id="tab2-2">
+        <pre><span class="cm"># ③ MNIST 신경망 모델 구성</span>
+model = <span class="fn">Sequential</span>()
+model.<span class="fn">add</span>(<span class="fn">Dense</span>(<span class="num">128</span>, <span class="param">activation</span>=<span class="str">'relu'</span>, <span class="param">input_dim</span>=<span class="num">784</span>))
+model.<span class="fn">add</span>(<span class="fn">Dense</span>(<span class="num">64</span>,  <span class="param">activation</span>=<span class="str">'relu'</span>))
+model.<span class="fn">add</span>(<span class="fn">Dense</span>(<span class="num">10</span>,  <span class="param">activation</span>=<span class="str">'softmax'</span>))
+<span class="cm"># 출력층 10개 = 숫자 0~9</span>
+
+model.<span class="fn">compile</span>(
+    <span class="param">loss</span>      = <span class="str">'sparse_categorical_crossentropy'</span>,
+    <span class="param">optimizer</span> = <span class="str">'adam'</span>,
+    <span class="param">metrics</span>   = [<span class="str">'accuracy'</span>]
+)</pre>
+      </div>
+
+      <div class="code-panel2" id="tab2-3">
+        <pre><span class="cm"># ④ 학습 및 모델 저장</span>
+history = model.<span class="fn">fit</span>(
+    X_train, y_train,
+    <span class="param">epochs</span>          = <span class="num">10</span>,
+    <span class="param">validation_data</span> = (X_test, y_test)
+)
+
+<span class="cm"># 모델 평가</span>
+loss, acc = model.<span class="fn">evaluate</span>(X_test, y_test)
+<span class="fn">print</span>(<span class="str">f"테스트 정확도: </span>{acc:.4f}<span class="str">"</span>)  <span class="cm"># 약 97~98%</span>
+
+<span class="cm"># 모델 저장 (내가 쓴 숫자 인식에 사용)</span>
+model.<span class="fn">save</span>(<span class="str">'mnist_model.h5'</span>)</pre>
+        <div class="highlight-box">💾 저장된 <strong>mnist_model.h5</strong> 파일로 나중에 내가 쓴 숫자를 인식할 수 있어요!</div>
+      </div>
+    </div>
+
+    <!-- 내가 쓴 숫자 인식 활동 -->
+    <div class="card" style="margin-top:20px;border-left:3px solid var(--accent3);">
+      <h3 style="color:var(--accent3);margin-bottom:12px;">✏️ 확장 활동: 내가 쓴 숫자 인식해보기</h3>
+      <div style="font-size:13px;color:var(--text-muted);line-height:2;">
+        <p><span class="badge badge-time">순서</span></p>
+        <p>① 흰 종이에 <strong>굵은 검은 펜</strong>으로 한 자리 숫자 여러 개 작성</p>
+        <p>② 스마트폰으로 촬영 → <code style="color:var(--accent4)">13.jpg</code>로 저장</p>
+        <p>③ Google Colab에서 <a href="http://bit.ly/MNIST_data" style="color:var(--primary);" target="_blank">http://bit.ly/MNIST_data</a> 열기 → Drive로 복사</p>
+        <p>④ <code>mnist_model.h5</code>와 숫자 이미지 파일 업로드</p>
+        <p>⑤ 코드 실행 → 신경망이 내 숫자를 얼마나 정확히 인식하는지 확인!</p>
+      </div>
+      <div class="highlight-box" style="margin-top:12px;">🤔 <strong>토의 질문:</strong> 모델이 내 숫자를 틀렸다면? 그 이유는 무엇일까? (힌트: 학습 데이터와의 차이)</div>
+    </div>
+
+    <div class="phase-nav">
+      <button class="nav-btn" onclick="showPhase(2)">← 이전</button>
+      <button class="nav-btn primary" onclick="showPhase(4)">다음: 정리·평가 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 4  정리 · 형성평가
+  ══════════════════════════════════════ -->
+  <div class="phase" id="phase-4">
+    <div class="phase-header color-red">
+      <span class="phase-num">47~50분</span>
+      <div class="phase-title-wrap">
+        <h2>정리 &amp; 형성평가</h2>
+        <p>핵심 개념 빈칸 채우기 + 선택형 퀴즈</p>
+      </div>
+    </div>
+
+    <!-- 빈칸 채우기 -->
+    <div class="fill-blank">
+      <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:12px;">📝 빈칸 채우기 — 핵심 개념 정리</div>
+
+      <div class="blank-q">
+        1. 신경망은 <input class="blank-input" data-ans="입력층" placeholder="?"> · 은닉층 · <input class="blank-input" data-ans="출력층" placeholder="?"> 으로 구성된다.
+      </div>
+      <div class="blank-q">
+        2. 은닉층에서 주로 사용하는 활성화 함수는 <input class="blank-input" data-ans="ReLU" placeholder="?"> 이고, 다중 분류 출력층에는 <input class="blank-input" data-ans="Softmax" placeholder="?"> 를 사용한다.
+      </div>
+      <div class="blank-q">
+        3. 예측값과 실젯값의 차이를 측정하는 함수를 <input class="blank-input" data-ans="손실함수" placeholder="?"> 라 하고, 이를 최소화하는 함수를 <input class="blank-input" data-ans="최적화함수" placeholder="?"> 라 한다.
+      </div>
+      <div class="blank-q">
+        4. 케라스에서 층을 순차적으로 쌓는 클래스는 <input class="blank-input" data-ans="Sequential" placeholder="?"> 이고, 모델 학습 함수는 model.<input class="blank-input" data-ans="fit" placeholder="?">() 이다.
+      </div>
+
+      <button class="check-btn" onclick="checkBlanks()">✅ 정답 확인</button>
+      <div id="blank-result" style="margin-top:12px;font-size:13px;display:none;"></div>
+    </div>
+
+    <!-- 선택형 퀴즈 3문항 -->
+    <div class="quiz-container">
+      <div class="quiz-q">Q1. 다음 중 출력층의 노드 수를 결정하는 요소로 옳은 것은?</div>
+      <div class="quiz-opts" id="q1">
+        <div class="quiz-opt" onclick="checkQuiz(this,'q1',false)"><span class="opt-marker">①</span> 학습 데이터의 샘플 수</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q1',false)"><span class="opt-marker">②</span> 입력 특징(feature)의 개수</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q1',true)"><span class="opt-marker">③</span> 분류해야 할 클래스의 수</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q1',false)"><span class="opt-marker">④</span> 학습 반복 횟수(epochs)</div>
+      </div>
+      <div class="quiz-feedback" id="q1-fb">
+        ✅ 정답! 출력층 노드 수 = 분류 클래스 수. (과일/단백질/채소 → 3개, 숫자 0~9 → 10개)
+      </div>
+    </div>
+
+    <div class="quiz-container">
+      <div class="quiz-q">Q2. model.compile()에서 다중 분류 시 적합한 손실함수는?</div>
+      <div class="quiz-opts" id="q2">
+        <div class="quiz-opt" onclick="checkQuiz(this,'q2',false)"><span class="opt-marker">①</span> mean_squared_error</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q2',true)"><span class="opt-marker">②</span> sparse_categorical_crossentropy</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q2',false)"><span class="opt-marker">③</span> binary_crossentropy</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q2',false)"><span class="opt-marker">④</span> relu</div>
+      </div>
+      <div class="quiz-feedback" id="q2-fb">
+        ✅ 정답! sparse_categorical_crossentropy는 정수 레이블(0,1,2…)의 다중 분류에 사용.
+      </div>
+    </div>
+
+    <div class="quiz-container">
+      <div class="quiz-q">Q3. MNIST 데이터에서 이미지 한 장(28×28)을 신경망 입력으로 변환하면 몇 개의 입력 노드가 필요한가?</div>
+      <div class="quiz-opts" id="q3">
+        <div class="quiz-opt" onclick="checkQuiz(this,'q3',false)"><span class="opt-marker">①</span> 28</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q3',false)"><span class="opt-marker">②</span> 256</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q3',true)"><span class="opt-marker">③</span> 784</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'q3',false)"><span class="opt-marker">④</span> 1024</div>
+      </div>
+      <div class="quiz-feedback" id="q3-fb">
+        ✅ 정답! 28 × 28 = 784. flatten()으로 1차원 배열로 펴면 784개 값이 나와요.
+      </div>
+    </div>
+
+    <!-- 오늘 수업 한 줄 정리 -->
+    <div class="teacher-box" style="border-left-color:var(--accent2);background:#211317;">
+      <div class="teacher-label" style="color:var(--accent2);">🎙 마무리 교사 멘트</div>
+      <p>"오늘 배운 4단계를 기억하세요: <strong style="color:var(--accent)">① 데이터 준비 → ② 모델 설계(Sequential+Dense) → ③ compile → ④ fit/evaluate/predict</strong>. 다음 시간엔 모델 성능을 더 높이는 방법—층 추가, epochs 조정, 드롭아웃—을 배웁니다."</p>
+    </div>
+
+    <div class="phase-nav">
+      <button class="nav-btn" onclick="showPhase(3)">← 이전</button>
+      <button class="nav-btn" onclick="showPhase(0)" style="border-color:var(--accent);color:var(--accent);">🔄 처음부터 다시</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── Phase & Timeline ──────────────────────────
+let currentPhase = 0;
+const phases = ['intro','concept','code','mnist','review'];
+const colors  = ['#2ea043','#58a6ff','#ffa657','#d2a8ff','#f78166'];
+const progPct = [20, 40, 60, 80, 100];
+
+function showPhase(n) {
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tl-block').forEach(b => b.classList.remove('active'));
+  document.getElementById('phase-'+n).classList.add('active');
+  document.querySelectorAll('.tl-block')[n].classList.add('active');
+  document.getElementById('progressFill').style.width = progPct[n] + '%';
+  currentPhase = n;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ── Flow Step Toggle ──────────────────────────
+function toggleStep(el) {
+  const exp = el.querySelector('.step-expand');
+  exp.classList.toggle('show');
+  el.classList.toggle('highlight');
+}
+
+// ── Code Tabs (Phase 2) ───────────────────────
+function switchTab(n) {
+  document.querySelectorAll('#phase-2 .code-tab').forEach((t,i) => t.classList.toggle('active', i===n));
+  document.querySelectorAll('#phase-2 .code-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+}
+
+// ── Code Tabs (Phase 3) ───────────────────────
+function switchTab2(n) {
+  document.querySelectorAll('#phase-3 .code-tab').forEach((t,i) => t.classList.toggle('active', i===n));
+  document.querySelectorAll('.code-panel2').forEach((p,i) => p.classList.toggle('active', i===n));
+}
+
+// ── Quiz ──────────────────────────────────────
+function checkQuiz(el, qId, correct) {
+  const container = document.getElementById(qId);
+  if (container.dataset.done) return;
+  container.dataset.done = '1';
+  container.querySelectorAll('.quiz-opt').forEach(o => o.classList.add('disabled'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    container.querySelectorAll('.quiz-opt').forEach(o => {
+      if (o.onclick.toString().includes('true')) o.classList.add('correct');
+    });
+  }
+  const fb = document.getElementById(qId+'-fb');
+  fb.classList.add('show', correct ? 'ok' : 'no');
+  if (!correct) {
+    fb.textContent = '❌ 틀렸어요. 위에 초록색으로 표시된 정답을 확인하세요.';
+  }
+}
+
+// ── Blanks ────────────────────────────────────
+function checkBlanks() {
+  const inputs = document.querySelectorAll('.blank-input');
+  let correct = 0;
+  inputs.forEach(inp => {
+    const ans = inp.dataset.ans.trim().toLowerCase();
+    const val = inp.value.trim().toLowerCase().replace(/[\s_]/g,'');
+    const isOk = val === ans.replace(/[\s_]/g,'');
+    inp.classList.toggle('correct', isOk);
+    inp.classList.toggle('wrong', !isOk);
+    if (isOk) correct++;
+  });
+  const result = document.getElementById('blank-result');
+  result.style.display = 'block';
+  if (correct === inputs.length) {
+    result.style.color = '#7ee787';
+    result.textContent = '🎉 모두 정답! 오늘 수업 내용을 완벽히 이해했습니다.';
+  } else {
+    result.style.color = '#f78166';
+    result.textContent = `${correct}/${inputs.length} 정답. 빨간색 빈칸을 다시 확인해보세요.`;
+  }
+}
+
+// ── Timer ─────────────────────────────────────
+let timerSeconds = 50 * 60;
+let timerInterval = null;
+let running = false;
+
+function startTimer() {
+  if (running) { clearInterval(timerInterval); running = false; return; }
+  running = true;
+  timerInterval = setInterval(() => {
+    if (timerSeconds <= 0) { clearInterval(timerInterval); running = false; return; }
+    timerSeconds--;
+    const m = Math.floor(timerSeconds / 60).toString().padStart(2,'0');
+    const s = (timerSeconds % 60).toString().padStart(2,'0');
+    document.getElementById('timerDisplay').textContent = m + ':' + s;
+    if (timerSeconds <= 300) {
+      document.getElementById('timerDisplay').style.color = '#f78166';
+    }
+  }, 1000);
+}
+function resetTimer() {
+  clearInterval(timerInterval); running = false;
+  timerSeconds = 50 * 60;
+  document.getElementById('timerDisplay').textContent = '50:00';
+  document.getElementById('timerDisplay').style.color = 'var(--accent)';
+}
+</script>
+</body>
+</html>
