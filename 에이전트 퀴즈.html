@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에이전트 구분 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F4F1EB;
+    --card: #FFFFFF;
+    --text: #1A1A2E;
+    --muted: #6B6B7B;
+    --accent: #4B3FBF;
+    --accent-light: #EAE8FF;
+    --green: #1B6B45;
+    --green-light: #D6F0E4;
+    --red: #8B2020;
+    --red-light: #FFE8E8;
+    --border: #E0DDD4;
+    --shadow: 0 4px 24px rgba(75, 63, 191, 0.08);
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 620px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .header .badge {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 99px;
+    margin-bottom: 1rem;
+  }
+
+  .header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .header p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .score-live {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .q-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+
+  .q-text {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.65;
+    margin-bottom: 1.75rem;
+  }
+
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+
+  .btn {
+    padding: 0.85rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+
+  .btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .btn:disabled { cursor: default; }
+
+  .btn.correct {
+    border-color: var(--green);
+    background: var(--green-light);
+    color: var(--green);
+  }
+
+  .btn.wrong {
+    border-color: var(--red);
+    background: var(--red-light);
+    color: var(--red);
+    text-decoration: line-through;
+    opacity: 0.8;
+  }
+
+  .btn.reveal {
+    border-color: var(--green);
+    background: var(--green-light);
+    color: var(--green);
+  }
+
+  .feedback {
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    display: none;
+    margin-bottom: 1.25rem;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.ok { background: var(--green-light); color: var(--green); }
+  .feedback.no { background: var(--red-light); color: var(--red); }
+
+  .next-btn {
+    width: 100%;
+    padding: 0.85rem;
+    border: 1.5px solid var(--accent);
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: none;
+    transition: opacity 0.15s;
+  }
+
+  .next-btn:hover { opacity: 0.88; }
+  .next-btn.show { display: block; }
+
+  /* Score screen */
+  .score-screen {
+    text-align: center;
+  }
+
+  .score-ring {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
+
+  .score-ring svg { transform: rotate(-90deg); }
+
+  .score-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .score-big {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .score-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .score-msg {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .score-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+
+  .retry-btn {
+    padding: 0.85rem 2.5rem;
+    border: 1.5px solid var(--accent);
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .retry-btn:hover { opacity: 0.88; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+
+  .review-list {
+    text-align: left;
+  }
+
+  .review-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .review-item:last-child { border-bottom: none; }
+
+  .dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+
+  .dot.ok { background: var(--green-light); color: var(--green); }
+  .dot.no { background: var(--red-light); color: var(--red); }
+
+  .review-q { color: var(--text); line-height: 1.5; }
+  .review-ans { font-size: 11px; color: var(--muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">AI 기초 개념</div>
+    <h1>일반 에이전트 vs<br>지능형 에이전트</h1>
+    <p>다음 보기가 어떤 에이전트에 해당하는지 골라보세요.</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-track">
+      <div class="progress-fill" id="pbar" style="width:10%"></div>
+    </div>
+    <span class="progress-label" id="prog-text">1 / 10</span>
+    <span class="score-live" id="score-live">✓ 0</span>
+  </div>
+
+  <div class="card" id="card-area"></div>
+</div>
+
+<script>
+const questions = [
+  { q: "방의 밝기를 감지해서 일정 수준 이하가 되면 자동으로 전등을 켜는 시스템", ans: "A", why: "조건이 충족되면 정해진 행동을 수행하는 단순 반응 구조입니다." },
+  { q: "체스 게임에서 상대방의 수를 분석하고 최적의 전략을 스스로 찾아 두는 프로그램", ans: "B", why: "상황을 분석하고 스스로 최적 전략을 추론하므로 지능형 에이전트입니다." },
+  { q: "냉장고 온도가 설정값보다 올라가면 냉각기를 작동시키는 장치", ans: "A", why: "단순 센서값 비교 후 고정된 행동을 취하는 규칙 기반 시스템입니다." },
+  { q: "사용자의 시청 기록을 분석해서 취향에 맞는 영상을 추천해주는 시스템", ans: "B", why: "개인 패턴을 학습·분석해 맞춤형 판단을 내리므로 지능형 에이전트입니다." },
+  { q: "횡단보도 앞에서 빨간불이면 멈추고 초록불이면 출발하는 자율주행 기능", ans: "A", why: "신호등 색상이라는 단일 입력에 고정 반응하는 단순 에이전트입니다." },
+  { q: "고객 문의 내용을 이해하고 상황에 따라 다른 답변을 생성하는 챗봇", ans: "B", why: "문맥을 이해하고 상황별로 다른 판단을 내리는 지능형 에이전트입니다." },
+  { q: "화재 감지 센서가 연기를 감지하면 자동으로 스프링클러를 작동시키는 장치", ans: "A", why: "연기 감지라는 단순 조건에 반응하는 규칙 기반 일반 에이전트입니다." },
+  { q: "학생의 오답 패턴을 분석해서 취약한 부분을 파악하고 맞춤형 문제를 출제하는 AI 튜터", ans: "B", why: "데이터를 분석해 개인화된 판단을 내리는 지능형 에이전트입니다." },
+  { q: "엘리베이터가 버튼이 눌린 층으로 이동하는 시스템", ans: "A", why: "버튼 입력에 고정된 동작으로 반응하는 단순 에이전트입니다." },
+  { q: "번역할 문장의 문맥과 뉘앙스를 파악해서 자연스러운 번역을 제공하는 AI", ans: "B", why: "문맥과 뉘앙스를 추론해 유연하게 번역하므로 지능형 에이전트입니다." }
+];
+
+let cur = 0, score = 0, answered = false, userAnswers = [];
+
+function render() {
+  const q = questions[cur];
+  document.getElementById('card-area').innerHTML = `
+    <div class="q-num">Q${cur + 1} / 10</div>
+    <div class="q-text">${q.q}</div>
+    <div class="choices">
+      <button class="btn" id="btn-a" onclick="answer('A')">A. 일반 에이전트</button>
+      <button class="btn" id="btn-b" onclick="answer('B')">B. 지능형 에이전트</button>
+    </div>
+    <div class="feedback" id="fb"></div>
+    <button class="next-btn" id="next-btn" onclick="next()">${cur < 9 ? '다음 문제 →' : '결과 보기 →'}</button>
+  `;
+  answered = false;
+}
+
+function answer(choice) {
+  if (answered) return;
+  answered = true;
+  const q = questions[cur];
+  const btnA = document.getElementById('btn-a');
+  const btnB = document.getElementById('btn-b');
+  const fb = document.getElementById('fb');
+  const nextBtn = document.getElementById('next-btn');
+  const correct = q.ans === choice;
+
+  btnA.disabled = true; btnB.disabled = true;
+  const chosen = choice === 'A' ? btnA : btnB;
+  const correctBtn = q.ans === 'A' ? btnA : btnB;
+
+  if (correct) {
+    chosen.classList.add('correct');
+    fb.textContent = '✓ 정답! ' + q.why;
+    fb.className = 'feedback show ok';
+    score++;
+    document.getElementById('score-live').textContent = '✓ ' + score;
+  } else {
+    chosen.classList.add('wrong');
+    correctBtn.classList.add('reveal');
+    fb.textContent = '✗ 오답. ' + q.why;
+    fb.className = 'feedback show no';
+  }
+
+  userAnswers.push({ q: q.q, correct, userAns: choice, rightAns: q.ans });
+  nextBtn.classList.add('show');
+  document.getElementById('pbar').style.width = ((cur + 1) / 10 * 100) + '%';
+  document.getElementById('prog-text').textContent = `${cur + 1} / 10`;
+}
+
+function next() {
+  cur++;
+  if (cur >= 10) showScore();
+  else render();
+}
+
+function showScore() {
+  document.getElementById('prog-text').textContent = '완료';
+  document.getElementById('pbar').style.width = '100%';
+
+  const pct = score / 10;
+  const r = 52, cx = 60, cy = 60;
+  const circ = 2 * Math.PI * r;
+  const dash = circ * pct;
+
+  const msg = score >= 9 ? '완벽해요! 🎉' : score >= 7 ? '잘했어요!' : score >= 5 ? '절반 통과!' : '다시 도전!';
+  const desc = score >= 9 ? '개념을 확실히 이해했군요.' : score >= 7 ? '조금만 더 복습하면 완벽해요.' : score >= 5 ? '헷갈리는 개념을 다시 살펴볼까요?' : '개념을 다시 공부하고 도전해보세요.';
+
+  const reviewHTML = userAnswers.map((a, i) => `
+    <div class="review-item">
+      <div class="dot ${a.correct ? 'ok' : 'no'}">${a.correct ? '○' : '✗'}</div>
+      <div>
+        <div class="review-q">Q${i + 1}. ${a.q}</div>
+        <div class="review-ans">정답: ${a.rightAns === 'A' ? '일반 에이전트' : '지능형 에이전트'}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('card-area').innerHTML = `
+    <div class="score-screen">
+      <div class="score-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#EAE8FF" stroke-width="8"/>
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#4B3FBF" stroke-width="8"
+            stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+        </svg>
+        <div class="score-inner">
+          <div class="score-big">${score}</div>
+          <div class="score-sub">/ 10</div>
+        </div>
+      </div>
+      <div class="score-msg">${msg}</div>
+      <div class="score-desc">${desc}</div>
+      <button class="retry-btn" onclick="restart()">↺ 다시 풀기</button>
+      <div class="divider"></div>
+      <div class="review-list">${reviewHTML}</div>
+    </div>
+  `;
+}
+
+function restart() {
+  cur = 0; score = 0; answered = false; userAnswers = [];
+  document.getElementById('score-live').textContent = '✓ 0';
+  document.getElementById('pbar').style.width = '10%';
+  document.getElementById('prog-text').textContent = '1 / 10';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
