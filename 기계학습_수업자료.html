@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기계학습의 개념과 유형 · 인터랙티브 수업자료</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1f33;
+    --navy:#0f2c4a;
+    --navy-2:#12395f;
+    --teal:#0fb5a6;
+    --teal-d:#0a8f84;
+    --cyan:#23d3c0;
+    --amber:#ffb02e;
+    --coral:#ff6b5e;
+    --paper:#f4f7fa;
+    --card:#ffffff;
+    --line:#dce6ee;
+    --muted:#5d7286;
+    --good:#1aa179;
+    --bad:#e0564a;
+    --shadow:0 18px 48px -20px rgba(11,38,64,.45);
+    --r:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Gothic A1',sans-serif;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #11355a 0%, transparent 55%),
+      radial-gradient(900px 600px at 110% 120%, #0c5a55 0%, transparent 50%),
+      #081a2c;
+    color:var(--ink);
+    overflow:hidden;
+  }
+  .stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:26px}
+  .deck{
+    position:relative;width:min(1180px,96vw);height:min(700px,92vh);
+    aspect-ratio:16/9;
+  }
+  .slide{
+    position:absolute;inset:0;background:var(--paper);
+    border-radius:24px;box-shadow:var(--shadow);
+    overflow:hidden;display:none;flex-direction:column;
+  }
+  .slide.active{display:flex;animation:in .5s cubic-bezier(.2,.7,.2,1)}
+  @keyframes in{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+
+  /* shared header band */
+  .band{
+    display:flex;align-items:center;gap:14px;
+    padding:18px 34px;background:linear-gradient(100deg,var(--navy),var(--navy-2));
+    color:#eaf3fb;flex:none;
+  }
+  .band .chip{font-size:13px;font-weight:700;letter-spacing:.4px;background:rgba(35,211,192,.18);
+    color:#9af1e6;border:1px solid rgba(35,211,192,.4);padding:5px 12px;border-radius:999px}
+  .band h2{font-size:24px;font-weight:900;letter-spacing:-.5px}
+  .band .pg{margin-left:auto;font-size:13px;font-weight:600;color:#9fb6cd}
+
+  .body{flex:1;padding:30px 38px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+  .body::-webkit-scrollbar{width:9px}
+  .body::-webkit-scrollbar-thumb{background:#c3d2df;border-radius:9px}
+
+  h3.q{font-size:21px;font-weight:900;color:var(--navy);letter-spacing:-.4px}
+  .lead{font-size:16px;line-height:1.65;color:#2b3f52;font-weight:500}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:#e8f7f5;color:var(--teal-d);
+    font-weight:800;padding:7px 14px;border-radius:12px;font-size:14px;border:1px solid #bfe9e3}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+  /* ---------- TITLE SLIDE ---------- */
+  .title-slide{background:
+    radial-gradient(800px 500px at 80% -10%, #16507a 0%, transparent 60%),
+    radial-gradient(700px 500px at -10% 120%, #0c7d74 0%, transparent 55%),
+    linear-gradient(160deg,#0c2540,#0a1c30)}
+  .title-slide .body{justify-content:center;color:#eef6fb}
+  .kicker{font-size:15px;font-weight:800;color:#54e6d5;letter-spacing:2px}
+  .big-title{font-family:'Black Han Sans';font-size:64px;line-height:1.05;color:#fff;letter-spacing:-1px;margin:8px 0}
+  .big-title em{font-style:normal;color:#ffd270;
+    background:linear-gradient(transparent 62%,rgba(255,176,46,.28) 62%)}
+  .subt{font-size:18px;color:#bcd2e6;font-weight:500;max-width:680px;line-height:1.6}
+  .meta{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+  .meta span{font-size:13px;font-weight:700;background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.18);padding:8px 14px;border-radius:999px;color:#dceaf5}
+  .float-dots{position:absolute;inset:0;pointer-events:none}
+  .float-dots i{position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(84,230,213,.5);
+    animation:fl 6s ease-in-out infinite}
+  @keyframes fl{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-16px);opacity:1}}
+
+  /* ---------- STORY SLIDE ---------- */
+  .story-slide{background:
+    radial-gradient(700px 460px at 78% -8%, #173a5e 0%, transparent 58%),
+    linear-gradient(160deg,#0b2138,#081726)}
+  .story-slide .band{background:linear-gradient(100deg,#10243c,#143150)}
+  .story-wrap{display:grid;grid-template-columns:1.02fr 1fr;gap:26px;flex:1;align-items:center;padding:24px 38px}
+  .art-frame{position:relative;border-radius:18px;overflow:hidden;
+    box-shadow:0 24px 60px -22px rgba(0,0,0,.7);border:1px solid rgba(255,210,112,.35)}
+  .art-frame svg{display:block;width:100%;height:auto}
+  .art-frame .award{position:absolute;top:14px;left:14px;background:rgba(255,176,46,.95);color:#3a2400;
+    font-weight:900;font-size:13px;padding:6px 13px;border-radius:999px;opacity:0;transform:translateY(-6px);
+    transition:.4s;box-shadow:0 6px 16px -4px rgba(0,0,0,.5)}
+  .art-frame .award.show{opacity:1;transform:none}
+  .art-cap{margin-top:9px;font-size:12.5px;color:#7f9bb5;font-weight:600;text-align:center;font-style:italic}
+
+  .story-text{color:#e7f1fb;display:flex;flex-direction:column;gap:0}
+  .beat{font-size:18.5px;line-height:1.6;font-weight:500;color:#cfe0f0;
+    padding:11px 0;border-left:3px solid transparent;padding-left:0;
+    max-height:0;overflow:hidden;opacity:0;transform:translateY(8px);transition:.5s ease}
+  .beat.show{max-height:240px;opacity:1;transform:none}
+  .beat b{color:#ffd270;font-weight:800}
+  .beat .twist{color:#ff8d80;font-weight:900;font-size:21px}
+  .beat .ask{display:block;margin-top:8px;font-size:21px;font-weight:900;color:#7df0e0}
+  .story-btn{align-self:flex-start;margin-top:18px;background:linear-gradient(100deg,var(--teal),#23d3c0);
+    color:#06231f;border:none;border-radius:999px;padding:12px 24px;font-weight:900;font-size:15px;
+    cursor:pointer;font-family:inherit;box-shadow:0 8px 22px -8px rgba(35,211,192,.7);transition:.2s}
+  .story-btn:hover{transform:translateY(-2px)}
+  .story-btn.done{background:rgba(255,255,255,.1);color:#9fb6cd;box-shadow:none;cursor:default}
+  .beat-dots{display:flex;gap:7px;margin-top:14px}
+  .beat-dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.18);transition:.3s}
+  .beat-dots i.on{background:var(--teal)}
+
+  /* motivation hotspots */
+  .moti{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .moti .item{position:relative;border-radius:16px;overflow:hidden;cursor:pointer;
+    border:2px solid var(--line);background:#fff;transition:.25s;min-height:170px;
+    display:flex;flex-direction:column}
+  .moti .item:hover{transform:translateY(-4px);border-color:var(--teal);box-shadow:var(--shadow)}
+  .moti .ic{flex:1;display:flex;align-items:center;justify-content:center;font-size:60px;
+    background:linear-gradient(135deg,#eef6fb,#dcefe9)}
+  .moti .cap{padding:11px 14px;font-weight:800;color:var(--navy);font-size:15px;text-align:center}
+  .moti .reveal{display:none;padding:10px 14px;background:var(--navy);color:#cdeee9;font-size:13px;
+    font-weight:600;line-height:1.5}
+  .moti .item.on .reveal{display:block;animation:in .35s}
+  .answer-line{margin-top:6px;font-size:17px;font-weight:800;color:var(--teal-d);
+    text-align:center;opacity:0;transition:.4s}
+  .answer-line.show{opacity:1}
+
+  /* objectives */
+  .obj{display:flex;gap:14px;align-items:flex-start}
+  .obj .n{flex:none;width:38px;height:38px;border-radius:12px;background:var(--teal);color:#fff;
+    font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .obj p{font-size:17px;font-weight:600;line-height:1.55;color:#23394d;padding-top:5px}
+  .terms{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .terms b{background:#fff;border:1px dashed var(--teal);color:var(--teal-d);
+    padding:8px 16px;border-radius:12px;font-size:15px}
+
+  /* classify lab (mammal/bird) */
+  .animal-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .animal{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px;text-align:center;
+    cursor:pointer;transition:.2s;position:relative}
+  .animal:hover{border-color:var(--teal)}
+  .animal .emo{font-size:42px}
+  .animal .nm{font-weight:800;color:var(--navy);margin-top:4px}
+  .animal .feat{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .animal .tag{position:absolute;top:8px;right:8px;font-size:11px;font-weight:800;padding:3px 8px;
+    border-radius:8px;opacity:0;transition:.2s}
+  .animal.mam .tag{background:#e7f1ff;color:#2563c8;opacity:1}
+  .animal.bird .tag{background:#fff0e6;color:#d97a1f;opacity:1}
+  .rule-box{margin-top:6px;background:#0f2c4a;color:#dcefe9;border-radius:14px;padding:14px 18px;
+    font-size:14.5px;line-height:1.6;display:none}
+  .rule-box.show{display:block;animation:in .4s}
+  .rule-box b{color:#ffd270}
+  .predict{margin-top:10px;display:none;gap:14px;align-items:center;
+    background:#e8f7f5;border:1px solid #bfe9e3;border-radius:14px;padding:14px 18px}
+  .predict.show{display:flex;animation:in .4s}
+  .predict .lion{font-size:46px}
+  .predict .ask{flex:1;font-weight:700;color:#23394d;font-size:15px}
+  .predict .guess{background:#fff;border:2px dashed var(--teal);padding:10px 18px;border-radius:12px;
+    font-weight:900;color:var(--teal-d);cursor:pointer}
+  .predict .guess.done{background:var(--teal);color:#fff;border-style:solid}
+
+  /* vs columns */
+  .vs{display:grid;grid-template-columns:1fr 64px 1fr;gap:0;align-items:stretch}
+  .vs .col{border-radius:16px;padding:18px 20px}
+  .vs .trad{background:#fdeeee;border:1px solid #f4c9c6}
+  .vs .ml{background:#e7f6f3;border:1px solid #b9e6dd}
+  .vs .col h4{font-size:17px;font-weight:900;margin-bottom:8px}
+  .vs .trad h4{color:#c4453a}.vs .ml h4{color:var(--teal-d)}
+  .vs .col p{font-size:13.5px;line-height:1.6;color:#3a4c5c}
+  .vs .mid{display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--navy);font-size:20px}
+  .flow{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .flow .step{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 11px;
+    font-size:12px;font-weight:800;color:var(--navy)}
+  .flow .arr{color:var(--teal);font-weight:900}
+
+  /* activity1 sorting */
+  .sortwrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;min-height:0}
+  .qbank .q{background:#fff;border:2px solid var(--line);border-radius:13px;padding:12px 14px;
+    margin-bottom:10px;cursor:grab;font-weight:700;color:#243a4d;font-size:14px;transition:.18s;
+    display:flex;gap:10px;align-items:center}
+  .qbank .q:hover{border-color:var(--teal)}
+  .qbank .q.placed{opacity:.4;cursor:default}
+  .qbank .q .num{flex:none;width:26px;height:26px;border-radius:8px;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px}
+  .bins{display:flex;flex-direction:column;gap:14px}
+  .bin{flex:1;border-radius:14px;border:2px dashed;padding:12px;min-height:90px;transition:.2s}
+  .bin.trad{border-color:#e8a39d;background:#fdf2f1}
+  .bin.ml{border-color:#8fd6c8;background:#eef9f6}
+  .bin.over{transform:scale(1.01);box-shadow:var(--shadow)}
+  .bin .bt{font-weight:900;font-size:14px;margin-bottom:6px;display:flex;justify-content:space-between}
+  .bin.trad .bt{color:#c4453a}.bin.ml .bt{color:var(--teal-d)}
+  .drop{background:#fff;border:1px solid var(--line);border-radius:9px;padding:7px 10px;margin-top:6px;
+    font-size:12.5px;font-weight:700;color:#243a4d;display:flex;align-items:center;gap:7px}
+  .drop.right{border-color:var(--good);background:#eafaf3}
+  .drop.wrong{border-color:var(--bad);background:#fdeeee}
+  .drop .mk{margin-left:auto;font-weight:900}
+  .drop.right .mk{color:var(--good)}.drop.wrong .mk{color:var(--bad)}
+
+  /* 3 types */
+  .type{border-radius:16px;padding:16px;border:1px solid var(--line);background:#fff;position:relative;
+    overflow:hidden}
+  .type .top{font-size:34px}
+  .type h4{font-size:17px;font-weight:900;margin:4px 0 4px;color:var(--navy)}
+  .type .lbl{font-size:11px;font-weight:800;color:#fff;padding:3px 9px;border-radius:999px;position:absolute;top:14px;right:14px}
+  .type.sup .lbl{background:var(--teal)}.type.uns .lbl{background:var(--amber)}.type.rei .lbl{background:var(--coral)}
+  .type p{font-size:13px;line-height:1.55;color:#3a4c5c}
+  .type .ex{margin-top:8px;font-size:12px;color:var(--muted);font-weight:700;border-top:1px dashed var(--line);padding-top:8px}
+
+  /* match game */
+  .matchwrap{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;flex:1;min-height:0}
+  .cases .case{background:#fff;border:2px solid var(--line);border-radius:13px;padding:11px 14px;
+    margin-bottom:9px;cursor:grab;font-weight:700;font-size:13.5px;color:#243a4d;transition:.18s}
+  .cases .case:hover{border-color:var(--teal)}
+  .cases .case.placed{opacity:.4;cursor:default}
+  .mbins{display:flex;flex-direction:column;gap:10px}
+  .mbin{flex:1;border-radius:13px;border:2px dashed var(--line);padding:10px 12px;transition:.2s}
+  .mbin.over{box-shadow:var(--shadow)}
+  .mbin .h{font-weight:900;font-size:14px;display:flex;align-items:center;gap:7px}
+  .mbin.s{border-color:var(--teal)}.mbin.u{border-color:var(--amber)}.mbin.r{border-color:var(--coral)}
+  .mbin .slot{font-size:12px;font-weight:700;padding:5px 9px;border-radius:8px;margin-top:5px;background:#f3f7fa}
+  .mbin .slot.right{background:#eafaf3;color:var(--good)}
+  .mbin .slot.wrong{background:#fdeeee;color:var(--bad)}
+
+  /* quiz */
+  .quiz .stem{font-size:18px;font-weight:800;color:var(--navy);line-height:1.5}
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .opt{background:#fff;border:2px solid var(--line);border-radius:13px;padding:13px 16px;
+    font-size:15px;font-weight:700;color:#243a4d;cursor:pointer;transition:.18s;display:flex;gap:11px;align-items:center}
+  .opt:hover{border-color:var(--teal);transform:translateX(3px)}
+  .opt .k{flex:none;width:28px;height:28px;border-radius:8px;background:#eef3f7;color:var(--navy);
+    display:flex;align-items:center;justify-content:center;font-weight:900}
+  .opt.right{border-color:var(--good);background:#eafaf3}
+  .opt.right .k{background:var(--good);color:#fff}
+  .opt.wrong{border-color:var(--bad);background:#fdeeee}
+  .opt.wrong .k{background:var(--bad);color:#fff}
+  .fb{margin-top:10px;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:700;display:none}
+  .fb.show{display:block;animation:in .3s}
+  .fb.ok{background:#eafaf3;color:#0e7a59;border:1px solid #b6e7d4}
+  .fb.no{background:#fdeeee;color:#b53e34;border:1px solid #f3c8c4}
+  .quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:8px}
+  .quiz-dot{display:flex;gap:6px}
+  .quiz-dot i{width:9px;height:9px;border-radius:50%;background:#cdd9e3}
+  .quiz-dot i.on{background:var(--teal)}
+  .miniBtn{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:9px 18px;
+    font-weight:800;cursor:pointer;font-size:14px;font-family:inherit}
+  .miniBtn:disabled{opacity:.4;cursor:default}
+
+  /* fill blanks */
+  .fill{font-size:18px;line-height:2.1;font-weight:600;color:#23394d}
+  .blank{display:inline-flex;align-items:center;gap:6px;border-bottom:3px solid var(--teal);
+    padding:2px 8px;font-weight:900;color:var(--teal-d);cursor:pointer;min-width:90px;justify-content:center;
+    background:#eef9f6;border-radius:6px 6px 0 0}
+  .blank.empty{color:#9db0c0;background:#f1f5f8;border-color:#cdd9e3}
+  .wordbank{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .word{background:#fff;border:2px solid var(--line);border-radius:11px;padding:9px 16px;font-weight:800;
+    color:var(--navy);cursor:pointer;transition:.18s}
+  .word:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .word.used{opacity:.35;cursor:default}
+
+  /* self assess */
+  .self{display:flex;gap:14px;flex-wrap:wrap}
+  .self .row{flex:1;min-width:240px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .self .row p{font-weight:700;color:#23394d;font-size:14px;margin-bottom:10px}
+  .stars{display:flex;gap:6px}
+  .stars span{font-size:26px;color:#d8e2ea;cursor:pointer;transition:.15s}
+  .stars span.on{color:var(--amber);transform:scale(1.1)}
+
+  /* controls */
+  .ctrl{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+    display:flex;align-items:center;gap:14px;background:rgba(9,26,44,.78);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.12);padding:9px 16px;border-radius:999px;z-index:50}
+  .ctrl button{background:rgba(255,255,255,.1);border:none;color:#dceaf5;width:38px;height:38px;
+    border-radius:50%;cursor:pointer;font-size:17px;transition:.18s}
+  .ctrl button:hover{background:var(--teal);color:#06231f}
+  .ctrl .count{color:#cdeee9;font-weight:800;font-size:14px;min-width:54px;text-align:center}
+  .progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--cyan));
+    z-index:60;transition:width .4s;border-radius:0 4px 4px 0}
+  .nav-hint{position:fixed;top:16px;right:20px;color:#7f9bb5;font-size:12px;font-weight:600;z-index:40}
+  .badge-step{font-size:12px;font-weight:800;color:#fff;padding:4px 11px;border-radius:999px}
+  .b-intro{background:#5b86b3}.b-dev{background:var(--teal)}.b-act{background:var(--amber);color:#3a2a00}.b-end{background:var(--coral)}
+  .tag2{font-size:12.5px;color:var(--muted);font-weight:700}
+  .note{font-size:12.5px;color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="nav-hint">← → 방향키 · 스페이스</div>
+<div class="stage">
+  <div class="deck" id="deck">
+
+    <!-- 1 TITLE -->
+    <section class="slide title-slide active">
+      <div class="float-dots">
+        <i style="top:18%;left:20%"></i><i style="top:30%;left:78%;animation-delay:1s"></i>
+        <i style="top:65%;left:12%;animation-delay:2s"></i><i style="top:72%;left:85%;animation-delay:.5s"></i>
+        <i style="top:48%;left:50%;animation-delay:1.6s"></i>
+      </div>
+      <div class="body">
+        <div class="kicker">고등학교 정보 · Ⅳ. 인공지능 · 2. 기계 학습</div>
+        <h1 class="big-title">기계학습의<br><em>개념과 유형</em></h1>
+        <p class="subt">컴퓨터는 어떻게 '스스로' 학습할까? 사람이 규칙을 정해주는 방식과 무엇이 다를까?<br>오늘은 데이터로 학습하는 기계의 원리와 세 가지 학습 방법을 탐구합니다.</p>
+        <div class="meta">
+          <span>⏱ 50분 · 1차시</span>
+          <span>🎯 개념 비교 · 유형 분석</span>
+          <span>🧩 탐구 · 분류 · 매칭 활동</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 STORYTELLING -->
+    <section class="slide story-slide">
+      <div class="band"><span class="chip">도입 · 이야기로 열기</span><h2>사람이 그린 게… 아니라고?</h2><span class="pg">176쪽</span></div>
+      <div class="story-wrap">
+        <div>
+          <div class="art-frame">
+            <span class="award" id="award">🏆 디지털 아트 부문 1위</span>
+            <svg viewBox="0 0 520 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="우주 오페라 극장 분위기의 일러스트">
+              <defs>
+                <radialGradient id="sky" cx="50%" cy="36%" r="75%">
+                  <stop offset="0%" stop-color="#3a2c5e"/><stop offset="45%" stop-color="#23204a"/>
+                  <stop offset="100%" stop-color="#0c0c22"/>
+                </radialGradient>
+                <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#fff6d8"/><stop offset="40%" stop-color="#ffd373"/>
+                  <stop offset="80%" stop-color="#f0a23c"/><stop offset="100%" stop-color="rgba(240,162,60,0)"/>
+                </radialGradient>
+                <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#2a2138"/><stop offset="100%" stop-color="#100b1c"/>
+                </linearGradient>
+                <linearGradient id="robe" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#d9c089"/><stop offset="100%" stop-color="#8a6f3f"/>
+                </linearGradient>
+              </defs>
+              <rect width="520" height="380" fill="url(#sky)"/>
+              <!-- stars -->
+              <g fill="#fbe9b8" opacity=".85">
+                <circle cx="60" cy="48" r="1.4"/><circle cx="120" cy="30" r="1"/><circle cx="200" cy="55" r="1.2"/>
+                <circle cx="330" cy="34" r="1"/><circle cx="430" cy="60" r="1.5"/><circle cx="470" cy="38" r="1"/>
+                <circle cx="90" cy="90" r="1"/><circle cx="410" cy="100" r="1.1"/><circle cx="260" cy="28" r="1"/>
+              </g>
+              <!-- ornate arch frame -->
+              <path d="M70 250 Q70 70 260 60 Q450 70 450 250 L450 250 L420 250 Q420 100 260 92 Q100 100 100 250 Z" fill="#2c2440" opacity=".9"/>
+              <path d="M70 250 Q70 70 260 60 Q450 70 450 250" fill="none" stroke="#caa45b" stroke-width="3" opacity=".7"/>
+              <!-- glowing portal / sun -->
+              <circle cx="260" cy="170" r="92" fill="url(#sun)"/>
+              <circle cx="260" cy="170" r="58" fill="#fff7e0" opacity=".55"/>
+              <!-- floor -->
+              <rect x="0" y="300" width="520" height="80" fill="url(#floor)"/>
+              <path d="M100 300 L420 300 L470 380 L50 380 Z" fill="#1c1530" opacity=".6"/>
+              <!-- robed figures (silhouettes facing the light) -->
+              <g fill="url(#robe)" opacity=".96">
+                <path d="M170 300 q-6 -70 18 -96 q14 -14 28 0 q24 26 18 96 Z"/>
+                <circle cx="200" cy="196" r="13" fill="#caa45b"/>
+                <path d="M250 302 q-7 -82 20 -110 q15 -16 30 0 q27 28 20 110 Z"/>
+                <circle cx="284" cy="180" r="14" fill="#d9c089"/>
+                <path d="M330 300 q-6 -66 16 -90 q13 -13 26 0 q22 24 16 90 Z"/>
+                <circle cx="358" cy="200" r="12" fill="#b7944f"/>
+              </g>
+              <!-- light rays -->
+              <g stroke="#ffe9ad" stroke-width="2" opacity=".25">
+                <line x1="260" y1="170" x2="150" y2="60"/><line x1="260" y1="170" x2="370" y2="60"/>
+                <line x1="260" y1="170" x2="110" y2="250"/><line x1="260" y1="170" x2="410" y2="250"/>
+              </g>
+            </svg>
+          </div>
+          <p class="art-cap">▲ '우주 오페라 극장' 분위기를 표현한 일러스트 (실제 수상작 아님)</p>
+        </div>
+        <div class="story-text">
+          <div class="beat" data-b="0">🗓️ <b>2022년 8월,</b> 미국 콜로라도 주립 박람회 미술 대회. 웅장한 그림 한 점이 출품됐습니다.</div>
+          <div class="beat" data-b="1">🏆 제목은 <b>'스페이스 오페라 극장'</b>. 심사위원도 관람객도 감탄했고, 결국 <b>1위</b>를 차지했죠.</div>
+          <div class="beat" data-b="2"><span class="twist">그런데… 이 그림을 그린 건 사람이 아니었습니다.</span></div>
+          <div class="beat" data-b="3">🤖 한 게이머가 <b>인공지능 도구</b>에 명령어를 입력해 만든 그림이었어요. "이게 예술이냐"며 큰 <b>논란</b>이 일었습니다.<span class="ask">❓ 기계가 어떻게 그림을 '그릴' 수 있었을까?</span></div>
+          <button class="story-btn" id="storyBtn" onclick="nextBeat()">이야기 시작 ▶</button>
+          <div class="beat-dots" id="beatDots"><i class="on"></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 MOTIVATION -->
+    <section class="slide">
+      <div class="band"><span class="chip">도입 · 동기유발</span><h2>이 셋의 공통점은 무엇일까?</h2><span class="pg">176쪽</span></div>
+      <div class="body">
+        <p class="lead">그림뿐만이 아닙니다. 아래 카드를 <b>클릭</b>해 보세요. 우리 곁의 기술들이 어떻게 '학습'하는지 드러납니다.</p>
+        <div class="moti">
+          <div class="item" onclick="this.classList.toggle('on');checkMoti()">
+            <div class="ic">🎨</div>
+            <div class="cap">AI가 그린 그림<br><span style="font-weight:600;font-size:12px;color:#5d7286">미술전 1위 수상작</span></div>
+            <div class="reveal">수많은 그림 데이터를 <b>학습</b>해 새 이미지를 창작</div>
+          </div>
+          <div class="item" onclick="this.classList.toggle('on');checkMoti()">
+            <div class="ic">🚗</div>
+            <div class="cap">자율주행 자동차<br><span style="font-weight:600;font-size:12px;color:#5d7286">스스로 판단·운전</span></div>
+            <div class="reveal">도로 영상을 <b>학습</b>해 신호·보행자를 스스로 인식</div>
+          </div>
+          <div class="item" onclick="this.classList.toggle('on');checkMoti()">
+            <div class="ic">💬</div>
+            <div class="cap">생성형 AI<br><span style="font-weight:600;font-size:12px;color:#5d7286">대화·번역·요약</span></div>
+            <div class="reveal">방대한 글 데이터를 <b>학습</b>해 사람처럼 답변 생성</div>
+          </div>
+        </div>
+        <div class="answer-line" id="motiAns">👉 모두 <b style="color:#0a8f84">데이터로 스스로 학습</b>하는 <b style="color:#0a8f84">기계학습(Machine Learning)</b> 기술입니다!</div>
+      </div>
+    </section>
+
+    <!-- 3 OBJECTIVES -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-intro">학습목표</span><h2>오늘 우리가 도달할 곳</h2><span class="pg">177쪽</span></div>
+      <div class="body">
+        <div class="card">
+          <div class="obj" style="margin-bottom:16px"><div class="n">1</div><p>기계학습의 개념을 <b>전통적 프로그래밍과 비교</b>하여 설명할 수 있다.</p></div>
+          <div class="obj"><div class="n">2</div><p>지도학습·비지도학습·강화학습의 <b>차이를 사례를 들어 구분</b>할 수 있다.</p></div>
+        </div>
+        <div>
+          <span class="pill">🔑 핵심 용어</span>
+          <div class="terms">
+            <b># 기계학습</b><b># 지도학습</b><b># 비지도학습</b><b># 강화학습</b><b># 레이블</b>
+          </div>
+        </div>
+        <p class="note">💡 인간은 경험으로 배우고 예측합니다. 그렇다면 기계는 무엇으로 배울까요? 오늘 그 답을 찾아봅시다.</p>
+      </div>
+    </section>
+
+    <!-- 4 CONCEPT -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-dev">전개 1 · 개념</span><h2>기계학습이란 무엇일까?</h2><span class="pg">177쪽</span></div>
+      <div class="body">
+        <div class="card" style="background:linear-gradient(120deg,#0f2c4a,#12395f);color:#eaf3fb;border:none">
+          <div class="lead" style="color:#eaf3fb">컴퓨터가 <b style="color:#ffd270">데이터를 기반으로 스스로 학습</b>하여 규칙을 찾고, 찾아낸 규칙으로 <b style="color:#54e6d5">새로운 데이터의 결과를 예측</b>하는 것</div>
+        </div>
+        <div class="grid2">
+          <div class="card"><div style="font-size:30px">🧑</div><h4 style="color:var(--navy);margin:6px 0;font-size:17px">사람</h4>
+            <p style="color:#3a4c5c;font-size:14.5px;line-height:1.6"><b>경험</b>을 토대로 이해하고 예측한다.</p></div>
+          <div class="card" style="border-color:var(--teal)"><div style="font-size:30px">🤖</div><h4 style="color:var(--teal-d);margin:6px 0;font-size:17px">기계학습</h4>
+            <p style="color:#3a4c5c;font-size:14.5px;line-height:1.6"><b>데이터</b>를 사용해 규칙을 찾고 예측한다.</p></div>
+        </div>
+        <div class="flow">
+          <span class="step">📊 데이터</span><span class="arr">→</span>
+          <span class="step">🔍 학습(규칙 발견)</span><span class="arr">→</span>
+          <span class="step">🎯 예측</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 CLASSIFY LAB -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-act">탐구 활동</span><h2>포유류 vs 조류, 기계처럼 규칙 찾기</h2><span class="pg">177쪽</span></div>
+      <div class="body">
+        <p class="lead">동물 4마리의 특징을 비교해 보세요. 어떤 <b>규칙(패턴)</b>이 보이나요?</p>
+        <div class="animal-row">
+          <div class="animal mam"><span class="tag">포유류</span><div class="emo">🐱</div><div class="nm">고양이</div><div class="feat">털 · 날개X · 다리 4개</div></div>
+          <div class="animal mam"><span class="tag">포유류</span><div class="emo">🐰</div><div class="nm">토끼</div><div class="feat">털 · 날개X · 다리 4개</div></div>
+          <div class="animal bird"><span class="tag">조류</span><div class="emo">🦉</div><div class="nm">부엉이</div><div class="feat">깃털 · 날개O · 다리 2개</div></div>
+          <div class="animal bird"><span class="tag">조류</span><div class="emo">🐦</div><div class="nm">참새</div><div class="feat">깃털 · 날개O · 다리 2개</div></div>
+        </div>
+        <button class="miniBtn" onclick="showRule()" id="ruleBtn">🔍 기계가 찾은 규칙 보기</button>
+        <div class="rule-box" id="ruleBox">
+          ✔ <b>털 · 날개 없음 · 다리 4개</b> → <b style="color:#54e6d5">포유류</b><br>
+          ✔ <b>깃털 · 날개 있음 · 다리 2개</b> → <b style="color:#54e6d5">조류</b>
+        </div>
+        <div class="predict" id="predictBox">
+          <div class="lion">🦁</div>
+          <div class="ask">새로운 데이터 <b>사자</b>(털·날개X·다리4개)가 들어왔어요. 기계는 어떻게 예측할까요?</div>
+          <div class="guess" onclick="this.classList.add('done');this.textContent='✓ 포유류!'">예측 확인</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 TRADITIONAL VS ML -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-dev">전개 2 · 비교</span><h2>전통적 프로그래밍 vs 기계학습</h2><span class="pg">178쪽</span></div>
+      <div class="body">
+        <p class="lead"><b>스팸 메일 분류</b>를 예로 두 방식을 비교해 봅시다.</p>
+        <div class="vs">
+          <div class="col trad">
+            <h4>📋 전통적 프로그래밍</h4>
+            <p><b>사람이 직접</b> 규칙을 정함.<br>"제목에 '이벤트'가 있으면 스팸" 처럼 사람이 규칙을 만듦.</p>
+            <div class="flow"><span class="step">입력</span><span class="arr">+</span><span class="step">사람이 만든 규칙</span><span class="arr">→</span><span class="step">정답</span></div>
+            <p style="margin-top:8px;color:#a8473e;font-weight:700">⚠ 새 상황마다 규칙을 계속 바꿔야 함</p>
+          </div>
+          <div class="mid">VS</div>
+          <div class="col ml">
+            <h4>🤖 기계학습</h4>
+            <p><b>컴퓨터가 데이터를 학습</b>해 규칙을 스스로 찾음.<br>수많은 메일에서 '당첨·무료·이벤트' 패턴을 자동 발견.</p>
+            <div class="flow"><span class="step">입력</span><span class="arr">+</span><span class="step">정답(레이블)</span><span class="arr">→</span><span class="step">규칙 학습</span></div>
+            <p style="margin-top:8px;color:#0a8f84;font-weight:700">✔ 복잡한 문제를 효율적으로 해결</p>
+          </div>
+        </div>
+        <p class="note">* <b>레이블(label)</b> : 각 입력 데이터에 대해 원하는 출력값(정답)</p>
+      </div>
+    </section>
+
+    <!-- 7 ACTIVITY 1 SORT -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-act">활동 1</span><h2>이 문제, 어떤 방식으로 풀까?</h2><span class="pg">178쪽</span></div>
+      <div class="body" style="padding-bottom:18px">
+        <p class="lead">문제 카드를 알맞은 통으로 <b>끌어다 놓으세요</b>. (드래그 & 드롭)</p>
+        <div class="sortwrap">
+          <div class="qbank" id="qbank">
+            <div class="q" draggable="true" data-id="1" data-ans="ml"><span class="num">1</span>손글씨 숫자 이미지를 보고 그 숫자를 인식</div>
+            <div class="q" draggable="true" data-id="2" data-ans="trad"><span class="num">2</span>주어진 숫자들의 합을 구하기</div>
+            <div class="q" draggable="true" data-id="3" data-ans="ml"><span class="num">3</span>과거 날씨로 내일의 기온을 예측</div>
+            <div class="q" draggable="true" data-id="4" data-ans="trad"><span class="num">4</span>두 점 사이의 거리를 계산</div>
+          </div>
+          <div class="bins">
+            <div class="bin trad" data-bin="trad"><div class="bt"><span>📋 전통적 프로그래밍</span><span id="cT">0/2</span></div></div>
+            <div class="bin ml" data-bin="ml"><div class="bt"><span>🤖 기계학습</span><span id="cM">0/2</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 THREE TYPES -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-dev">전개 3 · 유형</span><h2>기계학습의 세 가지 유형</h2><span class="pg">179쪽</span></div>
+      <div class="body">
+        <p class="lead">학습하는 <b>방식</b>에 따라 세 가지로 나뉩니다.</p>
+        <div class="grid3">
+          <div class="type sup"><span class="lbl">지도</span><div class="top">🏷️</div><h4>지도학습</h4>
+            <p>입력 데이터 + <b>정답(레이블)</b>을 함께 학습해 새 데이터를 예측·분류</p>
+            <div class="ex">예 : 강아지/고양이 사진 분류</div></div>
+          <div class="type uns"><span class="lbl">비지도</span><div class="top">🧩</div><h4>비지도학습</h4>
+            <p><b>레이블 없이</b> 데이터의 숨은 패턴을 찾아 비슷한 것끼리 묶음(군집)</p>
+            <div class="ex">예 : 고객 구매패턴 그룹화</div></div>
+          <div class="type rei"><span class="lbl">강화</span><div class="top">🎮</div><h4>강화학습</h4>
+            <p>변화하는 환경에서 <b>보상(reward)</b>이 최대가 되는 행동을 시행착오로 학습</p>
+            <div class="ex">예 : 게임 AI · 로봇 제어</div></div>
+        </div>
+        <div class="card" style="padding:12px 18px">
+          <p style="font-size:13.5px;color:#3a4c5c;line-height:1.6"><b style="color:var(--teal-d)">레이블이 있나?</b> → 있으면 <b>지도</b>, 없으면 <b>비지도</b>. &nbsp;|&nbsp; <b style="color:var(--coral)">보상으로 배우나?</b> → <b>강화</b>학습!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 ACTIVITY 2 MATCH -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-act">활동 2</span><h2>사례를 학습 유형에 매칭하기</h2><span class="pg">179쪽</span></div>
+      <div class="body" style="padding-bottom:18px">
+        <p class="lead">각 사례를 알맞은 유형으로 <b>드래그</b>하세요.</p>
+        <div class="matchwrap">
+          <div class="cases" id="cases">
+            <div class="case" draggable="true" data-ans="s">정답이 표시된 사진으로 개·고양이를 구분하도록 학습</div>
+            <div class="case" draggable="true" data-ans="u">레이블 없이 고객을 구매성향별 그룹으로 묶기</div>
+            <div class="case" draggable="true" data-ans="r">알파고가 수많은 대국으로 이기는 수를 스스로 터득</div>
+            <div class="case" draggable="true" data-ans="s">병명이 적힌 X-ray로 질병 진단 모델 학습</div>
+            <div class="case" draggable="true" data-ans="u">뉴스 기사를 주제별로 자동 분류(정답 없음)</div>
+          </div>
+          <div class="mbins">
+            <div class="mbin s" data-mbin="s"><div class="h">🏷️ 지도학습</div></div>
+            <div class="mbin u" data-mbin="u"><div class="h">🧩 비지도학습</div></div>
+            <div class="mbin r" data-mbin="r"><div class="h">🎮 강화학습</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 QUIZ -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-end">정리 · 형성평가</span><h2>오늘 배운 내용 퀴즈</h2><span class="pg">평가</span></div>
+      <div class="body quiz" id="quiz">
+        <div class="quiz-dot" id="qdots"><i class="on"></i><i></i><i></i></div>
+        <div class="stem" id="qstem"></div>
+        <div class="opts" id="qopts"></div>
+        <div class="fb" id="qfb"></div>
+        <div class="quiz-nav">
+          <span class="tag2" id="qscore">맞힌 개수 : 0 / 3</span>
+          <button class="miniBtn" id="qnext" onclick="nextQuiz()" disabled>다음 문제 →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 FILL -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-end">정리</span><h2>핵심 개념 빈칸 채우기</h2><span class="pg">179쪽</span></div>
+      <div class="body">
+        <p class="lead">아래 단어를 눌러 빈칸을 완성하세요.</p>
+        <div class="card">
+          <p class="fill">
+            <span class="blank empty" data-need="기계학습" onclick="clearBlank(this)">　？　</span> 은 데이터를 기반으로 스스로 규칙을 찾는 것이고,
+            <span class="blank empty" data-need="지도학습" onclick="clearBlank(this)">　？　</span> 은 입력 데이터와 레이블을 함께 학습하는 방법,
+            <span class="blank empty" data-need="비지도학습" onclick="clearBlank(this)">　？　</span> 은 레이블 없이 데이터를 학습하는 방법이다.
+          </p>
+        </div>
+        <div class="wordbank" id="wordbank">
+          <span class="word" data-w="비지도학습" onclick="useWord(this)">비지도학습</span>
+          <span class="word" data-w="기계학습" onclick="useWord(this)">기계학습</span>
+          <span class="word" data-w="지도학습" onclick="useWord(this)">지도학습</span>
+        </div>
+        <div class="fb ok" id="fillFb">🎉 완벽합니다! 세 개념을 정확히 구분했어요.</div>
+      </div>
+    </section>
+
+    <!-- 12 SELF ASSESS -->
+    <section class="slide">
+      <div class="band"><span class="badge-step b-end">자기평가 · 마무리</span><h2>오늘 나의 배움 점검</h2><span class="pg">성취도</span></div>
+      <div class="body">
+        <p class="lead">스스로 별점을 매겨 보세요. (점수는 활동지에 기록)</p>
+        <div class="self">
+          <div class="row"><p>① 기계학습과 전통적 프로그래밍의 차이를 설명할 수 있다.</p><div class="stars" data-q="1"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div></div>
+          <div class="row"><p>② 지도·비지도·강화학습을 사례로 구분할 수 있다.</p><div class="stars" data-q="2"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div></div>
+        </div>
+        <div class="card" style="background:linear-gradient(120deg,#0f2c4a,#0a8f84);color:#eaf3fb;border:none">
+          <h4 style="font-size:17px;font-weight:900;margin-bottom:6px">📌 한 줄 정리</h4>
+          <p style="font-size:15px;line-height:1.6;color:#eaf3fb">기계학습은 <b style="color:#ffd270">데이터로 규칙을 스스로 찾는</b> 기술이며, <b style="color:#aef6ec">레이블 유무와 보상</b>에 따라 지도·비지도·강화학습으로 나뉜다.</p>
+        </div>
+        <p class="note">🔭 다음 차시 : 데이터를 직접 학습시켜 보는 <b>기계학습 모델 만들기</b> 실습</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="ctrl">
+  <button onclick="go(-1)">‹</button>
+  <span class="count"><b id="cur">1</b> / <span id="tot">12</span></span>
+  <button onclick="go(1)">›</button>
+</div>
+
+<script>
+/* ---------- slide nav ---------- */
+const slides=[...document.querySelectorAll('.slide')];
+let idx=0;
+document.getElementById('tot').textContent=slides.length;
+function render(){
+  slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  document.getElementById('cur').textContent=idx+1;
+  document.getElementById('prog').style.width=((idx+1)/slides.length*100)+'%';
+}
+function go(d){idx=Math.max(0,Math.min(slides.length-1,idx+d));render();}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1);}
+  if(e.key==='ArrowLeft')go(-1);
+});
+render();
+
+/* ---------- storytelling ---------- */
+let beat=-1;
+const beats=document.querySelectorAll('.story-slide .beat');
+const beatDots=document.querySelectorAll('#beatDots i');
+function nextBeat(){
+  if(beat<beats.length-1){
+    beat++;
+    beats[beat].classList.add('show');
+    beatDots.forEach((d,i)=>d.classList.toggle('on',i<=beat));
+    if(beat===1)document.getElementById('award').classList.add('show');
+    const btn=document.getElementById('storyBtn');
+    if(beat===0)btn.textContent='다음 이야기 ▶';
+    if(beat>=beats.length-1){btn.textContent='✓ 그래서 오늘 배웁니다';btn.classList.add('done');}
+  }
+}
+
+/* ---------- motivation ---------- */
+function checkMoti(){
+  const all=[...document.querySelectorAll('.moti .item')].every(i=>i.classList.contains('on'));
+  if(all)document.getElementById('motiAns').classList.add('show');
+}
+
+/* ---------- classify lab ---------- */
+function showRule(){
+  document.getElementById('ruleBox').classList.add('show');
+  document.getElementById('predictBox').classList.add('show');
+  document.getElementById('ruleBtn').style.display='none';
+}
+
+/* ---------- drag helper ---------- */
+let dragEl=null;
+function bindDrag(sel){
+  document.querySelectorAll(sel).forEach(el=>{
+    el.addEventListener('dragstart',()=>{if(!el.classList.contains('placed'))dragEl=el;});
+  });
+}
+
+/* ---- activity 1 ---- */
+bindDrag('#qbank .q');
+let t1=0,m1=0;
+document.querySelectorAll('.bin').forEach(bin=>{
+  bin.addEventListener('dragover',e=>{e.preventDefault();bin.classList.add('over');});
+  bin.addEventListener('dragleave',()=>bin.classList.remove('over'));
+  bin.addEventListener('drop',e=>{
+    e.preventDefault();bin.classList.remove('over');
+    if(!dragEl||dragEl.classList.contains('placed'))return;
+    const correct=dragEl.dataset.ans===bin.dataset.bin;
+    const d=document.createElement('div');
+    d.className='drop '+(correct?'right':'wrong');
+    d.innerHTML=dragEl.textContent.replace(/^\d/,'')+'<span class="mk">'+(correct?'✓':'✗ 다시!')+'</span>';
+    bin.appendChild(d);
+    dragEl.classList.add('placed');
+    if(correct){bin.dataset.bin==='trad'?t1++:m1++;}
+    document.getElementById('cT').textContent=t1+'/2';
+    document.getElementById('cM').textContent=m1+'/2';
+    dragEl=null;
+  });
+});
+
+/* ---- activity 2 ---- */
+bindDrag('#cases .case');
+document.querySelectorAll('.mbin').forEach(bin=>{
+  bin.addEventListener('dragover',e=>{e.preventDefault();bin.classList.add('over');});
+  bin.addEventListener('dragleave',()=>bin.classList.remove('over'));
+  bin.addEventListener('drop',e=>{
+    e.preventDefault();bin.classList.remove('over');
+    if(!dragEl||dragEl.classList.contains('placed'))return;
+    const correct=dragEl.dataset.ans===bin.dataset.mbin;
+    const d=document.createElement('div');
+    d.className='slot '+(correct?'right':'wrong');
+    d.textContent=(correct?'✓ ':'✗ ')+dragEl.textContent;
+    bin.appendChild(d);
+    dragEl.classList.add('placed');dragEl=null;
+  });
+});
+
+/* ---------- quiz ---------- */
+const quiz=[
+  {stem:'Q1. 기계학습의 가장 큰 특징은?',
+   opts:['사람이 모든 규칙을 직접 작성한다','데이터를 기반으로 스스로 규칙을 찾는다','정답이 항상 필요 없다','계산 속도가 가장 중요하다'],
+   ans:1,fb:'기계학습은 데이터에서 규칙(패턴)을 스스로 학습합니다.'},
+  {stem:'Q2. "정답이 표시된 데이터로 개·고양이를 분류"하는 학습은?',
+   opts:['지도학습','비지도학습','강화학습','전통적 프로그래밍'],
+   ans:0,fb:'입력+레이블(정답)을 함께 학습 → 지도학습입니다.'},
+  {stem:'Q3. "보상을 최대화하는 행동을 시행착오로 배우는" 학습은?',
+   opts:['지도학습','비지도학습','강화학습','회귀분석'],
+   ans:2,fb:'행동-보상으로 학습하는 방식은 강화학습입니다.'},
+];
+let qi=0,score=0,answered=false;
+function loadQuiz(){
+  answered=false;
+  const q=quiz[qi];
+  document.getElementById('qstem').textContent=q.stem;
+  const keys=['A','B','C','D'];
+  document.getElementById('qopts').innerHTML=q.opts.map((o,i)=>
+    `<div class="opt" onclick="answer(${i})"><span class="k">${keys[i]}</span>${o}</div>`).join('');
+  document.getElementById('qfb').className='fb';
+  document.getElementById('qnext').disabled=true;
+  document.getElementById('qnext').textContent=qi<quiz.length-1?'다음 문제 →':'완료 ✓';
+  [...document.getElementById('qdots').children].forEach((d,i)=>d.classList.toggle('on',i===qi));
+}
+function answer(i){
+  if(answered)return;answered=true;
+  const q=quiz[qi];const opts=document.querySelectorAll('#qopts .opt');
+  opts[q.ans].classList.add('right');
+  if(i!==q.ans)opts[i].classList.add('wrong');else score++;
+  const fb=document.getElementById('qfb');
+  fb.className='fb show '+(i===q.ans?'ok':'no');
+  fb.innerHTML=(i===q.ans?'✅ 정답! ':'❌ 아쉬워요. ')+q.fb;
+  document.getElementById('qscore').textContent='맞힌 개수 : '+score+' / '+quiz.length;
+  document.getElementById('qnext').disabled=false;
+}
+function nextQuiz(){
+  if(qi<quiz.length-1){qi++;loadQuiz();}
+  else{
+    document.getElementById('qstem').textContent='🎯 형성평가 완료! 최종 '+score+' / '+quiz.length+'점';
+    document.getElementById('qopts').innerHTML='';
+    document.getElementById('qfb').className='fb show ok';
+    document.getElementById('qfb').innerHTML=score===3?'완벽합니다! 개념을 정확히 이해했어요.':'틀린 문제는 활동지에서 다시 확인해 봅시다.';
+    document.getElementById('qnext').disabled=true;
+  }
+}
+loadQuiz();
+
+/* ---------- fill blanks ---------- */
+let selectedBlank=null;
+function useWord(el){
+  if(el.classList.contains('used'))return;
+  // place into first matching empty blank
+  const target=[...document.querySelectorAll('.blank')].find(b=>b.classList.contains('empty')&&b.dataset.need===el.dataset.w);
+  if(!target)return;
+  target.textContent=el.dataset.w;
+  target.classList.remove('empty');
+  target.dataset.filled=el.dataset.w;
+  el.classList.add('used');
+  checkFill();
+}
+function clearBlank(b){
+  if(b.classList.contains('empty'))return;
+  const w=b.dataset.filled;
+  b.textContent='　？　';b.classList.add('empty');b.dataset.filled='';
+  const word=[...document.querySelectorAll('.word')].find(x=>x.dataset.w===w);
+  if(word)word.classList.remove('used');
+  document.getElementById('fillFb').classList.remove('show');
+}
+function checkFill(){
+  const done=[...document.querySelectorAll('.blank')].every(b=>!b.classList.contains('empty'));
+  if(done)document.getElementById('fillFb').classList.add('show');
+}
+
+/* ---------- self stars ---------- */
+document.querySelectorAll('.stars').forEach(g=>{
+  const stars=[...g.children];
+  stars.forEach((s,i)=>s.addEventListener('click',()=>{
+    stars.forEach((x,j)=>x.classList.toggle('on',j<=i));
+  }));
+});
+</script>
+</body>
+</html>
