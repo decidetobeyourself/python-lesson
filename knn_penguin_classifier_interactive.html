@@ -1,0 +1,105 @@
+<div style="padding: 0.5rem 0;">
+<h2 class="sr-only">미지의 펭귄을 그래프에 찍으면 가장 가까운 이웃 k마리의 다수결로 종을 분류하는 KNN 체험 도구</h2>
+
+<div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px;">
+  <span style="font-size:14px; color:var(--color-text-secondary);">이웃 수 k</span>
+  <input type="range" id="kslider" min="1" max="9" step="2" value="5" style="flex:1; min-width:160px;">
+  <span id="kval" style="font-size:16px; font-weight:500; min-width:18px;">5</span>
+  <button id="resetbtn" style="font-size:13px;"><i class="ti ti-refresh" style="font-size:15px; vertical-align:-2px; margin-right:4px;" aria-hidden="true"></i>다시</button>
+</div>
+
+<div style="font-size:13px; color:var(--color-text-tertiary); margin-bottom:8px;">
+  <i class="ti ti-click" style="vertical-align:-2px;" aria-hidden="true"></i> 그래프 안을 클릭해 "정체불명 펭귄"을 놓아보세요.
+</div>
+
+<svg id="plot" viewBox="0 0 640 420" style="width:100%; height:auto; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); background:var(--color-background-primary); cursor:crosshair;" role="img" aria-label="펭귄 신체 측정값 산점도"></svg>
+
+<div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; font-size:13px;">
+  <span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#639922;vertical-align:-1px;margin-right:5px;"></span>아델리</span>
+  <span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#D85A30;vertical-align:-1px;margin-right:5px;"></span>턱끈</span>
+  <span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#378ADD;vertical-align:-1px;margin-right:5px;"></span>젠투</span>
+</div>
+
+<div id="result" style="margin-top:14px; padding:14px 16px; background:var(--color-background-secondary); border-radius:var(--border-radius-lg); font-size:14px; color:var(--color-text-secondary); min-height:24px;">
+  펭귄을 찍으면 가장 가까운 <b id="rk">5</b>마리가 투표해서 종을 정합니다.
+</div>
+</div>
+
+<script>
+(function(){
+  const NS="http://www.w3.org/2000/svg";
+  const svg=document.getElementById("plot");
+  const PAD={l:52,r:20,t:20,b:46}, W=640,H=420;
+  const xMin=32,xMax=60,yMin=172,yMax=234;
+  const sx=d=>PAD.l+(d-xMin)/(xMax-xMin)*(W-PAD.l-PAD.r);
+  const sy=d=>PAD.t+(1-(d-yMin)/(yMax-yMin))*(H-PAD.t-PAD.b);
+  const COL={Adelie:"#639922",Chinstrap:"#D85A30",Gentoo:"#378ADD"};
+  const KO={Adelie:"아델리",Chinstrap:"턱끈",Gentoo:"젠투"};
+  const data=[
+    [37,190,"Adelie"],[39,186,"Adelie"],[41,195,"Adelie"],[36,184,"Adelie"],[40,192,"Adelie"],
+    [38,198,"Adelie"],[42,188,"Adelie"],[35,193,"Adelie"],[39,200,"Adelie"],[41,183,"Adelie"],
+    [48,192,"Chinstrap"],[50,196,"Chinstrap"],[52,190,"Chinstrap"],[47,200,"Chinstrap"],[51,188,"Chinstrap"],
+    [49,203,"Chinstrap"],[53,194,"Chinstrap"],[46,198,"Chinstrap"],[50,205,"Chinstrap"],[48,186,"Chinstrap"],
+    [46,215,"Gentoo"],[48,222,"Gentoo"],[50,218,"Gentoo"],[45,225,"Gentoo"],[52,212,"Gentoo"],
+    [49,228,"Gentoo"],[53,220,"Gentoo"],[47,230,"Gentoo"],[51,214,"Gentoo"],[54,224,"Gentoo"]
+  ].map(p=>({px:sx(p[0]),py:sy(p[1]),sp:p[2]}));
+
+  function mk(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+  const axisColor=getComputedStyle(document.documentElement).getPropertyValue('--color-border-secondary')||"#888";
+
+  function drawBase(){
+    svg.appendChild(mk("line",{x1:PAD.l,y1:H-PAD.b,x2:W-PAD.r,y2:H-PAD.b,stroke:"currentColor","stroke-opacity":0.35}));
+    svg.appendChild(mk("line",{x1:PAD.l,y1:PAD.t,x2:PAD.l,y2:H-PAD.b,stroke:"currentColor","stroke-opacity":0.35}));
+    const xl=mk("text",{x:(PAD.l+W-PAD.r)/2,y:H-12,"text-anchor":"middle","font-size":13,fill:"currentColor","fill-opacity":0.7});
+    xl.textContent="부리 길이 (mm) →"; svg.appendChild(xl);
+    const yl=mk("text",{x:16,y:(PAD.t+H-PAD.b)/2,"text-anchor":"middle","font-size":13,fill:"currentColor","fill-opacity":0.7,transform:`rotate(-90 16 ${(PAD.t+H-PAD.b)/2})`});
+    yl.textContent="날개 길이 (mm) →"; svg.appendChild(yl);
+  }
+
+  let lineLayer=mk("g",{}), ptLayer=mk("g",{}), myLayer=mk("g",{});
+  svg.appendChild(lineLayer); svg.appendChild(ptLayer); svg.appendChild(myLayer);
+
+  function drawPoints(){
+    ptLayer.innerHTML="";
+    data.forEach(p=>{ptLayer.appendChild(mk("circle",{cx:p.px,cy:p.py,r:6,fill:COL[p.sp],"fill-opacity":0.85}));});
+  }
+
+  let mystery=null;
+  function classify(){
+    lineLayer.innerHTML=""; myLayer.innerHTML="";
+    const k=+document.getElementById("kslider").value;
+    if(!mystery){return;}
+    const d=data.map(p=>({...p,dist:Math.hypot(p.px-mystery.x,p.py-mystery.y)}))
+                .sort((a,b)=>a.dist-b.dist).slice(0,k);
+    d.forEach(n=>{lineLayer.appendChild(mk("line",{x1:mystery.x,y1:mystery.y,x2:n.px,y2:n.py,stroke:"currentColor","stroke-opacity":0.4,"stroke-width":1.5}));});
+    d.forEach(n=>{myLayer.appendChild(mk("circle",{cx:n.px,cy:n.py,r:9,fill:"none",stroke:COL[n.sp],"stroke-width":2.5}));});
+    const tally={Adelie:0,Chinstrap:0,Gentoo:0}; d.forEach(n=>tally[n.sp]++);
+    const winner=Object.keys(tally).sort((a,b)=>tally[b]-tally[a])[0];
+    myLayer.appendChild(mk("circle",{cx:mystery.x,cy:mystery.y,r:9,fill:"var(--color-background-primary)",stroke:COL[winner],"stroke-width":3}));
+    myLayer.appendChild(mk("circle",{cx:mystery.x,cy:mystery.y,r:3,fill:COL[winner]}));
+    const parts=Object.keys(tally).filter(s=>tally[s]>0)
+      .sort((a,b)=>tally[b]-tally[a])
+      .map(s=>`<span style="color:${COL[s]};font-weight:500;">${KO[s]} ${tally[s]}표</span>`).join(" · ");
+    document.getElementById("result").innerHTML=
+      `가까운 ${k}마리 투표 → ${parts}<br><span style="font-size:16px;">이 펭귄은 <b style="color:${COL[winner]};">${KO[winner]} 펭귄</b>으로 분류됩니다.</span>`;
+  }
+
+  svg.addEventListener("click",e=>{
+    const r=svg.getBoundingClientRect();
+    const vx=(e.clientX-r.left)/r.width*W, vy=(e.clientY-r.top)/r.height*H;
+    if(vx<PAD.l||vx>W-PAD.r||vy<PAD.t||vy>H-PAD.b)return;
+    mystery={x:vx,y:vy}; classify();
+  });
+  document.getElementById("kslider").addEventListener("input",e=>{
+    document.getElementById("kval").textContent=e.target.value;
+    const rk=document.getElementById("rk"); if(rk)rk.textContent=e.target.value;
+    classify();
+  });
+  document.getElementById("resetbtn").addEventListener("click",()=>{
+    mystery=null; lineLayer.innerHTML=""; myLayer.innerHTML="";
+    document.getElementById("result").innerHTML=`펭귄을 찍으면 가장 가까운 <b>${document.getElementById("kslider").value}</b>마리가 투표해서 종을 정합니다.`;
+  });
+
+  drawBase(); drawPoints();
+})();
+</script>
