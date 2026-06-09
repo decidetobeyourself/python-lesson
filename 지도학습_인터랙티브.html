@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지도학습 인터랙티브 — 분류와 회귀</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --ink:#1E2A4A; --ink2:#33416b;
+    --bg:#EEF2F8; --card:#FFFFFF; --line:#D7DEEC; --soft:#F3F6FB;
+    --dog:#E2622E; --dog-d:#b54b1f; --cat:#0E9594; --cat-d:#0a6f6e;
+    --reg:#6D4ABF; --amber:#F5A201; --good:#1F9D55; --bad:#D6453B;
+    --mut:#697390;
+    --r:16px; --sh:0 6px 24px rgba(30,42,74,.08); --sh2:0 2px 8px rgba(30,42,74,.06);
+    --ff:'Pretendard',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);line-height:1.55;-webkit-font-smoothing:antialiased}
+
+  /* ---- top nav ---- */
+  header{position:sticky;top:0;z-index:50;background:rgba(30,42,74,.97);backdrop-filter:blur(6px);
+    box-shadow:0 2px 14px rgba(0,0,0,.18)}
+  .nav-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:14px;
+    padding:10px 18px;overflow-x:auto;scrollbar-width:none}
+  .nav-in::-webkit-scrollbar{display:none}
+  .brand{color:#fff;font-weight:800;font-size:15px;white-space:nowrap;letter-spacing:-.2px}
+  .brand b{color:var(--amber)}
+  nav{display:flex;gap:6px;margin-left:auto}
+  nav a{color:#c3cde2;text-decoration:none;font-size:13.5px;font-weight:600;
+    padding:6px 11px;border-radius:999px;white-space:nowrap;transition:.18s}
+  nav a:hover{color:#fff;background:rgba(255,255,255,.12)}
+  nav a.on{color:var(--ink);background:var(--amber)}
+
+  main{max-width:1080px;margin:0 auto;padding:28px 18px 90px}
+  section{margin:30px 0;scroll-margin-top:74px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:var(--sh);padding:26px 26px 30px;position:relative;overflow:hidden}
+
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;
+    letter-spacing:.4px;color:var(--mut);text-transform:uppercase;margin-bottom:8px}
+  .eyebrow .dot{width:9px;height:9px;border-radius:50%}
+  h1.sec{font-size:25px;font-weight:800;margin:0 0 6px;letter-spacing:-.5px}
+  .lead{color:var(--ink2);font-size:15.5px;margin:0 0 18px;max-width:760px}
+
+  .hero{background:linear-gradient(135deg,#1E2A4A 0%,#2c3a64 60%,#3a4a7a 100%);color:#fff;border:none}
+  .hero .eyebrow{color:#a9b6d6}
+  .hero h1.sec{color:#fff;font-size:30px}
+  .hero .lead{color:#d4dcf0}
+
+  .btn{appearance:none;border:none;cursor:pointer;font-family:var(--ff);font-weight:700;
+    border-radius:11px;padding:11px 18px;font-size:14.5px;transition:.16s;background:var(--ink);color:#fff}
+  .btn:hover{transform:translateY(-1px);box-shadow:var(--sh2)}
+  .btn:active{transform:translateY(0)}
+  .btn.amber{background:var(--amber);color:var(--ink)}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:8px 13px;font-size:13px;border-radius:9px}
+
+  .reveal{margin-top:16px;padding:16px 18px;border-radius:12px;background:var(--soft);
+    border:1px dashed var(--line);font-size:15px;display:none}
+  .reveal.show{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:800}
+  .chip.dog{background:#fbe5d8;color:var(--dog-d)} .chip.cat{background:#d6f0ef;color:var(--cat-d)}
+  .chip.reg{background:#e7defb;color:#4b2f93}
+
+  /* ---- drag classify ---- */
+  .pool{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 20px}
+  .case{padding:10px 14px;border-radius:11px;background:#fff;border:1.5px solid var(--line);
+    font-size:14px;font-weight:600;cursor:grab;box-shadow:var(--sh2);transition:.12s;user-select:none}
+  .case:active{cursor:grabbing}
+  .case.placed{opacity:.55}
+  .bins{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .bin{min-height:130px;border-radius:14px;padding:14px;border:2px dashed var(--line);
+    background:var(--soft);transition:.15s}
+  .bin h4{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}
+  .bin.dog{border-color:#f0b79a} .bin.dog.over{background:#fbe5d8;border-color:var(--dog)}
+  .bin.cat{border-color:#9cd6d3} .bin.cat.over{background:#d6f0ef;border-color:var(--cat)}
+  .bin .drop{display:flex;flex-wrap:wrap;gap:8px;min-height:48px}
+  .case.ok{border-color:var(--good);box-shadow:0 0 0 2px rgba(31,157,85,.25)}
+  .case.no{border-color:var(--bad);box-shadow:0 0 0 2px rgba(214,69,59,.25)}
+
+  /* ---- layout split ---- */
+  .split{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:start}
+  @media(max-width:760px){.split{grid-template-columns:1fr}.bins{grid-template-columns:1fr}.nav-in{padding:10px 12px}}
+
+  svg{display:block;width:100%;height:auto;touch-action:none}
+  .panel{background:var(--soft);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .panel h4{margin:0 0 10px;font-size:14px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+
+  .control{margin:14px 0}
+  .control label{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:6px}
+  .control label b{color:var(--ink)}
+  input[type=range]{width:100%;height:6px;border-radius:6px;background:#d7deec;-webkit-appearance:none;appearance:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+    background:var(--ink);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25);border:3px solid #fff}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);
+    cursor:pointer;border:3px solid #fff}
+
+  .verdict{margin-top:8px;text-align:center;font-weight:800;font-size:20px;padding:12px;border-radius:12px}
+  .tally{display:flex;justify-content:center;gap:18px;margin:10px 0;font-weight:800;font-size:15px}
+  .tally .t{display:flex;align-items:center;gap:7px}
+  .swatch{width:14px;height:14px;border-radius:4px;display:inline-block}
+
+  .hint{font-size:13px;color:var(--mut);margin-top:10px}
+  .seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+  .seg button{border:none;background:none;font-family:var(--ff);font-weight:700;font-size:13.5px;
+    padding:7px 13px;border-radius:8px;cursor:pointer;color:var(--mut)}
+  .seg button.on{background:var(--ink);color:#fff}
+
+  /* tree */
+  .tree-q{font-size:18px;font-weight:800;margin:8px 0 14px}
+  .tree-opts{display:flex;gap:12px;flex-wrap:wrap}
+  .path{margin-top:16px;font-size:13.5px;color:var(--mut)}
+  .path span{display:inline-block;background:var(--soft);border:1px solid var(--line);
+    padding:4px 10px;border-radius:8px;margin:3px 4px 0 0}
+  .leaf{margin-top:14px;padding:16px;border-radius:12px;background:#eaf6ef;border:1px solid #b6e0c6;
+    font-weight:800;font-size:18px;text-align:center;color:var(--good)}
+
+  /* quiz */
+  .q{margin:18px 0;padding:18px;border:1px solid var(--line);border-radius:13px;background:#fff}
+  .q .qt{font-weight:800;font-size:15.5px;margin-bottom:12px}
+  .opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--soft);
+    border-radius:10px;padding:11px 14px;margin:8px 0;font-family:var(--ff);font-size:14.5px;font-weight:600;
+    cursor:pointer;transition:.14s;color:var(--ink)}
+  .opt:hover{border-color:var(--ink2)}
+  .opt.correct{background:#eaf6ef;border-color:var(--good);color:#15663a}
+  .opt.wrong{background:#fbeae8;border-color:var(--bad);color:#9c2c24}
+  .opt:disabled{cursor:default}
+  .score{font-size:18px;font-weight:800;text-align:center;margin-top:14px;padding:14px;border-radius:12px;
+    background:var(--soft);display:none}
+  .score.show{display:block}
+
+  .foot{text-align:center;color:var(--mut);font-size:12.5px;margin-top:40px}
+  .kbd{font:inherit;font-weight:800;color:var(--dog)}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav-in">
+    <span class="brand">기계학습 · <b>지도학습</b></span>
+    <nav id="nav">
+      <a href="#s0" class="on">도입</a>
+      <a href="#s1">분류 vs 회귀</a>
+      <a href="#s2">k-NN</a>
+      <a href="#s3">의사결정트리</a>
+      <a href="#s4">로지스틱</a>
+      <a href="#s5">선형 회귀</a>
+      <a href="#s6">점검</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ========== 도입 ========== -->
+  <section id="s0">
+    <div class="card hero">
+      <div class="eyebrow"><span class="dot" style="background:var(--amber)"></span>도입 · 생각 열기</div>
+      <h1 class="sec">인공지능은 꽃 이름을 어떻게 알까?</h1>
+      <p class="lead">길을 지나다 이름 모를 꽃을 카메라로 찍으면, 앱은 꽃의 이름을 알려 줍니다.
+        세상의 수많은 꽃 중에서 ‘이 꽃’이 어느 종류인지 골라내는 일 — 이것이 오늘 배울 <b>지도학습</b>의 한 장면입니다.</p>
+      <button class="btn amber" id="hookBtn">정답이 ‘이름표(레이블)’를 맞히는 일이라면, 이건 어떤 문제일까? 👀</button>
+      <div class="reveal" id="hookRev" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:#eaf0ff">
+        꽃 이름은 ‘장미·튤립·국화’처럼 <b style="color:var(--amber)">딱 떨어지는 범주</b>예요. 이렇게 정답이 범주(category)이면 <b style="color:var(--amber)">분류(classification)</b> 문제입니다.<br>
+        만약 정답이 ‘키 23.4cm’처럼 <b style="color:var(--amber)">연속적인 수치</b>라면? 그건 <b style="color:var(--amber)">회귀(regression)</b>가 되죠. 오늘의 두 주인공입니다.
+      </div>
+      <p class="lead" style="margin-top:18px;font-size:14px">
+        <b style="color:#fff">학습 목표</b> ① 분류 문제와 회귀 문제를 구별한다  ② 분류·회귀 알고리즘의 방법을 설명한다</p>
+    </div>
+  </section>
+
+  <!-- ========== 분류 vs 회귀 ========== -->
+  <section id="s1">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--dog)"></span>전개 1 · 지도학습의 두 유형</div>
+      <h1 class="sec">분류일까, 회귀일까?</h1>
+      <p class="lead">정답(종속변수)의 모양을 보세요. <span class="chip dog">범주형</span>이면 <b>분류</b>, <span class="chip cat">연속적 수치</span>이면 <b>회귀</b>.
+        아래 사례 카드를 알맞은 상자로 끌어다 놓아 봅시다.</p>
+
+      <div class="pool" id="pool"></div>
+      <div class="bins">
+        <div class="bin dog" data-type="분류" id="binC">
+          <h4><span class="chip dog">분류</span> 정답이 범주(맑음·장미·개…)</h4>
+          <div class="drop" data-type="분류"></div>
+        </div>
+        <div class="bin cat" data-type="회귀" id="binR">
+          <h4><span class="chip cat">회귀</span> 정답이 연속 수치(기온·연봉…)</h4>
+          <div class="drop" data-type="회귀"></div>
+        </div>
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="checkDrag">정답 확인</button>
+        <button class="btn ghost" id="resetDrag">다시 하기</button>
+        <span id="dragMsg" style="align-self:center;font-weight:700"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== k-NN ========== -->
+  <section id="s2">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--dog)"></span>전개 2 · 분류 알고리즘 ①</div>
+      <h1 class="sec">k-최근접 이웃 (k-NN) — 거리로 판단하기</h1>
+      <p class="lead">새 동물(<b>?</b>)이 개일까 고양이일까? k-NN은 <b>가장 가까운 k개의 이웃</b>이 무엇인지 보고 다수결로 정합니다.
+        <span class="kbd">?</span>를 끌어 옮기거나 <b>k 값</b>을 바꿔 결과가 어떻게 달라지는지 직접 확인해 보세요.</p>
+      <div class="split">
+        <div><svg id="knn" viewBox="0 0 480 380" aria-label="k-NN 좌표평면"></svg>
+          <p class="hint">가로축 = 무게, 세로축 = 크기. 점선은 <b>?</b>에서 가장 가까운 이웃까지의 거리예요.</p></div>
+        <div class="panel">
+          <h4>조작</h4>
+          <div class="control">
+            <label>이웃 수 <b>k = <span id="kval">3</span></b></label>
+            <input type="range" id="kSlider" min="1" max="7" step="2" value="3">
+          </div>
+          <div class="tally" id="knnTally"></div>
+          <div class="verdict" id="knnVerdict"></div>
+          <button class="btn ghost sm" id="knnReset" style="margin-top:12px;width:100%">교과서 위치로 되돌리기</button>
+          <p class="hint" style="margin-top:14px"><b>왜 k가 중요할까?</b> 같은 데이터라도 k=3이면 개, k=5이면 고양이가 됩니다.
+            또 k-NN은 ‘거리’에 민감해서, 무게(kg)와 크기(cm)처럼 단위·범위가 다르면 <b>정규화</b>가 꼭 필요해요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 의사결정트리 ========== -->
+  <section id="s3">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--dog)"></span>전개 2 · 분류 알고리즘 ②</div>
+      <h1 class="sec">의사결정트리 — 질문으로 좁혀가기</h1>
+      <p class="lead">트리는 <b>속성으로 질문</b>을 던져, 한 노드에 <b>한 종류만 남을 때까지</b> 데이터를 나눕니다.
+        스무고개처럼 질문에 답하며 동물을 분류해 봅시다. (시작점 = 루트 노드, 끝 = 리프 노드)</p>
+      <div class="panel" style="background:#fff">
+        <div id="treeBox">
+          <div class="tree-q" id="treeQ"></div>
+          <div class="tree-opts" id="treeOpts"></div>
+        </div>
+        <div class="leaf" id="treeLeaf" style="display:none"></div>
+        <div class="path" id="treePath"></div>
+        <button class="btn ghost sm" id="treeReset" style="margin-top:16px">루트 노드부터 다시</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 로지스틱 ========== -->
+  <section id="s4">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--dog)"></span>전개 2 · 분류 알고리즘 ③</div>
+      <h1 class="sec">로지스틱 회귀 — S자 곡선으로 가르기</h1>
+      <p class="lead">연속적인 입력(강아지 <b>털 길이</b>)을 받아 <b>이발이 필요한가?</b>를 0~1 확률로 바꾼 뒤,
+        <b>기준값(0.5)</b>을 넘으면 ‘필요’로 분류합니다. 기준선을 좌우로 움직여 보세요.</p>
+      <div class="split">
+        <div><svg id="logit" viewBox="0 0 480 320" aria-label="로지스틱 S곡선"></svg>
+          <p class="hint">보라색 S곡선이 ‘이발 필요 확률’이에요. 세로 기준선보다 오른쪽(털이 긴 쪽)은 ‘필요’로 분류됩니다.</p></div>
+        <div class="panel">
+          <h4>조작</h4>
+          <div class="control">
+            <label>분류 기준 털 길이 <b><span id="thVal">50</span></b></label>
+            <input type="range" id="thSlider" min="20" max="80" step="1" value="50">
+          </div>
+          <div class="tally" id="logitTally"></div>
+          <div class="verdict" id="logitVerdict" style="background:var(--soft);color:var(--ink);font-size:15px"></div>
+          <p class="hint" style="margin-top:14px">선형 회귀가 ‘수치’를 예측한다면, 로지스틱 회귀는 그 곡선을 <b>이산적인 범주(필요/불필요)</b>로 바꿉니다.
+            그래서 이름은 ‘회귀’지만 하는 일은 <b>분류</b>예요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 선형 회귀 ========== -->
+  <section id="s5">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--reg)"></span>전개 3 · 회귀 알고리즘</div>
+      <h1 class="sec">선형 회귀 — 오차가 가장 작은 직선 찾기</h1>
+      <p class="lead">선형 회귀의 목표는 데이터를 가장 잘 설명하는 <b>직선</b>을 찾는 것.
+        ‘잘 설명한다’는 건 예측값과 실젯값의 차이, 즉 <b>오차</b>가 작다는 뜻입니다.
+        기울기·절편을 조절해 <span class="chip reg">총오차</span>를 최소로 만들어 보세요!</p>
+      <div class="split">
+        <div><svg id="lin" viewBox="0 0 480 360" aria-label="선형 회귀 산점도"></svg>
+          <p class="hint">빨간 세로선이 각 점의 <b>오차</b>예요. 짧을수록 좋은 직선!</p></div>
+        <div class="panel">
+          <h4>직선 조절</h4>
+          <div class="control"><label>기울기 <b><span id="slV">1.00</span></b></label>
+            <input type="range" id="slSlider" min="0" max="2" step="0.02" value="1.4"></div>
+          <div class="control"><label>절편 <b><span id="inV">10</span></b></label>
+            <input type="range" id="inSlider" min="-10" max="50" step="1" value="2"></div>
+          <div class="verdict" id="linErr" style="background:#e7defb;color:#4b2f93;font-size:17px"></div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn amber sm" id="linBest" style="flex:1">최적 직선 보기</button>
+            <button class="btn ghost sm" id="linReset">다시</button>
+          </div>
+          <p class="hint" id="linHint" style="margin-top:12px">총오차를 줄여 보세요. 가장 작게 만든 값을 기억해 두세요!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 점검 ========== -->
+  <section id="s6">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--amber)"></span>정리 · 배움 점검</div>
+      <h1 class="sec">오늘의 형성평가</h1>
+      <p class="lead">보기에서 알맞은 답을 골라 보세요. 누르면 바로 정답과 해설이 나옵니다.</p>
+      <div id="quiz"></div>
+      <div class="score" id="quizScore"></div>
+    </div>
+    <p class="foot">Ⅳ. 인공지능 · 2. 기계학습 — 지도학습 (교과서 180~185쪽) · 수업용 인터랙티브 학습 도구</p>
+  </section>
+
+</main>
+
+<script>
+/* ===================== 도입 ===================== */
+document.getElementById('hookBtn').addEventListener('click',function(){
+  document.getElementById('hookRev').classList.add('show');
+});
+
+/* ===================== nav active ===================== */
+const navLinks=[...document.querySelectorAll('#nav a')];
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{
+  if(e.isIntersecting){const id=e.target.id;
+    navLinks.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+id));}});
+},{rootMargin:'-45% 0px -50% 0px'});
+document.querySelectorAll('section').forEach(s=>obs.observe(s));
+
+/* ===================== 분류 vs 회귀 (drag) ===================== */
+const CASES=[
+  {t:'음악 특성으로 장르 나누기',a:'분류'},
+  {t:'얼굴 표정으로 감정 알아내기',a:'분류'},
+  {t:'머리카락 길이·키로 성별 예측',a:'분류'},
+  {t:'영화 관람객 수로 팝콘 판매량 예측',a:'회귀'},
+  {t:'1년 수입으로 소비량 예측',a:'회귀'},
+  {t:'선수 성적으로 다음 시즌 연봉 예측',a:'회귀'},
+];
+const pool=document.getElementById('pool');
+function buildPool(){
+  pool.innerHTML='';
+  document.querySelectorAll('.drop').forEach(d=>d.innerHTML='');
+  document.getElementById('dragMsg').textContent='';
+  CASES.forEach((c,i)=>{
+    const el=document.createElement('div');
+    el.className='case';el.textContent=c.t;el.draggable=true;el.dataset.idx=i;el.dataset.ans=c.a;
+    el.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain',i);el.classList.add('drag')});
+    el.addEventListener('dragend',()=>el.classList.remove('drag'));
+    pool.appendChild(el);
+  });
+}
+document.querySelectorAll('.bin').forEach(bin=>{
+  bin.addEventListener('dragover',e=>{e.preventDefault();bin.classList.add('over')});
+  bin.addEventListener('dragleave',()=>bin.classList.remove('over'));
+  bin.addEventListener('drop',e=>{
+    e.preventDefault();bin.classList.remove('over');
+    const idx=e.dataTransfer.getData('text/plain');
+    const el=document.querySelector('.case[data-idx="'+idx+'"]');
+    if(el){el.classList.remove('ok','no');bin.querySelector('.drop').appendChild(el);}
+  });
+});
+document.getElementById('checkDrag').addEventListener('click',()=>{
+  let placed=0,correct=0;
+  document.querySelectorAll('.bin').forEach(bin=>{
+    const type=bin.dataset.type;
+    bin.querySelectorAll('.case').forEach(c=>{
+      placed++;
+      const ok=c.dataset.ans===type;
+      c.classList.toggle('ok',ok);c.classList.toggle('no',!ok);
+      if(ok)correct++;
+    });
+  });
+  const msg=document.getElementById('dragMsg');
+  if(placed<CASES.length){msg.style.color='var(--mut)';msg.textContent='아직 분류하지 않은 카드가 있어요.';return;}
+  if(correct===CASES.length){msg.style.color='var(--good)';msg.textContent='완벽해요! 6개 모두 정답 🎉';}
+  else{msg.style.color='var(--bad)';msg.textContent=correct+'/6 정답 — 빨간 카드를 다시 옮겨 보세요.';}
+});
+document.getElementById('resetDrag').addEventListener('click',buildPool);
+buildPool();
+
+/* ===================== k-NN ===================== */
+const KNN_SVG=document.getElementById('knn');
+const SVGNS='http://www.w3.org/2000/svg';
+const PAD=40, W=480, H=380, PLOT_W=W-PAD*1.4, PLOT_H=H-PAD*1.6;
+const DEFAULT_NEW={x:50,y:50};
+let newPt={...DEFAULT_NEW};
+const PTS=[ // data space 0..100
+  {x:45,y:52,c:'dog'},{x:56,y:47,c:'dog'},{x:28,y:30,c:'dog'},{x:76,y:72,c:'dog'},{x:15,y:62,c:'dog'},{x:35,y:82,c:'dog'},
+  {x:58,y:58,c:'cat'},{x:40,y:42,c:'cat'},{x:62,y:44,c:'cat'},{x:20,y:76,c:'cat'},{x:82,y:24,c:'cat'},{x:88,y:60,c:'cat'},
+];
+const COL={dog:'#E2622E',cat:'#0E9594'};
+function dx(x){return PAD*1.1 + x/100*PLOT_W;}
+function dy(y){return PAD*0.6 + (100-y)/100*PLOT_H;}
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function drawKNN(){
+  const k=+document.getElementById('kSlider').value;
+  KNN_SVG.innerHTML='';
+  // axes
+  KNN_SVG.appendChild(el('line',{x1:dx(0),y1:dy(0),x2:dx(100),y2:dy(0),stroke:'#c3cad9','stroke-width':1.5}));
+  KNN_SVG.appendChild(el('line',{x1:dx(0),y1:dy(0),x2:dx(0),y2:dy(100),stroke:'#c3cad9','stroke-width':1.5}));
+  const xl=el('text',{x:dx(100),y:dy(0)+22,'text-anchor':'end',fill:'#697390','font-size':12,'font-weight':700});xl.textContent='무게 →';KNN_SVG.appendChild(xl);
+  const yl=el('text',{x:dx(0)-8,y:dy(100)-6,'text-anchor':'start',fill:'#697390','font-size':12,'font-weight':700});yl.textContent='↑ 크기';KNN_SVG.appendChild(yl);
+  // distances
+  const dists=PTS.map(p=>({...p,d:Math.hypot(p.x-newPt.x,p.y-newPt.y)})).sort((a,b)=>a.d-b.d);
+  const near=dists.slice(0,k);
+  // connection lines to k nearest
+  near.forEach(p=>KNN_SVG.appendChild(el('line',{x1:dx(newPt.x),y1:dy(newPt.y),x2:dx(p.x),y2:dy(p.y),
+    stroke:COL[p.c],'stroke-width':2,'stroke-dasharray':'4 4',opacity:.65})));
+  // all points
+  const nearSet=new Set(near.map(p=>p.x+','+p.y));
+  PTS.forEach(p=>{
+    const on=nearSet.has(p.x+','+p.y);
+    KNN_SVG.appendChild(el('circle',{cx:dx(p.x),cy:dy(p.y),r:on?11:8,fill:COL[p.c],
+      stroke:on?'#1E2A4A':'#fff','stroke-width':on?3:2,opacity:on?1:.85}));
+  });
+  // new point (draggable)
+  const ng=el('g',{id:'newpt',style:'cursor:grab'});
+  ng.appendChild(el('circle',{cx:dx(newPt.x),cy:dy(newPt.y),r:14,fill:'#ffffff',stroke:'#1E2A4A','stroke-width':3}));
+  const q=el('text',{x:dx(newPt.x),y:dy(newPt.y)+5,'text-anchor':'middle',fill:'#1E2A4A','font-size':16,'font-weight':800});q.textContent='?';
+  ng.appendChild(q);KNN_SVG.appendChild(ng);
+  // tally + verdict
+  const nd=near.filter(p=>p.c==='dog').length, nc=k-nd;
+  document.getElementById('kval').textContent=k;
+  document.getElementById('knnTally').innerHTML=
+    '<span class="t"><span class="swatch" style="background:'+COL.dog+'"></span>개 '+nd+'</span>'+
+    '<span class="t"><span class="swatch" style="background:'+COL.cat+'"></span>고양이 '+nc+'</span>';
+  const win=nd>nc?'dog':'cat';
+  const v=document.getElementById('knnVerdict');
+  v.textContent=(win==='dog'?'🐶 개로 분류':'🐱 고양이로 분류');
+  v.style.background=win==='dog'?'#fbe5d8':'#d6f0ef';
+  v.style.color=win==='dog'?'#b54b1f':'#0a6f6e';
+}
+// drag new point
+let dragging=false;
+function svgPt(evt){
+  const r=KNN_SVG.getBoundingClientRect();
+  const px=(evt.touches?evt.touches[0].clientX:evt.clientX)-r.left;
+  const py=(evt.touches?evt.touches[0].clientY:evt.clientY)-r.top;
+  const vx=px/r.width*W, vy=py/r.height*H;
+  let x=(vx-PAD*1.1)/PLOT_W*100;
+  let y=100-(vy-PAD*0.6)/PLOT_H*100;
+  return {x:Math.max(2,Math.min(98,x)),y:Math.max(2,Math.min(98,y))};
+}
+function startDrag(e){const t=e.target.closest('#newpt');if(t){dragging=true;e.preventDefault();}}
+function moveDrag(e){if(!dragging)return;newPt=svgPt(e);drawKNN();e.preventDefault();}
+function endDrag(){dragging=false;}
+KNN_SVG.addEventListener('mousedown',startDrag);KNN_SVG.addEventListener('touchstart',startDrag,{passive:false});
+window.addEventListener('mousemove',moveDrag);window.addEventListener('touchmove',moveDrag,{passive:false});
+window.addEventListener('mouseup',endDrag);window.addEventListener('touchend',endDrag);
+document.getElementById('kSlider').addEventListener('input',drawKNN);
+document.getElementById('knnReset').addEventListener('click',()=>{newPt={...DEFAULT_NEW};document.getElementById('kSlider').value=3;drawKNN();});
+drawKNN();
+
+/* ===================== 의사결정트리 ===================== */
+const TREE={
+  q:'다리가 4개인가요?',
+  yes:{q:'몸집이 큰가요?',
+        yes:{q:'사람을 태울 수 있나요?',yes:{leaf:'🐴 말'},no:{leaf:'🐯 호랑이'}},
+        no:{q:'“야옹” 소리를 내나요?',yes:{leaf:'🐱 고양이'},no:{leaf:'🐶 개'}}},
+  no:{q:'날 수 있나요?',
+       yes:{leaf:'🦅 새'},
+       no:{q:'물속에 사나요?',yes:{leaf:'🐟 물고기'},no:{leaf:'🐍 뱀'}}},
+};
+let path=[];
+function renderTree(node){
+  const qEl=document.getElementById('treeQ'),oEl=document.getElementById('treeOpts'),
+        lEl=document.getElementById('treeLeaf');
+  if(node.leaf){
+    qEl.style.display='none';oEl.style.display='none';
+    lEl.style.display='block';lEl.textContent='분류 결과 (리프 노드): '+node.leaf;
+    drawPath();return;
+  }
+  qEl.style.display='block';oEl.style.display='flex';lEl.style.display='none';
+  qEl.textContent=node.q;oEl.innerHTML='';
+  [['예','yes','amber'],['아니요','no','ghost']].forEach(([lab,key,cls])=>{
+    const b=document.createElement('button');b.className='btn '+cls+' sm';b.textContent=lab;
+    b.onclick=()=>{path.push(node.q+' → '+lab);renderTree(node[key]);};
+    oEl.appendChild(b);
+  });
+  drawPath();
+}
+function drawPath(){
+  document.getElementById('treePath').innerHTML = path.length
+    ? '지나온 질문: '+path.map(p=>'<span>'+p+'</span>').join('') : '';
+}
+document.getElementById('treeReset').addEventListener('click',()=>{path=[];renderTree(TREE);});
+renderTree(TREE);
+
+/* ===================== 로지스틱 회귀 ===================== */
+const LG=document.getElementById('logit'), LW=480,LH=320,LP=40;
+const HAIR=[24,30,38,44,52,58,66,74]; // 강아지 털 길이 표본
+function lx(v){return LP+ v/100*(LW-LP*1.6);}
+function ly(p){return (LH-LP) - p*(LH-LP*1.6);} // p 0..1
+function sigmoid(x,x0){return 1/(1+Math.exp(-0.18*(x-x0)));}
+function drawLogit(){
+  const th=+document.getElementById('thSlider').value;
+  LG.innerHTML='';
+  // axes
+  LG.appendChild(el('line',{x1:lx(0),y1:ly(0),x2:lx(100),y2:ly(0),stroke:'#c3cad9','stroke-width':1.5}));
+  LG.appendChild(el('line',{x1:lx(0),y1:ly(0),x2:lx(0),y2:ly(1),stroke:'#c3cad9','stroke-width':1.5}));
+  const xl=el('text',{x:lx(100),y:ly(0)+22,'text-anchor':'end',fill:'#697390','font-size':12,'font-weight':700});xl.textContent='털 길이 →';LG.appendChild(xl);
+  const yl=el('text',{x:lx(0)-6,y:ly(1)-6,fill:'#697390','font-size':11,'font-weight':700});yl.textContent='이발 필요 확률';LG.appendChild(yl);
+  // 0.5 line
+  LG.appendChild(el('line',{x1:lx(0),y1:ly(.5),x2:lx(100),y2:ly(.5),stroke:'#c3cad9','stroke-width':1,'stroke-dasharray':'3 4'}));
+  const h5=el('text',{x:lx(100),y:ly(.5)-5,'text-anchor':'end',fill:'#9aa3b8','font-size':10});h5.textContent='0.5';LG.appendChild(h5);
+  // sigmoid path (centered at th)
+  let d='';for(let x=0;x<=100;x+=2){const p=sigmoid(x,th);d+=(x===0?'M':'L')+lx(x).toFixed(1)+' '+ly(p).toFixed(1)+' ';}
+  LG.appendChild(el('path',{d,fill:'none',stroke:'#6D4ABF','stroke-width':3}));
+  // threshold vertical
+  LG.appendChild(el('line',{x1:lx(th),y1:ly(0),x2:lx(th),y2:ly(1),stroke:'#1E2A4A','stroke-width':2,'stroke-dasharray':'5 4'}));
+  const tt=el('text',{x:lx(th),y:ly(1)-4,'text-anchor':'middle',fill:'#1E2A4A','font-size':11,'font-weight':800});tt.textContent='기준';LG.appendChild(tt);
+  // points
+  let need=0,no=0;
+  HAIR.forEach(v=>{const p=sigmoid(v,th);const isNeed=v>th;
+    if(isNeed)need++;else no++;
+    LG.appendChild(el('circle',{cx:lx(v),cy:ly(p),r:8,fill:isNeed?'#E2622E':'#9aa3b8',
+      stroke:'#fff','stroke-width':2}));
+  });
+  document.getElementById('thVal').textContent=th;
+  document.getElementById('logitTally').innerHTML=
+    '<span class="t"><span class="swatch" style="background:#E2622E"></span>이발 필요 '+need+'</span>'+
+    '<span class="t"><span class="swatch" style="background:#9aa3b8"></span>불필요 '+no+'</span>';
+  document.getElementById('logitVerdict').textContent='기준 '+th+'보다 털이 길면 → 이발 필요로 분류';
+}
+document.getElementById('thSlider').addEventListener('input',drawLogit);
+drawLogit();
+
+/* ===================== 선형 회귀 ===================== */
+const LN=document.getElementById('lin'), NW=480,NH=360,NP=42;
+const DATA=[[8,16],[16,22],[24,30],[33,38],[41,46],[50,52],[58,62],[66,66],[75,78],[84,82],[92,92]];
+// best fit (least squares)
+(function(){let n=DATA.length,sx=0,sy=0,sxy=0,sxx=0;
+  DATA.forEach(([x,y])=>{sx+=x;sy+=y;sxy+=x*y;sxx+=x*x;});
+  const m=(n*sxy-sx*sy)/(n*sxx-sx*sx); const b=(sy-m*sx)/n;
+  window.BEST={m,b};
+  let sse=0;DATA.forEach(([x,y])=>{const e=y-(m*x+b);sse+=e*e;});window.BEST.sse=sse;
+})();
+function nx(x){return NP+ x/100*(NW-NP*1.5);}
+function ny(y){return (NH-NP) - y/100*(NH-NP*1.6);}
+function drawLin(){
+  const m=+document.getElementById('slSlider').value, b=+document.getElementById('inSlider').value;
+  LN.innerHTML='';
+  LN.appendChild(el('line',{x1:nx(0),y1:ny(0),x2:nx(100),y2:ny(0),stroke:'#c3cad9','stroke-width':1.5}));
+  LN.appendChild(el('line',{x1:nx(0),y1:ny(0),x2:nx(0),y2:ny(100),stroke:'#c3cad9','stroke-width':1.5}));
+  const xl=el('text',{x:nx(100),y:ny(0)+22,'text-anchor':'end',fill:'#697390','font-size':12,'font-weight':700});xl.textContent='독립변수 x →';LN.appendChild(xl);
+  const yl=el('text',{x:nx(0)-6,y:ny(100)-6,fill:'#697390','font-size':12,'font-weight':700});yl.textContent='종속변수 y';LN.appendChild(yl);
+  // regression line (clip to plot)
+  const y0=b, y100=m*100+b;
+  LN.appendChild(el('line',{x1:nx(0),y1:ny(Math.max(-20,Math.min(120,y0))),x2:nx(100),y2:ny(Math.max(-20,Math.min(120,y100))),
+    stroke:'#6D4ABF','stroke-width':3}));
+  // residuals + points
+  let sse=0;
+  DATA.forEach(([x,y])=>{
+    const pred=m*x+b; const e=y-pred; sse+=e*e;
+    LN.appendChild(el('line',{x1:nx(x),y1:ny(y),x2:nx(x),y2:ny(pred),stroke:'#D6453B','stroke-width':2,opacity:.7}));
+  });
+  DATA.forEach(([x,y])=>LN.appendChild(el('circle',{cx:nx(x),cy:ny(y),r:7,fill:'#1E2A4A',stroke:'#fff','stroke-width':2})));
+  document.getElementById('slV').textContent=m.toFixed(2);
+  document.getElementById('inV').textContent=b;
+  const err=Math.round(sse);
+  const ev=document.getElementById('linErr');
+  ev.textContent='총오차 (오차²의 합) = '+err;
+  // closeness feedback
+  const ratio=window.BEST.sse/sse; // <=1
+  const hint=document.getElementById('linHint');
+  if(err<=Math.round(window.BEST.sse)+30){hint.style.color='var(--good)';hint.innerHTML='👏 거의 최적이에요! 더 줄이기 어렵습니다.';}
+  else if(err<=Math.round(window.BEST.sse)*2){hint.style.color='var(--amber)';hint.innerHTML='좋아요 — 조금만 더 줄여 볼 수 있어요.';}
+  else{hint.style.color='var(--mut)';hint.innerHTML='빨간 오차선이 길어요. 직선을 점들 가운데로 옮겨 보세요.';}
+}
+document.getElementById('slSlider').addEventListener('input',drawLin);
+document.getElementById('inSlider').addEventListener('input',drawLin);
+document.getElementById('linBest').addEventListener('click',()=>{
+  document.getElementById('slSlider').value=window.BEST.m.toFixed(2);
+  document.getElementById('inSlider').value=Math.round(window.BEST.b);
+  drawLin();
+  document.getElementById('linHint').innerHTML='✅ 이것이 <b>오차를 최소화하는 직선</b> (최소제곱법)! 총오차 ≈ '+Math.round(window.BEST.sse);
+  document.getElementById('linHint').style.color='var(--reg)';
+});
+document.getElementById('linReset').addEventListener('click',()=>{
+  document.getElementById('slSlider').value=1.4;document.getElementById('inSlider').value=2;drawLin();});
+drawLin();
+
+/* ===================== 퀴즈 ===================== */
+const QUIZ=[
+  {q:'1. 종속변수가 ‘22.5℃, 27.6℃’처럼 연속적인 수치라면, 이 문제는?',
+   opts:['분류','회귀','정규화','부트스트랩'],ans:1,
+   ex:'정답은 회귀. 연속적인 실수형 값을 예측하면 회귀, 범주(맑음/흐림)면 분류입니다.'},
+  {q:'2. “데이터 사이의 거리를 재서, 가까운 k개의 이웃으로 분류한다.” 어떤 알고리즘?',
+   opts:['선형 회귀','의사결정트리','k-최근접 이웃','앙상블'],ans:2,
+   ex:'정답은 k-최근접 이웃(k-NN). 거리 기반이라 단위가 다르면 정규화가 필요합니다.'},
+  {q:'3. “S자 모양 곡선을 이용해 어느 범주에 속하는지 분류한다.” 어떤 알고리즘?',
+   opts:['로지스틱 회귀','선형 회귀','랜덤 포레스트','k-NN'],ans:0,
+   ex:'정답은 로지스틱 회귀. 이름은 회귀지만 하는 일은 분류입니다.'},
+  {q:'4. 선형 회귀가 찾으려는 가장 좋은 직선의 기준은?',
+   opts:['기울기가 가장 큰 직선','오차가 가장 작은 직선','점을 가장 많이 지나는 직선','y절편이 0인 직선'],ans:1,
+   ex:'정답은 오차가 가장 작은 직선. 예측값과 실젯값의 차이(오차)를 최소화합니다.'},
+];
+const quizBox=document.getElementById('quiz');
+let answered=0,right=0;
+QUIZ.forEach((item,qi)=>{
+  const card=document.createElement('div');card.className='q';
+  const t=document.createElement('div');t.className='qt';t.textContent=item.q;card.appendChild(t);
+  const ex=document.createElement('div');ex.className='reveal';ex.textContent=item.ex;
+  item.opts.forEach((o,oi)=>{
+    const btn=document.createElement('button');btn.className='opt';btn.textContent=o;
+    btn.onclick=()=>{
+      [...card.querySelectorAll('.opt')].forEach(b=>b.disabled=true);
+      const ok=oi===item.ans;
+      btn.classList.add(ok?'correct':'wrong');
+      if(!ok)card.querySelectorAll('.opt')[item.ans].classList.add('correct');
+      ex.classList.add('show');
+      answered++; if(ok)right++;
+      if(answered===QUIZ.length){
+        const s=document.getElementById('quizScore');s.classList.add('show');
+        s.textContent='점검 완료 — '+right+' / '+QUIZ.length+' 정답!'+(right===QUIZ.length?' 🎉 오늘 배움 완벽 도달!':' 다시 한 번 짚어 볼까요?');
+        s.style.background=right===QUIZ.length?'#eaf6ef':'var(--soft)';
+        s.style.color=right===QUIZ.length?'#15663a':'var(--ink)';
+      }
+    };
+    card.appendChild(btn);
+  });
+  card.appendChild(ex);quizBox.appendChild(card);
+});
+</script>
+</body>
+</html>
