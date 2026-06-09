@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>비지도학습 인터랙티브 — 군집과 k-평균</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --ink:#1E2A4A; --ink2:#33416b;
+    --bg:#EEF2F8; --card:#FFFFFF; --line:#D7DEEC; --soft:#F3F6FB;
+    --c1:#6D4ABF; --c2:#0E9594; --c3:#E2622E; --c4:#1F9D55;
+    --amber:#F5A201; --good:#1F9D55; --bad:#D6453B; --mut:#697390;
+    --r:16px; --sh:0 6px 24px rgba(30,42,74,.08); --sh2:0 2px 8px rgba(30,42,74,.06);
+    --ff:'Pretendard',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);line-height:1.55;-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:50;background:rgba(30,42,74,.97);backdrop-filter:blur(6px);box-shadow:0 2px 14px rgba(0,0,0,.18)}
+  .nav-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:10px 18px;overflow-x:auto;scrollbar-width:none}
+  .nav-in::-webkit-scrollbar{display:none}
+  .brand{color:#fff;font-weight:800;font-size:15px;white-space:nowrap;letter-spacing:-.2px}
+  .brand b{color:var(--amber)}
+  nav{display:flex;gap:6px;margin-left:auto}
+  nav a{color:#c3cde2;text-decoration:none;font-size:13.5px;font-weight:600;padding:6px 11px;border-radius:999px;white-space:nowrap;transition:.18s}
+  nav a:hover{color:#fff;background:rgba(255,255,255,.12)}
+  nav a.on{color:var(--ink);background:var(--amber)}
+  main{max-width:1080px;margin:0 auto;padding:28px 18px 90px}
+  section{margin:30px 0;scroll-margin-top:74px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:26px 26px 30px;position:relative;overflow:hidden}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;letter-spacing:.4px;color:var(--mut);text-transform:uppercase;margin-bottom:8px}
+  .eyebrow .dot{width:9px;height:9px;border-radius:50%}
+  h1.sec{font-size:25px;font-weight:800;margin:0 0 6px;letter-spacing:-.5px}
+  .lead{color:var(--ink2);font-size:15.5px;margin:0 0 18px;max-width:760px}
+  .hero{background:linear-gradient(135deg,#1E2A4A 0%,#2c3a64 60%,#3a4a7a 100%);color:#fff;border:none}
+  .hero .eyebrow{color:#a9b6d6}
+  .hero h1.sec{color:#fff;font-size:30px}
+  .hero .lead{color:#d4dcf0}
+  .btn{appearance:none;border:none;cursor:pointer;font-family:var(--ff);font-weight:700;border-radius:11px;padding:11px 18px;font-size:14.5px;transition:.16s;background:var(--ink);color:#fff}
+  .btn:hover{transform:translateY(-1px);box-shadow:var(--sh2)}
+  .btn:active{transform:translateY(0)}
+  .btn:disabled{opacity:.45;cursor:default;transform:none}
+  .btn.amber{background:var(--amber);color:var(--ink)}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:8px 13px;font-size:13px;border-radius:9px}
+  .reveal{margin-top:16px;padding:16px 18px;border-radius:12px;background:var(--soft);border:1px dashed var(--line);font-size:15px;display:none}
+  .reveal.show{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:800}
+  .chip.sup{background:#fbe5d8;color:#b54b1f} .chip.uns{background:#e7defb;color:#4b2f93}
+  .pool{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 20px}
+  .case{padding:10px 14px;border-radius:11px;background:#fff;border:1.5px solid var(--line);font-size:14px;font-weight:600;cursor:grab;box-shadow:var(--sh2);transition:.12s;user-select:none}
+  .case:active{cursor:grabbing}
+  .bins{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .bin{min-height:120px;border-radius:14px;padding:14px;border:2px dashed var(--line);background:var(--soft);transition:.15s}
+  .bin h4{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}
+  .bin.sup{border-color:#f0b79a} .bin.sup.over{background:#fbe5d8;border-color:var(--c3)}
+  .bin.uns{border-color:#bba6e8} .bin.uns.over{background:#e7defb;border-color:var(--c1)}
+  .bin .drop{display:flex;flex-wrap:wrap;gap:8px;min-height:48px}
+  .case.ok{border-color:var(--good);box-shadow:0 0 0 2px rgba(31,157,85,.25)}
+  .case.no{border-color:var(--bad);box-shadow:0 0 0 2px rgba(214,69,59,.25)}
+  .split{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:start}
+  @media(max-width:760px){.split{grid-template-columns:1fr}.bins{grid-template-columns:1fr}.cards3{grid-template-columns:1fr!important}.nav-in{padding:10px 12px}}
+  svg{display:block;width:100%;height:auto;touch-action:none}
+  .panel{background:var(--soft);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .panel h4{margin:0 0 10px;font-size:14px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+  .control{margin:14px 0}
+  .control label{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:6px}
+  input[type=range]{width:100%;height:6px;border-radius:6px;background:#d7deec;-webkit-appearance:none;appearance:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--ink);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25);border:3px solid #fff}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);cursor:pointer;border:3px solid #fff}
+  .hint{font-size:13px;color:var(--mut);margin-top:10px}
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+  .uc{background:var(--soft);border:1px solid var(--line);border-radius:13px;padding:16px;cursor:pointer;transition:.15s}
+  .uc:hover{border-color:var(--c1);transform:translateY(-2px);box-shadow:var(--sh2)}
+  .uc h5{margin:0 0 6px;font-size:15.5px;color:var(--ink)}
+  .uc .why{font-size:13.5px;color:var(--ink2);margin-top:8px;display:none}
+  .uc.open .why{display:block;animation:fade .3s}
+  .uc .tap{font-size:12px;color:var(--mut);font-weight:700}
+  .status{margin-top:10px;text-align:center;font-weight:800;font-size:15px;padding:12px;border-radius:12px;background:#fff;border:1px solid var(--line)}
+  .status.done{background:#eaf6ef;border-color:#b6e0c6;color:#15663a}
+  .iter{display:flex;justify-content:center;gap:18px;margin:8px 0;font-weight:800;font-size:14px;color:var(--ink2)}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:8px;font-size:13px;font-weight:700}
+  .legend .t{display:flex;align-items:center;gap:6px}
+  .sw{width:14px;height:14px;border-radius:50%;display:inline-block}
+  .q{margin:18px 0;padding:18px;border:1px solid var(--line);border-radius:13px;background:#fff}
+  .q .qt{font-weight:800;font-size:15.5px;margin-bottom:12px}
+  .opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--soft);border-radius:10px;padding:11px 14px;margin:8px 0;font-family:var(--ff);font-size:14.5px;font-weight:600;cursor:pointer;transition:.14s;color:var(--ink)}
+  .opt:hover{border-color:var(--ink2)}
+  .opt.correct{background:#eaf6ef;border-color:var(--good);color:#15663a}
+  .opt.wrong{background:#fbeae8;border-color:var(--bad);color:#9c2c24}
+  .opt:disabled{cursor:default}
+  .score{font-size:18px;font-weight:800;text-align:center;margin-top:14px;padding:14px;border-radius:12px;background:var(--soft);display:none}
+  .score.show{display:block}
+  .foot{text-align:center;color:var(--mut);font-size:12.5px;margin-top:40px}
+  .kbd{font-weight:800;color:var(--c1)}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav-in">
+    <span class="brand">기계학습 · <b>비지도학습</b></span>
+    <nav id="nav">
+      <a href="#s0" class="on">도입</a>
+      <a href="#s1">지도 vs 비지도</a>
+      <a href="#s2">군집이란?</a>
+      <a href="#s3">k-평균 체험</a>
+      <a href="#s4">점검</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- 도입 -->
+  <section id="s0">
+    <div class="card hero">
+      <div class="eyebrow"><span class="dot" style="background:var(--amber)"></span>도입 · 생각 열기</div>
+      <h1 class="sec">동영상 앱은 내 취향을 어떻게 알까?</h1>
+      <p class="lead">플랫폼은 내가 ‘좋아요’를 일일이 가르쳐 주지 않아도, 비슷한 취향의 콘텐츠를 알아서 묶어 추천합니다.
+        <b>정답표(레이블) 없이</b> 데이터를 비슷한 것끼리 묶는 일 — 오늘 배울 <b>비지도학습</b>입니다.</p>
+      <button class="btn amber" id="hookBtn">정답을 안 알려줬는데 어떻게 묶지? 🤔</button>
+      <div class="reveal" id="hookRev" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:#eaf0ff">
+        비밀은 <b style="color:var(--amber)">데이터끼리의 거리(유사도)</b>예요. 가까이 모여 있는 것들을 한 덩어리로 묶으면, 누가 정답을 알려주지 않아도 <b style="color:var(--amber)">‘군집(cluster)’</b>이 만들어집니다.
+        오늘은 그 대표 알고리즘 <b style="color:var(--amber)">k-평균</b>을 직접 돌려 봅니다.
+      </div>
+      <p class="lead" style="margin-top:18px;font-size:14px"><b style="color:#fff">학습 목표</b> ① 비지도학습의 특징을 설명한다  ② 군집 알고리즘(k-평균)의 원리를 설명한다</p>
+    </div>
+  </section>
+
+  <!-- 지도 vs 비지도 -->
+  <section id="s1">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--c3)"></span>전개 1 · 두 학습의 차이</div>
+      <h1 class="sec">정답표(레이블)가 있나요?</h1>
+      <p class="lead">데이터에 <b>정답 레이블이 있으면 <span class="chip sup">지도학습</span></b>, <b>없으면 <span class="chip uns">비지도학습</span></b>입니다.
+        아래 카드를 알맞은 상자로 끌어다 놓아 봅시다.</p>
+      <div class="pool" id="pool"></div>
+      <div class="bins">
+        <div class="bin sup" data-type="지도" id="binS">
+          <h4><span class="chip sup">지도학습</span> 정답 레이블이 있음 (예측)</h4>
+          <div class="drop" data-type="지도"></div>
+        </div>
+        <div class="bin uns" data-type="비지도" id="binU">
+          <h4><span class="chip uns">비지도학습</span> 정답 레이블이 없음 (묶기)</h4>
+          <div class="drop" data-type="비지도"></div>
+        </div>
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="checkDrag">정답 확인</button>
+        <button class="btn ghost" id="resetDrag">다시 하기</button>
+        <span id="dragMsg" style="align-self:center;font-weight:700"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 군집이란 -->
+  <section id="s2">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--c1)"></span>전개 2 · 개념 잡기</div>
+      <h1 class="sec">군집(cluster)이란?</h1>
+      <p class="lead">레이블이 없는 데이터를 <b>비슷한 특성을 가진 그룹</b>으로 묶는 것. 예를 들어 키·몸무게만으로 사람을 묶으면,
+        정답을 몰라도 ‘티셔츠 S·M·L’ 같은 <b>새로운 패턴</b>이 드러납니다. 군집은 이렇게 <b>몰랐던 정보를 발견</b>하게 해 줘요.</p>
+      <p class="lead" style="font-weight:700;color:var(--ink)">군집 분석은 어디에 쓰일까? (카드를 눌러 ‘무엇을 기준으로 묶는지’ 확인)</p>
+      <div class="cards3" id="ucards"></div>
+    </div>
+  </section>
+
+  <!-- k-means 체험 -->
+  <section id="s3">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--c1)"></span>전개 2 · 핵심 알고리즘</div>
+      <h1 class="sec">k-평균(k-means) 직접 돌려보기</h1>
+      <p class="lead">k-평균은 <b>① 각 데이터를 가까운 중심점으로 묶고 → ② 중심점을 그 군집의 평균 위치로 옮기는</b> 일을
+        <b>중심점이 더 이상 움직이지 않을 때까지</b> 반복합니다. ★표(중심점)가 어떻게 자리를 찾아가는지 단계별로 눌러 보세요.</p>
+      <div class="split">
+        <div><svg id="km" viewBox="0 0 480 380" aria-label="k-평균 군집화 평면"></svg>
+          <p class="hint">가로축 = 키, 세로축 = 몸무게. ★ = 군집의 중심점. 점은 가장 가까운 ★의 색으로 묶여요.</p>
+          <div class="legend" id="kmLegend"></div>
+        </div>
+        <div class="panel">
+          <h4>조작</h4>
+          <div class="control">
+            <label>군집 수 <b>k = <span id="kmKval">3</span></b></label>
+            <input type="range" id="kmK" min="2" max="4" step="1" value="3">
+          </div>
+          <div class="iter"><span>반복 횟수: <span id="kmIter">0</span></span></div>
+          <div class="status" id="kmStatus">중심점 ★을 아무 곳에나 찍었어요. 먼저 <b>① 묶기</b>부터!</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+            <button class="btn" id="kmStep">다음 단계 ▶ <span id="kmNext">① 가까운 중심으로 묶기</span></button>
+            <div style="display:flex;gap:8px">
+              <button class="btn amber sm" id="kmAuto" style="flex:1">자동 반복 ▶▶</button>
+              <button class="btn ghost sm" id="kmReset">처음으로</button>
+            </div>
+          </div>
+          <p class="hint" style="margin-top:14px">k값(군집 수)을 바꾸면 데이터가 몇 덩어리로 나뉘는지 달라져요. 정답 레이블 없이도 그룹이 만들어지는 게 <b>비지도학습</b>의 힘!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 점검 -->
+  <section id="s4">
+    <div class="card">
+      <div class="eyebrow"><span class="dot" style="background:var(--amber)"></span>정리 · 배움 점검</div>
+      <h1 class="sec">오늘의 형성평가</h1>
+      <p class="lead">보기에서 알맞은 답을 골라 보세요. 누르면 바로 정답과 해설이 나옵니다.</p>
+      <div id="quiz"></div>
+      <div class="score" id="quizScore"></div>
+    </div>
+    <p class="foot">Ⅳ. 인공지능 · 2. 기계학습 — 비지도학습 (교과서 186~187쪽) · 수업용 인터랙티브 학습 도구</p>
+  </section>
+</main>
+
+<script>
+const SVGNS='http://www.w3.org/2000/svg';
+function el(tag,a){const e=document.createElementNS(SVGNS,tag);for(const k in a)e.setAttribute(k,a[k]);return e;}
+
+/* 도입 */
+document.getElementById('hookBtn').addEventListener('click',()=>document.getElementById('hookRev').classList.add('show'));
+
+/* nav active */
+const navLinks=[...document.querySelectorAll('#nav a')];
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const id=e.target.id;
+  navLinks.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+id));}});},{rootMargin:'-45% 0px -50% 0px'});
+document.querySelectorAll('section').forEach(s=>obs.observe(s));
+
+/* ===== 지도 vs 비지도 (drag) ===== */
+const CASES=[
+  {t:'메일이 스팸인지 아닌지 분류',a:'지도'},
+  {t:'집 정보로 집값(가격) 예측',a:'지도'},
+  {t:'사진이 개인지 고양이인지 구별',a:'지도'},
+  {t:'구매 이력 비슷한 고객끼리 묶기',a:'비지도'},
+  {t:'주제 비슷한 뉴스끼리 묶기',a:'비지도'},
+  {t:'취향 비슷한 영화끼리 묶어 추천',a:'비지도'},
+];
+const pool=document.getElementById('pool');
+function buildPool(){
+  pool.innerHTML='';document.querySelectorAll('.drop').forEach(d=>d.innerHTML='');document.getElementById('dragMsg').textContent='';
+  CASES.forEach((c,i)=>{const e=document.createElement('div');e.className='case';e.textContent=c.t;e.draggable=true;e.dataset.idx=i;e.dataset.ans=c.a;
+    e.addEventListener('dragstart',ev=>ev.dataTransfer.setData('text/plain',i));
+    pool.appendChild(e);});
+}
+document.querySelectorAll('.bin').forEach(bin=>{
+  bin.addEventListener('dragover',e=>{e.preventDefault();bin.classList.add('over')});
+  bin.addEventListener('dragleave',()=>bin.classList.remove('over'));
+  bin.addEventListener('drop',e=>{e.preventDefault();bin.classList.remove('over');
+    const idx=e.dataTransfer.getData('text/plain');const el2=document.querySelector('.case[data-idx="'+idx+'"]');
+    if(el2){el2.classList.remove('ok','no');bin.querySelector('.drop').appendChild(el2);}});
+});
+document.getElementById('checkDrag').addEventListener('click',()=>{
+  let placed=0,correct=0;
+  document.querySelectorAll('.bin').forEach(bin=>{const type=bin.dataset.type;
+    bin.querySelectorAll('.case').forEach(c=>{placed++;const ok=c.dataset.ans===type;c.classList.toggle('ok',ok);c.classList.toggle('no',!ok);if(ok)correct++;});});
+  const m=document.getElementById('dragMsg');
+  if(placed<CASES.length){m.style.color='var(--mut)';m.textContent='아직 분류하지 않은 카드가 있어요.';return;}
+  if(correct===CASES.length){m.style.color='var(--good)';m.textContent='완벽해요! 6개 모두 정답 🎉';}
+  else{m.style.color='var(--bad)';m.textContent=correct+'/6 정답 — 빨간 카드를 다시 옮겨 보세요.';}
+});
+document.getElementById('resetDrag').addEventListener('click',buildPool);
+buildPool();
+
+/* ===== 활용 사례 카드 ===== */
+const UC=[
+  {h:'🎬 영화 추천',d:'장르·감독·배우·키워드가 비슷한 영화끼리 묶어, 취향에 맞는 작품을 추천한다.'},
+  {h:'📰 주제별 뉴스',d:'제목·내용·키워드로 주제가 비슷한 기사끼리 묶어, 관심 분야 뉴스를 모아 준다.'},
+  {h:'🛒 마케팅 전략',d:'구매 이력·선호 상품·방문 빈도로 고객 그룹을 나눠, 그룹별 맞춤 전략을 세운다.'},
+];
+const uw=document.getElementById('ucards');
+UC.forEach(u=>{const c=document.createElement('div');c.className='uc';
+  c.innerHTML='<h5>'+u.h+'</h5><div class="tap">👆 무엇을 기준으로 묶을까?</div><div class="why">'+u.d+'</div>';
+  c.onclick=()=>c.classList.toggle('open');uw.appendChild(c);});
+
+/* ===== k-평균 시뮬레이터 ===== */
+const KM=document.getElementById('km'), W=480,H=380,PAD=40;
+const PLOT_W=W-PAD*1.4, PLOT_H=H-PAD*1.6;
+const CCOL=['#6D4ABF','#0E9594','#E2622E','#1F9D55'];
+const CNAME=['보라','청록','주황','초록'];
+// 3 natural clusters (키 x, 몸무게 y) in 0..100 space
+const POINTS=[
+  [20,22],[28,20],[24,30],[32,28],[18,32],[30,24],
+  [48,50],[55,48],[50,58],[58,55],[45,54],[54,60],
+  [75,78],[82,75],[78,85],[85,82],[72,80],[88,72],
+].map(([x,y])=>({x,y,c:-1}));
+const INIT_C=[[40,70],[60,30],[50,52],[28,48]]; // deliberately off-center starts
+let cents=[], iter=0, phase='assign', auto=null;
+function dx(x){return PAD*1.1 + x/100*PLOT_W;}
+function dy(y){return PAD*0.6 + (100-y)/100*PLOT_H;}
+function initKM(){
+  if(auto){clearInterval(auto);auto=null;document.getElementById('kmAuto').textContent='자동 반복 ▶▶';}
+  const k=+document.getElementById('kmK').value;
+  cents=INIT_C.slice(0,k).map((p,i)=>({x:p[0],y:p[1],i}));
+  POINTS.forEach(p=>p.c=-1); iter=0; phase='assign';
+  document.getElementById('kmKval').textContent=k;
+  document.getElementById('kmNext').textContent='① 가까운 중심으로 묶기';
+  document.getElementById('kmStep').disabled=false;
+  setStatus('중심점 ★을 아무 곳에나 찍었어요. 먼저 <b>① 묶기</b>부터!',false);
+  drawKM();
+}
+function setStatus(html,done){const s=document.getElementById('kmStatus');s.innerHTML=html;s.classList.toggle('done',!!done);}
+function assign(){
+  POINTS.forEach(p=>{let best=0,bd=1e9;cents.forEach((c,i)=>{const d=(p.x-c.x)**2+(p.y-c.y)**2;if(d<bd){bd=d;best=i;}});p.c=best;});
+}
+function update(){
+  let moved=0;
+  cents.forEach((c,i)=>{const mine=POINTS.filter(p=>p.c===i);
+    if(mine.length){const mx=mine.reduce((s,p)=>s+p.x,0)/mine.length, my=mine.reduce((s,p)=>s+p.y,0)/mine.length;
+      moved=Math.max(moved,Math.hypot(mx-c.x,my-c.y));c.x=mx;c.y=my;}});
+  return moved;
+}
+function drawKM(){
+  const k=+document.getElementById('kmK').value;
+  KM.innerHTML='';
+  KM.appendChild(el('line',{x1:dx(0),y1:dy(0),x2:dx(100),y2:dy(0),stroke:'#c3cad9','stroke-width':1.5}));
+  KM.appendChild(el('line',{x1:dx(0),y1:dy(0),x2:dx(0),y2:dy(100),stroke:'#c3cad9','stroke-width':1.5}));
+  const xl=el('text',{x:dx(100),y:dy(0)+22,'text-anchor':'end',fill:'#697390','font-size':12,'font-weight':700});xl.textContent='키 →';KM.appendChild(xl);
+  const yl=el('text',{x:dx(0)-8,y:dy(100)-6,fill:'#697390','font-size':12,'font-weight':700});yl.textContent='↑ 몸무게';KM.appendChild(yl);
+  // lines point->centroid (if assigned)
+  POINTS.forEach(p=>{if(p.c>=0){const c=cents[p.c];KM.appendChild(el('line',{x1:dx(p.x),y1:dy(p.y),x2:dx(c.x),y2:dy(c.y),stroke:CCOL[p.c],'stroke-width':1,opacity:.3}));}});
+  // points
+  POINTS.forEach(p=>{const col=p.c>=0?CCOL[p.c]:'#9aa3b8';
+    KM.appendChild(el('circle',{cx:dx(p.x),cy:dy(p.y),r:8,fill:col,stroke:'#fff','stroke-width':2,opacity:.92}));});
+  // centroids as ★
+  cents.forEach((c,i)=>{
+    KM.appendChild(el('circle',{cx:dx(c.x),cy:dy(c.y),r:15,fill:'#fff',stroke:CCOL[i],'stroke-width':3}));
+    const star=el('text',{x:dx(c.x),y:dy(c.y)+6,'text-anchor':'middle','font-size':18,fill:CCOL[i],'font-weight':900});star.textContent='★';KM.appendChild(star);
+  });
+  // legend
+  document.getElementById('kmLegend').innerHTML=cents.map((c,i)=>'<span class="t"><span class="sw" style="background:'+CCOL[i]+'"></span>군집 '+(i+1)+'</span>').join('');
+}
+function step(){
+  if(phase==='assign'){assign();phase='update';
+    document.getElementById('kmNext').textContent='② 중심점을 평균으로 이동';
+    setStatus('각 점을 <b>가장 가까운 ★</b>의 군집으로 묶었어요. 이제 <b>② 중심 이동</b>!',false);
+  }else{
+    const moved=update();iter++;phase='assign';
+    document.getElementById('kmNext').textContent='① 가까운 중심으로 묶기';
+    document.getElementById('kmIter').textContent=iter;
+    if(moved<0.6){setStatus('✅ 중심점이 거의 움직이지 않아요 — <b>군집 완성!</b>',true);
+      if(auto){clearInterval(auto);auto=null;document.getElementById('kmAuto').textContent='자동 반복 ▶▶';}
+    }else{setStatus('★을 군집의 <b>평균 위치</b>로 옮겼어요. 다시 <b>① 묶기</b>로 확인!',false);}
+  }
+  drawKM();
+}
+document.getElementById('kmStep').addEventListener('click',step);
+document.getElementById('kmK').addEventListener('input',initKM);
+document.getElementById('kmReset').addEventListener('click',initKM);
+document.getElementById('kmAuto').addEventListener('click',function(){
+  if(auto){clearInterval(auto);auto=null;this.textContent='자동 반복 ▶▶';return;}
+  this.textContent='⏸ 멈추기';
+  auto=setInterval(step,700);
+});
+initKM();
+
+/* ===== 퀴즈 ===== */
+const QUIZ=[
+  {q:'1. 정답(레이블) 없이 데이터를 학습하는 방식은?',
+   opts:['지도학습','비지도학습','강화학습','선형 회귀'],ans:1,
+   ex:'정답은 비지도학습. 레이블이 없는 데이터를 비슷한 특성으로 묶습니다.'},
+  {q:'2. “거리를 이용해 데이터를 k개의 군집으로 묶는” 대표적 알고리즘은?',
+   opts:['의사결정트리','선형 회귀','k-평균','로지스틱 회귀'],ans:2,
+   ex:'정답은 k-평균(k-means). 비지도학습의 대표적인 군집 알고리즘입니다.'},
+  {q:'3. k-평균에서 ‘중심점(★)’은 어떻게 갱신할까?',
+   opts:['항상 처음 위치 그대로 둔다','자기 군집에 속한 데이터의 평균 위치로 옮긴다','가장 먼 점으로 옮긴다','무작위로 다시 찍는다'],ans:1,
+   ex:'정답은 평균 위치로 이동. 이 과정을 중심점이 안 바뀔 때까지 반복합니다.'},
+  {q:'4. 다음 중 비지도학습(군집)의 예로 알맞은 것은?',
+   opts:['메일을 스팸/정상으로 분류','집값을 예측','취향 비슷한 영화끼리 묶어 추천','사진 속 동물 이름 맞히기'],ans:2,
+   ex:'정답은 영화 군집 추천. 나머지는 정답 레이블이 있는 지도학습입니다.'},
+];
+const quizBox=document.getElementById('quiz');let answered=0,right=0;
+QUIZ.forEach(item=>{
+  const card=document.createElement('div');card.className='q';
+  const t=document.createElement('div');t.className='qt';t.textContent=item.q;card.appendChild(t);
+  const ex=document.createElement('div');ex.className='reveal';ex.textContent=item.ex;
+  item.opts.forEach((o,oi)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>{[...card.querySelectorAll('.opt')].forEach(x=>x.disabled=true);
+      const ok=oi===item.ans;b.classList.add(ok?'correct':'wrong');
+      if(!ok)card.querySelectorAll('.opt')[item.ans].classList.add('correct');
+      ex.classList.add('show');answered++;if(ok)right++;
+      if(answered===QUIZ.length){const s=document.getElementById('quizScore');s.classList.add('show');
+        s.textContent='점검 완료 — '+right+' / '+QUIZ.length+' 정답!'+(right===QUIZ.length?' 🎉 오늘 배움 완벽 도달!':' 다시 한 번 짚어 볼까요?');
+        s.style.background=right===QUIZ.length?'#eaf6ef':'var(--soft)';s.style.color=right===QUIZ.length?'#15663a':'var(--ink)';}};
+    card.appendChild(b);});
+  card.appendChild(ex);quizBox.appendChild(card);
+});
+</script>
+</body>
+</html>
