@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F6EFE3">
+<title>우리 집 AI 사용 약속문</title>
+<meta name="description" content="아이와 함께 우리 집 AI 사용 약속을 고르고, 이미지로 저장해 냉장고에 붙여 보세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Gowun+Batang:wght@700&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6EFE3; --card:#FFFDF8; --line:#E4D8C4; --ink:#2E2A26; --body:#5E564A; --muted:#8A7F70;
+    --red:#C4503A; --gold:#E3B23C; --green:#7A8B6F; --tint:#F1EADF;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    -webkit-text-size-adjust:100%;}
+  body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .wrap{max-width:560px;margin:0 auto;padding:0 16px}
+  header{padding:28px 4px 8px}
+  .eyebrow{font-size:13px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+  h1{font-family:"Gowun Batang",serif;font-size:30px;line-height:1.3;margin:8px 0 10px;letter-spacing:-.01em}
+  h1 em{font-style:normal;color:var(--red)}
+  .lead{font-size:15px;line-height:1.65;color:var(--body);margin:0}
+  .privacy{display:flex;gap:8px;align-items:flex-start;margin:14px 0 4px;padding:10px 12px;border-radius:12px;background:#EEF1E9;color:#4D5A45;font-size:13px;line-height:1.5}
+  .privacy b{font-weight:700}
+  section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:14px 0}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px}
+  .step h2{font-size:18px;margin:0;font-weight:700}
+  .hint{font-size:13px;color:var(--muted);margin:-4px 0 12px;line-height:1.55}
+  input[type=text]{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);outline:none}
+  input[type=text]:focus{border-color:var(--ink)}
+  .group{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--muted)}
+  .opt{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;margin:7px 0;background:#fff;cursor:pointer;font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+  .opt input{position:absolute;opacity:0;pointer-events:none}
+  .box{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid #CFC3AE;margin-top:1px;display:grid;place-items:center;transition:.15s}
+  .opt.on{border-color:var(--ink);background:#FBF6EC}
+  .opt.on .box{background:var(--ink);border-color:var(--ink)}
+  .opt.on .box::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .opt.radio .box{border-radius:50%}
+  .opt.dis{opacity:.45}
+  .row{display:flex;gap:8px}
+  .btn{font:inherit;font-weight:700;font-size:15px;border:none;border-radius:12px;padding:12px 16px;cursor:pointer;white-space:nowrap}
+  .btn.dark{background:var(--ink);color:#fff}
+  .btn.ghost{background:var(--tint);color:var(--ink)}
+  .count{font-size:13px;color:var(--muted);font-weight:500;margin-left:auto}
+  .mine{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+  .mine-title{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center}
+  .item{display:flex;gap:8px;align-items:center;margin:6px 0}
+  .item .dot{flex:none;width:24px;height:24px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+  .item input{padding:9px 11px;font-size:15px}
+  .x{flex:none;width:36px;height:36px;border:none;border-radius:10px;background:var(--tint);color:var(--muted);font-size:18px;cursor:pointer}
+  .warn{font-size:12.5px;color:#9A4A2E;background:#FBEDE6;border-radius:8px;padding:6px 10px;margin:2px 0 6px 32px;line-height:1.5}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--tint);border-radius:999px;padding:7px 8px 7px 14px;font-size:15px}
+  .chip button{border:none;background:#E6DCCB;border-radius:50%;width:22px;height:22px;cursor:pointer;color:var(--muted);font-size:13px;line-height:1}
+  .themes{display:flex;gap:10px}
+  .theme{flex:1;border:2px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;font-size:13px;cursor:pointer;background:#fff}
+  .theme.on{border-color:var(--ink)}
+  .sw{height:30px;border-radius:8px;margin-bottom:6px}
+  .preview canvas{width:100%;height:auto;display:block;border-radius:12px;box-shadow:0 6px 24px rgba(46,42,38,.12)}
+  .bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(246,239,227,0),var(--bg) 30%)}
+  .bar .btn{display:block;width:100%;max-width:528px;margin:0 auto;padding:16px;font-size:17px;border-radius:14px;background:var(--red);color:#fff;box-shadow:0 6px 18px rgba(196,80,58,.3)}
+  .modal{position:fixed;inset:0;background:rgba(30,27,24,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal.show{display:flex}
+  .sheet{background:var(--card);border-radius:20px;max-width:440px;width:100%;max-height:92vh;overflow:auto;padding:16px}
+  .sheet img{width:100%;border-radius:10px;display:block;-webkit-touch-callout:default}
+  .sheet p{font-size:14px;color:var(--body);line-height:1.6;margin:12px 2px}
+  .sheet .row .btn{flex:1}
+  footer{text-align:center;font-size:12px;color:var(--muted);padding:8px 0 20px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">AI 시대, 부모의 질문법 · 가정 활동</div>
+    <h1>우리 집 <em>AI 사용 약속문</em></h1>
+    <p class="lead">오늘 배운 원칙 중 우리 집에 맞는 약속을 아이와 함께 골라 보세요. 다 만들면 이미지로 저장해서 냉장고에 붙이거나 가족 단톡방에 올릴 수 있어요.</p>
+    <div class="privacy">🔒 <span>입력하신 내용은 <b>어디에도 저장되거나 전송되지 않아요.</b> 이 화면을 닫으면 사라집니다.</span></div>
+  </header>
+
+  <section>
+    <div class="step"><span class="num" style="background:var(--red)">1</span><h2>우리 가족 이름</h2></div>
+    <p class="hint">약속문 제목에 들어가요. 비워 두면 ‘우리 집’으로 나와요.</p>
+    <input type="text" id="family" maxlength="10" placeholder="예: 민준이네, 행복한 우리 집">
+  </section>
+
+  <section>
+    <div class="step"><span class="num" style="background:var(--gold)">2</span><h2>아이와 함께 지킬 약속</h2><span class="count" id="count"></span></div>
+    <p class="hint">3~5개를 추천해요. 최대 6개까지 고를 수 있어요.</p>
+    <div id="presets"></div>
+    <div class="mine">
+      <div class="mine-title">직접 쓰기</div>
+      <div class="row">
+        <input type="text" id="custom" maxlength="40" placeholder="예: 숙제는 먼저 혼자 풀고 AI로 채점한다">
+        <button class="btn dark" id="addCustom" type="button">추가</button>
+      </div>
+      <p class="hint" style="margin:8px 0 0">‘적당히’, ‘가끔’보다 <b>지켰는지 알 수 있는 문장</b>이 좋아요.</p>
+    </div>
+    <div class="mine">
+      <div class="mine-title">우리 집 약속 <span class="count" id="count2"></span></div>
+      <p class="hint" style="margin:0 0 6px">고른 문장을 눌러 우리 집 말투로 고칠 수 있어요.</p>
+      <div id="picked"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="step"><span class="num" style="background:var(--green)">3</span><h2>엄마·아빠의 약속</h2></div>
+    <p class="hint">부모님도 하나 지켜 주세요. 함께 지킬 때 아이가 따라와요.</p>
+    <div id="parentOpts"></div>
+    <input type="text" id="parentCustom" maxlength="40" placeholder="직접 쓰기 (예: 주말엔 함께 비버챌린지 풀기)" style="margin-top:8px">
+  </section>
+
+  <section>
+    <div class="step"><span class="num" style="background:var(--ink)">4</span><h2>함께 지킬 사람</h2></div>
+    <p class="hint">이름을 넣으면 서명처럼 들어가요. 비워 두면 인쇄해서 직접 서명할 수 있게 빈칸이 생겨요.</p>
+    <div class="row">
+      <input type="text" id="signer" maxlength="8" placeholder="예: 엄마, 아빠, 민준">
+      <button class="btn dark" id="addSigner" type="button">추가</button>
+    </div>
+    <div class="chips" id="signers"></div>
+  </section>
+
+  <section>
+    <div class="step"><span class="num" style="background:var(--muted)">5</span><h2>색깔 고르기</h2></div>
+    <div class="themes" id="themes"></div>
+  </section>
+
+  <section class="preview">
+    <div class="step"><h2>미리보기</h2></div>
+    <canvas id="cv" width="1080" height="1440" aria-label="약속문 미리보기"></canvas>
+  </section>
+
+  <footer>학부모 연수 「AI 시대, 우리 아이 공부를 망치지 않고 살리는 부모의 질문법」</footer>
+</div>
+
+<div class="bar"><button class="btn" id="save" type="button">이미지로 저장하기</button></div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="약속문 저장">
+  <div class="sheet">
+    <img id="outImg" alt="완성된 우리 집 AI 사용 약속문">
+    <p id="saveHint">아래 버튼으로 저장하거나, <b>이미지를 길게 눌러</b> 사진에 저장할 수 있어요.</p>
+    <div class="row">
+      <button class="btn ghost" id="close" type="button">닫기</button>
+      <button class="btn dark" id="share" type="button">사진에 저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const RED = "#C4503A", GOLD = "#E3B23C", GREEN = "#7A8B6F";
+  const DOTS = [RED, GOLD, GREEN];
+  const MAX = 6;
+
+  const PRESETS = [
+    ["생각이 먼저", [
+      "AI를 쓰기 전, 10분은 스스로 생각한다",
+      "AI에게는 정답 말고 힌트만 달라고 한다",
+      "AI 도움을 받은 뒤에는 내 말로 다시 설명해 본다",
+    ]],
+    ["한 번 더 확인", [
+      "AI 답변은 반드시 한 번 더 확인한다",
+      "AI가 틀린 곳을 찾으면 가족에게 알려 준다",
+    ]],
+    ["안전", [
+      "개인정보는 절대 입력하지 않는다",
+      "이름·학교·주소·사진은 AI에 넣지 않는다",
+    ]],
+    ["기록과 대화", [
+      "AI 도움 받은 것은 부모에게 말한다",
+      "숙제에서 AI가 도운 부분을 표시한다",
+      "매주 1번, AI를 어떻게 썼는지 이야기한다",
+      "고민은 AI보다 가족과 친구에게 먼저 말한다",
+    ]],
+    ["시간과 장소", [
+      "AI는 거실이나 식탁에서만 쓴다",
+      "평일에는 AI를 30분 안에서만 쓴다",
+      "식사 시간과 자기 1시간 전에는 끈다",
+      "혼자 쓰고 싶을 때는 먼저 이야기한다",
+    ]],
+  ];
+  const DEFAULTS = [
+    "AI를 쓰기 전, 10분은 스스로 생각한다",
+    "AI 답변은 반드시 한 번 더 확인한다",
+    "개인정보는 절대 입력하지 않는다",
+    "AI 도움 받은 것은 부모에게 말한다",
+    "매주 1번, AI를 어떻게 썼는지 이야기한다",
+  ];
+  const PARENT = [
+    "식사 시간에는 엄마·아빠도 휴대폰을 보지 않는다",
+    "“또 AI 썼어?” 대신 “AI가 뭐라고 했니?”라고 묻는다",
+    "아이가 AI의 틀린 곳을 찾으면 크게 칭찬한다",
+    "일주일에 하루, 가족 모두 디지털 OFF DAY를 지킨다",
+  ];
+  const THEMES = {
+    cream: {name:"따뜻한 크림", bg:"#F3E9D8", card:"#FFFCF5", line:"#E2D3BA", tint:"#F4ECDD", accent:RED, ink:"#2E2A26", body:"#4A443B", muted:"#8A7F70"},
+    sky:   {name:"맑은 하늘", bg:"#D6ECFA", card:"#FFFFFF", line:"#C3DBEC", tint:"#EEF6FC", accent:"#2F6FA5", ink:"#1F2B38", body:"#3B4856", muted:"#6F8295"},
+    leaf:  {name:"싱그러운 초록", bg:"#E1E9D8", card:"#FCFDF8", line:"#CCD8BF", tint:"#EFF4E8", accent:"#5E7A4E", ink:"#27301F", body:"#434D3A", muted:"#7A8670"},
+  };
+  const VAGUE = /(적당히|가끔|조금만?|너무|많이|웬만하면|되도록|알아서)/;
+
+  const state = {
+    family: "",
+    picked: DEFAULTS.map(t => ({ text: t, preset: t })),
+    parent: PARENT[0],
+    parentCustom: "",
+    signers: [],
+    theme: "cream",
+  };
+
+  const $ = s => document.querySelector(s);
+  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ── presets ──
+  function renderPresets() {
+    const el = $("#presets");
+    const pickedPresets = new Set(state.picked.map(p => p.preset).filter(Boolean));
+    const full = state.picked.length >= MAX;
+    el.innerHTML = PRESETS.map(([g, items]) =>
+      `<div class="group">${g}</div>` + items.map(t => {
+        const on = pickedPresets.has(t);
+        return `<label class="opt ${on ? "on" : ""} ${!on && full ? "dis" : ""}"><input type="checkbox" data-t="${esc(t)}" ${on ? "checked" : ""}><span class="box"></span><span>${esc(t)}</span></label>`;
+      }).join("")
+    ).join("");
+    el.querySelectorAll("input").forEach(inp => inp.addEventListener("change", () => {
+      const t = inp.dataset.t;
+      const i = state.picked.findIndex(p => p.preset === t);
+      if (i >= 0) state.picked.splice(i, 1);
+      else if (state.picked.length < MAX) state.picked.push({ text: t, preset: t });
+      renderAll();
+    }));
+  }
+
+  function renderPicked() {
+    const el = $("#picked");
+    const n = state.picked.length;
+    $("#count").textContent = `${n}/${MAX}`;
+    $("#count2").textContent = `${n}개`;
+    if (!n) { el.innerHTML = `<p class="hint" style="margin:6px 0">위에서 약속을 골라 주세요.</p>`; return; }
+    el.innerHTML = state.picked.map((p, i) => `
+      <div class="item"><span class="dot" style="background:${DOTS[i % 3]}">${i + 1}</span>
+        <input type="text" maxlength="40" data-i="${i}" value="${esc(p.text)}" aria-label="약속 ${i + 1}">
+        <button class="x" data-del="${i}" type="button" aria-label="약속 ${i + 1} 빼기">×</button></div>
+      ${VAGUE.test(p.text) ? `<div class="warn">‘${p.text.match(VAGUE)[0]}’은(는) 지켰는지 알기 어려워요. 숫자나 장소로 바꿔 보면 어떨까요?</div>` : ""}`
+    ).join("");
+    el.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", () => { state.picked[+inp.dataset.i].text = inp.value; draw(); });
+      inp.addEventListener("change", () => renderPicked());
+    });
+    el.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+      state.picked.splice(+b.dataset.del, 1); renderAll();
+    }));
+  }
+
+  function addCustom() {
+    const v = $("#custom").value.trim();
+    if (!v) return;
+    if (state.picked.length >= MAX) { alert(`약속은 ${MAX}개까지 넣을 수 있어요.`); return; }
+    state.picked.push({ text: v, preset: null });
+    $("#custom").value = "";
+    renderAll();
+  }
+  $("#addCustom").addEventListener("click", addCustom);
+  $("#custom").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } });
+
+  // ── parent ──
+  function renderParent() {
+    const el = $("#parentOpts");
+    const opts = [...PARENT, "__none"];
+    el.innerHTML = opts.map(t => {
+      const on = state.parent === t && !state.parentCustom;
+      const label = t === "__none" ? "이번엔 넣지 않을게요" : t;
+      return `<label class="opt radio ${on ? "on" : ""}"><input type="radio" name="parent" data-t="${esc(t)}" ${on ? "checked" : ""}><span class="box"></span><span>${esc(label)}</span></label>`;
+    }).join("");
+    el.querySelectorAll("input").forEach(inp => inp.addEventListener("change", () => {
+      state.parent = inp.dataset.t; state.parentCustom = ""; $("#parentCustom").value = "";
+      renderParent(); draw();
+    }));
+  }
+  $("#parentCustom").addEventListener("input", e => { state.parentCustom = e.target.value; renderParent(); draw(); });
+
+  // ── signers ──
+  function renderSigners() {
+    $("#signers").innerHTML = state.signers.map((s, i) =>
+      `<span class="chip">${esc(s)}<button type="button" data-i="${i}" aria-label="${esc(s)} 빼기">×</button></span>`).join("");
+    $("#signers").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      state.signers.splice(+b.dataset.i, 1); renderSigners(); draw();
+    }));
+  }
+  function addSigner() {
+    const v = $("#signer").value.trim();
+    if (!v) return;
+    if (state.signers.length >= 5) { alert("5명까지 넣을 수 있어요."); return; }
+    state.signers.push(v); $("#signer").value = ""; renderSigners(); draw();
+  }
+  $("#addSigner").addEventListener("click", addSigner);
+  $("#signer").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addSigner(); } });
+
+  // ── themes ──
+  function renderThemes() {
+    $("#themes").innerHTML = Object.entries(THEMES).map(([k, t]) =>
+      `<div class="theme ${state.theme === k ? "on" : ""}" data-k="${k}" role="button" tabindex="0"><div class="sw" style="background:linear-gradient(90deg,${t.bg} 50%,${t.accent} 50%)"></div>${t.name}</div>`).join("");
+    $("#themes").querySelectorAll(".theme").forEach(el => el.addEventListener("click", () => {
+      state.theme = el.dataset.k; renderThemes(); draw();
+    }));
+  }
+
+  $("#family").addEventListener("input", e => { state.family = e.target.value; draw(); });
+
+  // ── canvas drawing ──
+  const cv = $("#cv"), ctx = cv.getContext("2d");
+  const W = 1080, H = 1440;
+  const SANS = '"Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
+  const SERIF = '"Gowun Batang", "Noto Serif KR", serif';
+  const PEN = '"Nanum Pen Script", "Noto Sans KR", cursive';
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function wrap(text, maxW) {
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines = []; let cur = "";
+    const pushLong = w => { // break a single long word by characters
+      let seg = "";
+      for (const ch of w) { if (ctx.measureText(seg + ch).width > maxW && seg) { lines.push(seg); seg = ch; } else seg += ch; }
+      return seg;
+    };
+    for (const w of words) {
+      const test = cur ? cur + " " + w : w;
+      if (ctx.measureText(test).width <= maxW) cur = test;
+      else if (!cur) cur = pushLong(w);
+      else { lines.push(cur); cur = ctx.measureText(w).width > maxW ? pushLong(w) : w; }
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  }
+
+  function parentText() {
+    if (state.parentCustom.trim()) return state.parentCustom.trim();
+    return state.parent === "__none" ? "" : state.parent;
+  }
+
+  // measure the promises + parent block for a given font size
+  function planBody(fs) {
+    const X0 = 92, textX = X0 + 78, maxW = W - textX - 92;
+    ctx.font = `500 ${fs}px ${SANS}`;
+    const lh = fs * 1.42, gap = fs * 0.62;
+    const items = state.picked.filter(p => p.text.trim()).map(p => wrap(p.text.trim(), maxW));
+    let h = 0; items.forEach((ls, i) => { h += ls.length * lh + (i ? gap : 0); });
+    const pt = parentText();
+    let pLines = [];
+    const pfs = Math.round(fs * 0.9);
+    if (pt) { ctx.font = `500 ${pfs}px ${SANS}`; pLines = wrap(pt, W - 2 * 92 - 80); h += 48 + 70 + pLines.length * pfs * 1.42 + 44; }
+    return { fs, lh, gap, items, pLines, pfs, h, textX, X0 };
+  }
+
+  function draw() {
+    const t = THEMES[state.theme];
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+    // soft paper dots
+    ctx.fillStyle = "rgba(255,255,255,.35)";
+    for (let i = 0; i < 70; i++) { const x = (i * 157) % W, y = (i * 263) % H; ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fill(); }
+    // card
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,.08)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 8;
+    rr(44, 44, W - 88, H - 88, 40); ctx.fillStyle = t.card; ctx.fill(); ctx.restore();
+    rr(44, 44, W - 88, H - 88, 40); ctx.lineWidth = 3; ctx.strokeStyle = t.line; ctx.stroke();
+
+    ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+    // header
+    ctx.fillStyle = t.muted; ctx.font = `700 26px ${SANS}`;
+    ctx.fillText("AI 시대 · 우리 가족 약속", 92, 142);
+    const fam = state.family.trim() || "우리 집";
+    ctx.fillStyle = t.ink; ctx.font = `700 60px ${SERIF}`;
+    ctx.fillText(fam, 92, 230);
+    ctx.fillStyle = t.accent; ctx.font = `700 84px ${SERIF}`;
+    ctx.fillText("AI 사용 약속문", 88, 330);
+    // divider dots
+    DOTS.forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(100 + i * 26, 380, 7, 0, 7); ctx.fill(); });
+    ctx.strokeStyle = t.line; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(176, 380); ctx.lineTo(W - 92, 380); ctx.stroke();
+
+    // body region
+    const top = 440, bottom = H - 330;
+    let plan;
+    for (let fs = 44; fs >= 26; fs -= 1) { plan = planBody(fs); if (plan.h <= bottom - top) break; }
+    let y = top + Math.max(0, (bottom - top - plan.h) * 0.25);
+    if (!plan.items.length) {
+      ctx.fillStyle = t.muted; ctx.font = `500 34px ${SANS}`; ctx.textAlign = "center";
+      ctx.fillText("약속을 골라 주세요", W / 2, top + 120); ctx.textAlign = "left";
+    }
+    plan.items.forEach((lines, i) => {
+      if (i) y += plan.gap;
+      const cy = y + plan.fs * 0.62;
+      ctx.fillStyle = DOTS[i % 3]; ctx.beginPath(); ctx.arc(plan.X0 + 30, cy, Math.max(24, plan.fs * 0.66), 0, 7); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.font = `700 ${Math.round(plan.fs * 0.78)}px ${SANS}`; ctx.textAlign = "center";
+      ctx.fillText(String(i + 1), plan.X0 + 30, cy + plan.fs * 0.27); ctx.textAlign = "left";
+      ctx.fillStyle = t.ink; ctx.font = `500 ${plan.fs}px ${SANS}`;
+      lines.forEach((ln, j) => ctx.fillText(ln, plan.textX, y + plan.fs + j * plan.lh));
+      y += lines.length * plan.lh;
+    });
+    if (plan.pLines.length) {
+      y += 48;
+      const bh = 70 + plan.pLines.length * plan.pfs * 1.42 + 30;
+      rr(92, y, W - 184, bh, 24); ctx.fillStyle = t.tint; ctx.fill();
+      ctx.fillStyle = t.accent; ctx.font = `700 28px ${SANS}`;
+      ctx.fillText("♥ 엄마·아빠의 약속", 132, y + 52);
+      ctx.fillStyle = t.body; ctx.font = `500 ${plan.pfs}px ${SANS}`;
+      plan.pLines.forEach((ln, j) => ctx.fillText(ln, 132, y + 70 + plan.pfs + j * plan.pfs * 1.42));
+    }
+
+    // signatures
+    const sy = H - 290;
+    ctx.strokeStyle = t.line; ctx.lineWidth = 2; ctx.setLineDash([8, 10]);
+    ctx.beginPath(); ctx.moveTo(92, sy); ctx.lineTo(W - 92, sy); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = t.muted; ctx.font = `700 28px ${SANS}`;
+    ctx.fillText("함께 지킬게요", 92, sy + 62);
+    const d = new Date();
+    ctx.textAlign = "right"; ctx.font = `500 28px ${SANS}`;
+    ctx.fillText(`${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`, W - 92, sy + 62);
+    ctx.textAlign = "left";
+    const names = state.signers;
+    if (names.length) {
+      let fsN = 76; ctx.font = `${fsN}px ${PEN}`;
+      const joined = names.join("   ·   ");
+      while (ctx.measureText(joined).width > W - 184 && fsN > 40) { fsN -= 4; ctx.font = `${fsN}px ${PEN}`; }
+      ctx.fillStyle = t.ink; ctx.textAlign = "center"; ctx.fillText(joined, W / 2, sy + 150); ctx.textAlign = "left";
+    } else {
+      const n = 3, gapS = 40, w = (W - 184 - gapS * (n - 1)) / n;
+      ctx.strokeStyle = t.muted; ctx.lineWidth = 2;
+      for (let i = 0; i < n; i++) { const x = 92 + i * (w + gapS); ctx.beginPath(); ctx.moveTo(x, sy + 150); ctx.lineTo(x + w, sy + 150); ctx.stroke(); }
+      ctx.fillStyle = t.muted; ctx.font = `500 22px ${SANS}`; ctx.textAlign = "center";
+      for (let i = 0; i < n; i++) { const x = 92 + i * (w + gapS) + w / 2; ctx.fillText("서명", x, sy + 184); }
+      ctx.textAlign = "left";
+    }
+    ctx.fillStyle = t.muted; ctx.font = `500 22px ${SANS}`; ctx.textAlign = "center";
+    ctx.fillText("우리 집 냉장고에 붙여 두세요", W / 2, H - 64); ctx.textAlign = "left";
+  }
+
+  let raf = 0;
+  const _draw = draw;
+  draw = function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(_draw); };
+
+  function renderAll() { renderPresets(); renderPicked(); draw(); }
+
+  // ── save ──
+  const isInApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+  let lastFile = null;
+  $("#save").addEventListener("click", async () => {
+    if (!state.picked.filter(p => p.text.trim()).length) { alert("약속을 하나 이상 골라 주세요."); return; }
+    _draw();
+    const url = cv.toDataURL("image/png");
+    $("#outImg").src = url;
+    const blob = await new Promise(r => cv.toBlob(r, "image/png"));
+    const fname = `${(state.family.trim() || "우리집").replace(/[\\/:*?"<>|\s]/g, "")}_AI_약속문.png`;
+    lastFile = new File([blob], fname, { type: "image/png" });
+    $("#saveHint").innerHTML = isInApp
+      ? "앱 안에서 열린 화면이라 버튼이 안 될 수 있어요. <b>이미지를 길게 눌러</b> 저장해 주세요."
+      : "아래 버튼으로 저장하거나, <b>이미지를 길게 눌러</b> 사진에 저장할 수 있어요.";
+    $("#modal").classList.add("show");
+  });
+  $("#share").addEventListener("click", async () => {
+    if (!lastFile) return;
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [lastFile] })) {
+        await navigator.share({ files: [lastFile], title: "우리 집 AI 사용 약속문" });
+        return;
+      }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(lastFile); a.download = lastFile.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  });
+  $("#close").addEventListener("click", () => $("#modal").classList.remove("show"));
+  $("#modal").addEventListener("click", e => { if (e.target.id === "modal") $("#modal").classList.remove("show"); });
+
+  renderAll(); renderParent(); renderSigners(); renderThemes();
+  // redraw once web fonts are ready so the canvas uses them
+  if (document.fonts) {
+    Promise.all([
+      document.fonts.load(`500 40px "Noto Sans KR"`), document.fonts.load(`700 40px "Noto Sans KR"`),
+      document.fonts.load(`700 60px "Gowun Batang"`), document.fonts.load(`60px "Nanum Pen Script"`),
+    ]).catch(() => {}).then(() => _draw());
+    document.fonts.ready.then(() => _draw());
+  }
+})();
+</script>
+</body>
+</html>
