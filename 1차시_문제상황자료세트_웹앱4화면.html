@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1차시 문제 상황 자료 · 정확한 AI는 공정한 AI일까?</title>
+<style>
+:root{
+  --ink:#0E1420; --ink2:#1C2735; --muted:#5A6675; --gray:#8A97A8;
+  --line:#CBD3DC; --soft:#EEF1F5; --paper:#FFFFFF;
+  --teal:#12857C; --pink:#C4275C; --gold:#E0A33D;
+  --mint:#E7F2F0; --rose:#FBECF1; --cream:#FBF3E2;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--soft);color:var(--ink);font-family:"맑은 고딕","Malgun Gothic",sans-serif;font-size:15px;line-height:1.65}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px 110px}
+header{background:var(--ink);color:#fff;margin:0 -14px 16px;padding:20px 18px}
+header h1{margin:0;font-size:21px;line-height:1.35}
+header .sub{margin-top:7px;font-size:12.5px;color:#AEBBCA}
+.progress{display:flex;gap:6px;margin-top:14px}
+.progress i{height:5px;flex:1;background:#2C3A4C;border-radius:3px}
+.progress i.on{background:#5EC8BD}
+.screen{display:none;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px}
+.screen.on{display:block}
+.step{font-size:12px;font-weight:700;color:var(--pink);margin-bottom:6px}
+h2{margin:0 0 14px;font-size:20px;color:var(--ink2)}
+.warn{background:var(--cream);border:1px solid var(--gold);border-radius:8px;padding:11px 13px;margin-bottom:16px;font-size:13.5px}
+.quote{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:13px 14px;margin-top:14px}
+.quote p{margin:0;font-weight:700;color:var(--ink2)}
+.quote .by{font-size:12px;color:var(--gray);margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+tr.key td{background:var(--rose);color:var(--pink);font-weight:700}
+.note{font-size:12.5px;color:var(--gray);margin-top:8px}
+.cm td{text-align:center}
+.cm td:first-child{text-align:left}
+.cm .hit{background:var(--mint);color:var(--teal);font-weight:700;font-size:17px}
+.cm .mis{background:var(--rose);color:var(--pink);font-weight:700;font-size:17px}
+.big{border:1px solid var(--pink);border-radius:10px;padding:14px;text-align:center;margin:14px 0}
+.big .n{font-size:34px;font-weight:700;color:var(--pink);line-height:1}
+.big .c{font-size:13px;color:var(--muted);margin-top:5px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.card{border:1px solid var(--line);border-radius:9px;padding:10px}
+.card h3{margin:0 0 8px;font-size:15px}
+.card table{margin:0;font-size:11.5px}
+.card td{border:0;border-bottom:1px solid #EDF0F3;padding:4px 0}
+.card td:first-child{color:var(--muted)}
+.card td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.verdict{margin-top:8px;padding:7px;text-align:center;border-radius:6px;font-weight:700}
+.v-no{background:var(--rose);color:var(--pink)}
+.v-ok{background:var(--mint);color:var(--teal)}
+.ask{background:var(--ink);color:#fff;border-radius:9px;padding:15px 16px;margin-top:16px}
+.ask .q{font-size:19px;font-weight:700;color:#5EC8BD;margin-bottom:6px}
+.ask p{margin:0;font-size:13px;color:#CFDAE6}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(14,20,32,.97);padding:11px 14px;display:flex;gap:9px;align-items:center;z-index:50}
+.bar .st{flex:1;color:#AEBBCA;font-size:13px}
+.bar button{padding:11px 16px;font-size:14px;font-weight:700;border:0;border-radius:8px;cursor:pointer;font-family:inherit}
+#prev{background:#2C3A4C;color:#CFDAE6}
+#next{background:var(--teal);color:#fff}
+.bar button:disabled{opacity:.4;cursor:not-allowed}
+.finalnote{background:var(--mint);border:1px solid var(--teal);border-radius:8px;padding:12px 13px;margin-top:14px;font-weight:700;color:var(--ink2)}
+@media(max-width:700px){.cards{grid-template-columns:1fr}.card table{font-size:12.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>정확한 AI는 공정한 AI일까?</h1>
+  <div class="sub">인공지능 기초 · 1차시 · 문제 상황 자료</div>
+  <div class="progress" id="prog"><i></i><i></i><i></i><i></i></div>
+</header>
+
+<section class="screen on">
+  <div class="step">1 / 4</div>
+  <h2>상황</h2>
+  <div class="warn"><b>이 1,500명은 실제 지원자가 아닙니다.</b> 수업을 위해 만든 가상 자료이며, 여기 나온 합격·불합격은 어떤 실제 채용과도 관계가 없습니다. 우리가 볼 것은 누가 붙었느냐가 아니라 <b>이 기계가 무엇을 보고 판단하는가</b>입니다.</div>
+  <p>국내의 한 반도체 기업이 최근 3년간(2023~2025)의 <b>고졸 신입 채용 서류전형 결과 1,500건</b>을 모아, 앞으로 들어올 지원서를 미리 분류해 줄 인공지능을 만들었습니다.</p>
+  <div class="quote">
+    <p>“해마다 수백 장의 지원서를 사람이 다 읽기는 어렵습니다. 과거에 우리가 어떻게 판단했는지를 학습시켰으니, 같은 기준으로 걸러 줄 겁니다.”</p>
+    <div class="by">— 인사 담당자</div>
+  </div>
+</section>
+
+<section class="screen">
+  <div class="step">2 / 4</div>
+  <h2>데이터 항목</h2>
+  <table>
+    <tr><th style="width:46%">항목</th><th>설명</th></tr>
+    <tr><td>지원연도</td><td>2023 · 2024 · 2025</td></tr>
+    <tr><td>출신고 지역 · 출신고 학급 수</td><td>대도시 / 중소도시 / 읍면, 학년당 학급 수</td></tr>
+    <tr><td>물리학 · 화학 · 미적분 · 확률과통계 성적</td><td>등급 1~5 (1이 가장 높음)</td></tr>
+    <tr><td>정보 이수 여부 · 정보 성적</td><td>이수 1 / 미이수 0, 등급 1~5, 미이수는 6</td></tr>
+    <tr><td>인공지능기초 이수 여부 · 성적</td><td>이수 1 / 미이수 0, 등급 1~5, 미이수는 6</td></tr>
+    <tr><td>어학점수</td><td>점수, 일부 비어 있음</td></tr>
+    <tr><td>취득자격증수 · 프로젝트수 · 교과탐구활동수</td><td>개수, 교과탐구는 일부 비어 있음</td></tr>
+    <tr><td>동아리활동시간 · 결석일수</td><td>시간 · 일수</td></tr>
+    <tr class="key"><td>서류합격여부</td><td>서류전형 합격 / 불합격 — 모델이 맞혀야 하는 정답</td></tr>
+  </table>
+  <div class="note">오늘은 파일을 열지 않습니다. 이 표만 보고 판단하세요.</div>
+</section>
+
+<section class="screen">
+  <div class="step">3 / 4</div>
+  <h2>모델의 성능</h2>
+  <table class="cm">
+    <tr><th></th><th>모델: 불합격</th><th>모델: 합격</th></tr>
+    <tr><td>실제 불합격</td><td class="hit">292</td><td class="mis">23</td></tr>
+    <tr><td>실제 합격</td><td class="mis">40</td><td class="hit">95</td></tr>
+  </table>
+  <div class="big"><div class="n">86.0%</div><div class="c">전체 정확도</div></div>
+  <p><b>100명으로 치면 86명을 사람과 똑같이 판단했습니다.</b></p>
+  <p class="note">정확도는 모델의 판정이 과거 사람의 판정과 얼마나 같은지를 잽니다.</p>
+  <p class="note">1,500건 중 1,050건으로 학습시키고, 남겨 둔 450건으로 시험한 결과입니다.</p>
+</section>
+
+<section class="screen">
+  <div class="step">4 / 4</div>
+  <h2>판정 사례 카드 · 세 사람</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>A · 지원자 S0490</h3>
+      <table>
+        <tr><td>연도·지역·학급수</td><td>2024 · 읍면 · 6</td></tr><tr><td>물리·화학·미적·확통</td><td>2 · 3 · 1 · 1</td></tr><tr><td>정보</td><td>이수 · 1등급</td></tr><tr><td>인공지능기초</td><td>미이수 · 6</td></tr><tr><td>어학점수</td><td>(빈칸)</td></tr><tr><td>자격증·프로젝트</td><td>3 / 3</td></tr><tr><td>교과탐구·결석</td><td>3 / 1</td></tr><tr><td>동아리시간</td><td>71</td></tr>
+      </table>
+      <div class="verdict v-no">모델의 판정 → 불합격</div>
+    </div>
+    <div class="card">
+      <h3>B · 지원자 S0264</h3>
+      <table>
+        <tr><td>연도·지역·학급수</td><td>2024 · 대도시 · 9</td></tr><tr><td>물리·화학·미적·확통</td><td>4 · 4 · 3 · 2</td></tr><tr><td>정보</td><td>이수 · 3등급</td></tr><tr><td>인공지능기초</td><td>이수 · 2등급</td></tr><tr><td>어학점수</td><td>698</td></tr><tr><td>자격증·프로젝트</td><td>2 / 2</td></tr><tr><td>교과탐구·결석</td><td>3 / 2</td></tr><tr><td>동아리시간</td><td>65</td></tr>
+      </table>
+      <div class="verdict v-ok">모델의 판정 → 합격</div>
+    </div>
+    <div class="card">
+      <h3>C · 지원자 S0410</h3>
+      <table>
+        <tr><td>연도·지역·학급수</td><td>2025 · 읍면 · 4</td></tr><tr><td>물리·화학·미적·확통</td><td>1 · 1 · 1 · 1</td></tr><tr><td>정보</td><td>이수 · 1등급</td></tr><tr><td>인공지능기초</td><td>미이수 · 6</td></tr><tr><td>어학점수</td><td>739</td></tr><tr><td>자격증·프로젝트</td><td>6 / 4</td></tr><tr><td>교과탐구·결석</td><td>5 / 0</td></tr><tr><td>동아리시간</td><td>51</td></tr>
+      </table>
+      <div class="verdict v-ok">모델의 판정 → 합격</div>
+    </div>
+  </div>
+  <div class="ask">
+    <div class="q">정확한 AI는 공정한 AI일까?</div>
+    <p>이 모델은 100명으로 치면 86명을 사람과 똑같이 판단했습니다. 그리고 A를 불합격으로, B를 합격으로 판정했습니다.<br>이 모델은 틀린 것일까요, 정확한 것일까요?</p>
+  </div>
+  <div class="finalnote">이제 선생님이 안내한 <b>초기 응답지</b>로 이동하세요. 검색 · AI · 상의 없이 혼자 작성합니다.</div>
+</section>
+</div>
+
+<div class="bar">
+  <div class="st" id="st">자료 1 / 4</div>
+  <button type="button" id="prev">이전</button>
+  <button type="button" id="next">다음</button>
+</div>
+
+<script>
+(function(){
+  var idx=0;
+  var screens=[].slice.call(document.querySelectorAll('.screen'));
+  var dots=[].slice.call(document.querySelectorAll('#prog i'));
+  function draw(){
+    screens.forEach(function(s,i){s.classList.toggle('on',i===idx);});
+    dots.forEach(function(d,i){d.classList.toggle('on',i<=idx);});
+    document.getElementById('st').textContent='자료 '+(idx+1)+' / '+screens.length;
+    document.getElementById('prev').disabled=(idx===0);
+    document.getElementById('next').textContent=(idx===screens.length-1)?'처음으로':'다음';
+    window.scrollTo(0,0);
+  }
+  document.getElementById('prev').addEventListener('click',function(){if(idx>0){idx--;draw();}});
+  document.getElementById('next').addEventListener('click',function(){if(idx<screens.length-1){idx++;}else{idx=0;}draw();});
+  draw();
+})();
+</script>
+</body>
+</html>
