@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>5차시 발표 안내 및 동료평가지 · 두 집단 공통</title>
+<style>
+  :root{
+    --ink:#0E1420; --ink2:#1C2735; --muted:#5A6675; --gray:#8A97A8;
+    --line:#CBD3DC; --soft:#EEF1F5;
+    --teal:#12857C; --pink:#C4275C; --orng:#D96D2B; --gold:#E0A33D;
+    --mint:#E7F2F0; --rose:#FBECF1; --cream:#FBF3E2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);
+       font-family:"맑은 고딕","Malgun Gothic",sans-serif;font-size:10pt;line-height:1.5}
+  .page{width:210mm;height:297mm;padding:12mm 13mm;margin:0 auto}
+  @media print{ .page{margin:0;page-break-after:always} }
+
+  .top{background:var(--ink);color:#fff;border-radius:6px;padding:10px 14px;margin-bottom:9px;
+       display:flex;justify-content:space-between;align-items:flex-end}
+  .top h1{margin:0;font-size:14pt}
+  .top .m{font-size:8.5pt;color:#AEBBCA;text-align:right;line-height:1.4}
+
+  .lead{background:var(--mint);border:1px solid var(--teal);border-radius:6px;
+        padding:8px 12px;margin-bottom:10px;font-size:9.5pt}
+  .lead b{color:var(--teal)}
+
+  h2{font-size:10.5pt;margin:12px 0 5px;padding-left:7px;border-left:4px solid var(--teal)}
+  h2.p{border-left-color:var(--pink)}
+  h2 .n{font-weight:400;font-size:8.5pt;color:var(--gray);margin-left:5px}
+
+  table{width:100%;border-collapse:collapse;font-size:9pt}
+  th,td{border:1px solid var(--line);padding:4px 7px;vertical-align:top}
+  th{background:var(--soft);font-weight:700;font-size:8.5pt;color:var(--ink2)}
+  td.c{text-align:center}
+  .fill{height:13mm}
+
+  .kinds{display:flex;gap:7px;margin:6px 0}
+  .kinds>div{flex:1;border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+  .kinds .t{font-size:10pt;font-weight:700;margin-bottom:2px}
+  .kinds .d{font-size:8.5pt;color:var(--muted)}
+  .kinds .e{font-size:8.5pt;margin-top:4px}
+  .k1{border-color:var(--teal)!important} .k1 .t{color:var(--teal)}
+  .k2{border-color:var(--pink)!important} .k2 .t{color:var(--pink)}
+  .k3{border-color:var(--orng)!important} .k3 .t{color:var(--orng)}
+
+  .warn{background:var(--cream);border:1px solid var(--gold);border-radius:6px;
+        padding:8px 12px;font-size:9pt;margin-top:8px}
+  .warn b{color:var(--pink)}
+
+  .foot{margin-top:8px;font-size:8.5pt;color:var(--gray);
+        border-top:1px solid var(--line);padding-top:5px}
+  .sm{font-size:8pt;color:var(--gray)}
+</style>
+</head>
+<body>
+
+<!-- 1쪽 : 발표 안내 -->
+<div class="page">
+  <div class="top">
+    <h1>발표 안내 및 동료평가지</h1>
+    <div class="m">인공지능 기초 · 5차시 · 두 집단 공통<br>학번 ______ 이름 ______ 내 모둠 ____</div>
+  </div>
+
+  <div class="lead">
+    오늘은 <b>결론을 내지 않습니다.</b> 우리 해결안을 내놓고, 다른 모둠의 의견을 받습니다.<br>
+    오늘 받은 의견은 <b>다음 시간의 재료</b>입니다.
+  </div>
+
+  <h2>발표하는 모둠 <span class="n">2분 · 네 가지를 반드시 넣는다</span></h2>
+  <table>
+    <tr><th style="width:7%" class="c">1</th><td style="width:38%"><b>우리가 한 전처리</b></td>
+        <td>무엇을 어떻게 고쳤나</td></tr>
+    <tr><th class="c">2</th><td><b>그래서 달라진 것</b></td><td>숫자로 말한다</td></tr>
+    <tr><th class="c">3</th><td><b>달라지지 않은 것</b></td><td>숫자로 말한다</td></tr>
+    <tr><th class="c">4</th><td><b>지금 우리의 판단</b></td><td>이 모델의 문제는 어디에 있는가</td></tr>
+  </table>
+  <div class="warn" style="background:var(--mint);border-color:var(--teal)">
+    <b style="color:var(--teal)">3번을 빠뜨리지 마세요.</b>
+    안 달라진 것이 오늘 가장 중요한 이야기입니다.
+  </div>
+
+  <h2 class="p">듣는 모둠 <span class="n">모든 발표마다 평가 4칸 + 의견 1개</span></h2>
+  <table>
+    <tr><th style="width:40%">평가 항목</th><th>무엇을 보는가</th></tr>
+    <tr><td><b>전처리가 분명한가</b></td><td>무엇을 고쳤는지 알아들었나</td></tr>
+    <tr><td><b>숫자 근거가 있는가</b></td><td>말로만 하지 않았나</td></tr>
+    <tr><td><b>안 달라진 것을 다뤘는가</b></td><td>빠뜨리지 않았나</td></tr>
+    <tr><td><b>판단에 이유가 있는가</b></td><td>왜 그렇게 보는지 말했나</td></tr>
+  </table>
+  <div class="sm" style="margin-top:3px">각 항목을 <b>그렇다 · 보통 · 아니다</b> 중 하나로 표시합니다.
+    점수는 성적에 반영하지 않습니다.</div>
+
+  <h2 class="p">의견은 세 종류 <span class="n">발표마다 하나씩</span></h2>
+  <div class="kinds">
+    <div class="k1"><div class="t">질문</div>
+      <div class="d">못 알아들은 것을 묻는다</div>
+      <div class="e">“왜 그 방법을 골랐나요?”</div></div>
+    <div class="k2"><div class="t">반박</div>
+      <div class="d">동의하지 않는 지점을 말한다</div>
+      <div class="e">“그 숫자로는 그렇게 볼 수 없어요”</div></div>
+    <div class="k3"><div class="t">보완 제안</div>
+      <div class="d">더 해 보면 좋을 것</div>
+      <div class="e">“이것도 빼 보면 어떨까요?”</div></div>
+  </div>
+  <div class="warn">
+    <b>“좋았다” “잘했다”는 의견이 아닙니다.</b>
+    발표한 모둠이 다음 시간에 실제로 쓸 수 있는 말을 남기세요.
+  </div>
+
+  <div class="foot">
+    이 종이는 웹 활동지가 열리지 않을 때 쓰는 예비본입니다. 평소에는 웹으로 제출하세요. ·
+    발표 중에 미리 적어 두고, 발표가 끝나면 바로 제출합니다.
+  </div>
+</div>
+
+<!-- 2쪽 : 동료평가 기록지 -->
+<div class="page">
+  <div class="top">
+    <h1>동료평가 기록지</h1>
+    <div class="m">인공지능 기초 · 5차시<br>학번 ______ 이름 ______ 내 모둠 ____</div>
+  </div>
+
+  <div class="sm" style="margin-bottom:6px">
+    평가는 <b>○(그렇다) · △(보통) · ✕(아니다)</b> 로 표시합니다.
+    우리 모둠 줄은 비워 둡니다.
+  </div>
+
+  <table>
+    <tr>
+      <th style="width:8%" class="c">모둠</th>
+      <th style="width:9%" class="c">전처리<br>분명</th>
+      <th style="width:9%" class="c">숫자<br>근거</th>
+      <th style="width:9%" class="c">안 달라진<br>것</th>
+      <th style="width:9%" class="c">판단<br>이유</th>
+      <th style="width:14%" class="c">의견 종류<br><span class="sm">질문/반박/제안</span></th>
+      <th>의견 내용</th>
+    </tr>
+    <tr><td class="c fill"><b>1</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="c fill"><b>2</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="c fill"><b>3</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="c fill"><b>4</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="c fill"><b>5</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="c fill"><b>6</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="c fill"><b>7</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="c fill"><b>8</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+  </table>
+
+  <h2>우리 모둠이 받은 것 <span class="n">발표가 모두 끝난 뒤 · 11분</span></h2>
+  <table>
+    <tr><th style="width:26%">가장 뼈아픈 반박</th><td class="fill"></td></tr>
+    <tr><th>가장 쓸 만한 제안</th><td class="fill"></td></tr>
+    <tr><th>우리가 못 답한 질문</th><td class="fill"></td></tr>
+  </table>
+  <div class="warn">
+    <b>오늘은 답하지 않습니다.</b> 받아 두기만 합니다.
+    다음 시간에 이 의견들을 하나씩 다룹니다.
+  </div>
+
+  <h2>Exit Ticket</h2>
+  <table>
+    <tr><th style="width:40%">① 오늘 받은 의견 중 가장 뼈아팠던 것은?</th><td class="fill"></td></tr>
+    <tr><th>② 다른 모둠 발표를 듣고 바뀐 생각이 있나요?</th><td class="fill"></td></tr>
+  </table>
+
+  <div class="foot">
+    인공지능 기초 · 5차시 · 동료평가 기록지 &nbsp;|&nbsp;
+    다음 시간 · 6차시 — 받은 의견을 하나씩 다룬다
+  </div>
+</div>
+
+</body>
+</html>
