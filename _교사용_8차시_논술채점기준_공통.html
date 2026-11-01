@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>8차시 논술 채점 기준 · 교사용 · 두 집단 공통</title>
+<style>
+  :root{
+    --ink:#0E1420; --ink2:#1C2735; --muted:#5A6675; --gray:#8A97A8;
+    --line:#CBD3DC; --soft:#EEF1F5;
+    --teal:#12857C; --pink:#C4275C; --gold:#E0A33D;
+    --mint:#E7F2F0; --rose:#FBECF1; --cream:#FBF3E2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);
+       font-family:"맑은 고딕","Malgun Gothic",sans-serif;font-size:9.5pt;line-height:1.5}
+  .page{width:210mm;min-height:297mm;padding:12mm 13mm;margin:0 auto}
+  @media print{ .page{margin:0;page-break-after:always} }
+
+  .top{background:var(--ink);color:#fff;border-radius:6px;padding:10px 14px;margin-bottom:9px;
+       display:flex;justify-content:space-between;align-items:flex-end}
+  .top h1{margin:0;font-size:14pt}
+  .top .m{font-size:8.5pt;color:#AEBBCA;text-align:right;line-height:1.4}
+
+  .warn{background:var(--rose);border:1px solid var(--pink);border-radius:6px;
+        padding:9px 12px;margin-bottom:10px;font-size:9.5pt}
+  .warn b{color:var(--pink)}
+
+  h2{font-size:10.5pt;margin:13px 0 5px;padding-left:7px;border-left:4px solid var(--pink)}
+  h2 .n{font-weight:400;font-size:8.5pt;color:var(--gray);margin-left:5px}
+
+  table{width:100%;border-collapse:collapse;font-size:8.5pt}
+  th,td{border:1px solid var(--line);padding:5px 7px;vertical-align:top}
+  th{background:var(--soft);font-weight:700;color:var(--ink2);text-align:center}
+  td.c{text-align:center;font-weight:700}
+  .crit{width:24%}
+  .pt{width:8%}
+
+  .note{background:var(--cream);border:1px solid var(--gold);border-radius:6px;
+        padding:8px 12px;font-size:9pt;margin-top:8px}
+  .note.mint{background:var(--mint);border-color:var(--teal)}
+  .note b{color:var(--pink)}
+  .note.mint b{color:var(--teal)}
+
+  ol{margin:4px 0 0;padding-left:18px}
+  li{margin-bottom:3px}
+
+  .foot{margin-top:9px;font-size:8.5pt;color:var(--gray);
+        border-top:1px solid var(--line);padding-top:5px}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="top">
+    <h1>논술 채점 기준 · 교사용</h1>
+    <div class="m">인공지능 기초 · 8차시 · 30점<br>두 집단 공통 · 수정 금지</div>
+  </div>
+
+  <div class="warn">
+    <b>이 기준은 실험집단과 비교집단에 완전히 동일하게 적용합니다.</b>
+    어느 한쪽에 유리하도록 배점·요소·가중치를 바꾸면 <b>평가 공정성 위반</b>이며,
+    동시에 연구의 종속변인이 오염됩니다.<br>
+    <b>답안에는 이름이 없습니다.</b> 두 학급을 섞어 코드번호 순으로 채점하십시오.
+  </div>
+
+  <h2>문항 1 <span class="n">편향의 출처 · 12점</span></h2>
+  <table>
+    <tr><th class="crit">채점 요소</th><th class="pt">배점</th><th>수준별 기준</th></tr>
+    <tr>
+      <td><b>⑴ 편향의 출처</b><br><span style="color:var(--muted)">어디에서 비롯되었는가</span></td>
+      <td class="c">5</td>
+      <td>
+        <b>5</b> 과거 서류전형 결과(정답 열) 자체에 편향이 들어 있으며 모델이 그것을 학습·재생산했음을 설명<br>
+        <b>3~4</b> 과거 심사 결과가 원인임을 지적했으나 학습·재생산 과정 설명이 미흡<br>
+        <b>1~2</b> 데이터가 문제라고만 하고 어느 부분인지 특정하지 못함<br>
+        <b>0</b> 알고리즘 결함·코딩 오류 등으로만 설명하거나 무응답
+      </td>
+    </tr>
+    <tr>
+      <td><b>⑵ 전처리로 해결되지 않는 이유</b></td>
+      <td class="c">4</td>
+      <td>
+        <b>4</b> 입력(속성) 가공은 정답 열을 바꾸지 못하므로 결과가 동일함을 설명<br>
+        <b>2~3</b> 결과가 같다는 사실은 지적했으나 이유 설명이 부분적<br>
+        <b>1</b> 이상치·결측 처리 방식의 문제로만 설명<br>
+        <b>0</b> 무응답 또는 관련 없는 서술
+      </td>
+    </tr>
+    <tr>
+      <td><b>⑶ 숫자 근거</b></td>
+      <td class="c">3</td>
+      <td>
+        <b>3</b> 자료의 수치를 두 개 이상 정확히 인용 (91.7 / 2.2 / 3명 / 13.2 / 63.3 등)<br>
+        <b>2</b> 수치 한 개를 정확히 인용<br>
+        <b>1</b> 수치를 언급했으나 부정확<br>
+        <b>0</b> 수치 없음
+      </td>
+    </tr>
+  </table>
+
+  <div class="note mint">
+    <b>채점 유의</b> — ⑴에서 「편향」이라는 단어를 쓰지 않아도, <b>과거 심사 결과가 그대로 학습되었다</b>는
+    취지가 드러나면 만점 처리합니다. 용어가 아니라 논리를 봅니다.<br>
+    「미이수자를 뽑지 않은 것은 회사의 정당한 기준이다」라는 주장도 ⑴의 만점을 막지 않습니다.
+    출처를 정확히 지목했다면 가치 판단은 문항 2에서 다룹니다.
+  </div>
+
+  <h2>문항 2 <span class="n">Ⓓ를 채택할 것인가 · 18점</span></h2>
+  <table>
+    <tr><th class="crit">채점 요소</th><th class="pt">배점</th><th>수준별 기준</th></tr>
+    <tr>
+      <td><b>⑴ 입장의 명확성</b></td>
+      <td class="c">3</td>
+      <td>
+        <b>3</b> 채택/불채택/조건부 중 하나를 분명히 밝히고 글 전체가 일관됨<br>
+        <b>2</b> 입장은 있으나 중간에 흔들림<br>
+        <b>1</b> 양비론에 그침<br>
+        <b>0</b> 입장 없음
+      </td>
+    </tr>
+    <tr>
+      <td><b>⑵ 자료에 근거한 이유</b></td>
+      <td class="c">6</td>
+      <td>
+        <b>5~6</b> 표의 수치를 근거로 삼아 두 가지 이상의 이유를 제시<br>
+        <b>3~4</b> 수치를 활용한 이유 한 가지<br>
+        <b>1~2</b> 자료와 무관한 일반론<br>
+        <b>0</b> 이유 없음
+      </td>
+    </tr>
+    <tr>
+      <td><b>⑶ 예상 반론과 답변</b></td>
+      <td class="c">5</td>
+      <td>
+        <b>5</b> 자기 입장에 대한 실질적 반론을 제시하고 그에 답변<br>
+        <b>3~4</b> 반론을 제시했으나 답변이 약하거나, 반론이 형식적<br>
+        <b>1~2</b> 반론만 언급<br>
+        <b>0</b> 없음
+      </td>
+    </tr>
+    <tr>
+      <td><b>⑷ 정확도와 공정성의 관계 인식</b></td>
+      <td class="c">4</td>
+      <td>
+        <b>4</b> 정확도가 「과거 판단과의 일치율」이므로 편향을 줄이면 정확도가 내려가는 관계를 설명<br>
+        <b>2~3</b> 둘이 상충한다는 점은 지적했으나 이유 설명이 미흡<br>
+        <b>1</b> 정확도 하락을 단순히 성능 저하로만 서술<br>
+        <b>0</b> 언급 없음
+      </td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <b>채점 유의</b> — 문항 2에는 <b>정답 입장이 없습니다.</b> 채택·불채택·조건부 어느 쪽이든
+    근거와 반론 처리가 충실하면 만점이 가능합니다.<br>
+    채점자 본인의 입장과 다른 답안에 점수가 낮아지지 않도록 주의하십시오.
+    <b>이 문항에서 채점자 편향이 가장 크게 나타납니다.</b>
+  </div>
+
+  <div class="foot">
+    총점 30점 = 문항 1 (12) + 문항 2 (18) · 두 집단 공통 기준
+  </div>
+</div>
+
+<div class="page">
+  <div class="top">
+    <h1>채점 절차 · 채점자 눈가림</h1>
+    <div class="m">인공지능 기초 · 8차시 논술<br>연구 설계상 반드시 지켜야 하는 절차</div>
+  </div>
+
+  <div class="warn">
+    이 연구는 실험집단과 비교집단을 비교합니다.
+    <b>채점자가 어느 집단 답안인지 알면 그 자체가 결과를 만듭니다.</b>
+    아래 절차는 교육적 관례가 아니라 <b>연구 타당성을 위한 필수 조건</b>입니다.
+  </div>
+
+  <h2>채점 절차</h2>
+  <ol>
+    <li><b>코드번호 확인</b> — 답안지에 이름·학번이 없고 코드번호만 있는지 확인합니다.
+      코드번호가 없는 답안은 따로 빼 두고, 학번-코드 대응표로 나중에 확인합니다.</li>
+    <li><b>두 학급을 섞는다</b> — 실험반 답안과 비교반 답안을 한데 모아
+      <b>코드번호 순</b>으로 정렬합니다. 학급별로 나누어 채점하지 않습니다.</li>
+    <li><b>문항별로 채점한다</b> — 답안 한 장을 끝까지 채점하지 말고,
+      <b>모든 답안의 문항 1을 먼저</b> 채점한 뒤 문항 2로 넘어갑니다.
+      한 답안의 인상이 다음 문항에 옮겨 가는 것을 막습니다.</li>
+    <li><b>두 사람이 채점한다</b> — 교사 2명이 독립적으로 채점하고,
+      <b>총점 차이가 4점 이상</b>인 답안만 협의하여 조정합니다.
+      협의 전 각자의 점수를 그대로 기록해 둡니다(채점자 간 일치도 산출용).</li>
+    <li><b>대응표는 마지막에 연다</b> — 채점이 모두 끝난 뒤에야
+      학번-코드 대응표를 열어 성적에 반영합니다.</li>
+  </ol>
+
+  <div class="note mint">
+    <b>학번-코드 대응표는 어디에 있나</b><br>
+    8차시 활동지 스프레드시트의 <b>「8차시_대응표」 시트</b>에 자동 생성됩니다.
+    채점이 끝날 때까지 이 시트를 열지 마십시오.
+    시트를 숨김 처리해 두면 실수로 여는 것을 막을 수 있습니다.
+  </div>
+
+  <h2>기록할 것 <span class="n">연구 데이터</span></h2>
+  <table>
+    <tr><th style="width:34%">항목</th><th>기록</th></tr>
+    <tr><td>채점자 2인의 이름</td><td></td></tr>
+    <tr><td>채점 일자</td><td></td></tr>
+    <tr><td>총 답안 수 / 코드번호 없는 답안 수</td><td></td></tr>
+    <tr><td>총점 차이 4점 이상이었던 답안 수</td><td></td></tr>
+    <tr><td>조정 후 최종 점수 산출 방식</td><td>평균 / 협의 후 합의점 (택일)</td></tr>
+    <tr><td>채점 중 집단을 알아본 경우가 있었는가</td><td>있었다면 어떤 단서였는지</td></tr>
+  </table>
+
+  <div class="note">
+    <b>마지막 항목이 중요합니다.</b> 답안 내용에 집단을 드러내는 단서가 남을 수 있습니다.
+    예를 들어 실험집단 학생이 「수용·수정·제외로 판정해 보니」라고 쓰면
+    채점자가 집단을 알아차립니다.<br>
+    이런 답안이 얼마나 나왔는지 <b>숫자로 기록</b>해 두십시오.
+    분석 단계에서 채점자 눈가림이 얼마나 유지되었는지 보고해야 합니다.
+  </div>
+
+  <div class="foot">
+    이 문서는 교사용입니다. 학생에게 배부하지 마십시오. ·
+    채점 기준은 두 집단에 동일하게 적용합니다.
+  </div>
+</div>
+
+</body>
+</html>
