@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>32차시 윤리적 쟁점 시연</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 사례를 숫자와 그림으로 체감시키는 짧은 시연 — 차분하고 또렷하게
+   IDEA: 31차시 시뮬레이션과 같은 수업 화면, 슬라이드 번호와 1:1로 맞춘 탭
+   PICTURE: 10,000명 점 격자 / 집단별로 갈리는 결정 경계 / 숫자뿐인 신경망 vs 경로가 보이는 트리
+   COLOUR and TYPE: 따뜻한 흰 바탕, 남색 띠, 파랑·주황 강조, 오류는 빨강 / Noto Sans KR
+   LAYOUT: 상단 남색 띠 + 탭, 본문은 그림 | 조작판 2단, 좁으면 1단 */
+:root{color-scheme:light dark;
+--bg:light-dark(#f6f4ef,#14171d);--card:light-dark(#fff,#1c2129);--ink:light-dark(#1d2330,#e8ebf1);
+--sub:light-dark(#5a6272,#a4acba);--line:light-dark(#e3ded3,#333a47);--soft:light-dark(#edf3fb,#1f2b3c);
+--blue:light-dark(#2b65b0,#7aaaea);--org:light-dark(#c45f22,#f0965e);--navy:#1f2a3a;--pri:light-dark(#1f2a3a,#2f5f9e);--bad:light-dark(#c0392b,#ff7b6b)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;overflow-x:clip}
+header{background:var(--navy);color:#fff;position:sticky;top:0;z-index:5}
+.hin{max-width:1240px;margin:0 auto;padding:12px max(3vw,14px) 0}
+.hin h1{font-size:17px;font-weight:700;margin:0 0 8px;opacity:.92}
+nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav a{flex:none;color:#cfd6e2;text-decoration:none;padding:9px 14px 11px;border-radius:10px 10px 0 0;font-size:15.5px;white-space:nowrap}
+nav a b{font-weight:500;font-size:12.5px;opacity:.75;margin-right:6px}
+nav a[aria-current=page]{background:var(--bg);color:var(--ink);font-weight:700}
+nav a:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+main{max-width:1240px;margin:0 auto;padding:22px max(3vw,14px) 48px}
+.head{margin-bottom:16px}
+.slide{display:inline-block;font-size:13px;font-weight:700;color:var(--org);margin-bottom:2px}
+h2{font-size:clamp(26px,3.2vw,38px);line-height:1.12;margin:0 0 8px;text-wrap:balance;font-weight:800}
+.ask{margin:0;font-size:18px;color:var(--sub)}.ask strong{color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:22px;align-items:start}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.fig{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.fig>canvas{position:absolute;inset:0;width:100%;height:100%}
+.sq{aspect-ratio:1/1;max-height:74vh}
+.panel{display:grid;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.lab{font-size:14px;color:var(--sub);min-width:5.5em}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:4px}
+button{font:inherit;font-size:15.5px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-height:44px;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.seg button{border:0;background:transparent;min-height:40px}
+.seg button[aria-pressed=true]{background:var(--pri);color:#fff;font-weight:700}
+button.pri{background:var(--pri);border-color:var(--pri);color:#fff;font-weight:700}
+button:disabled{opacity:.5;cursor:default}
+.sl{display:grid;grid-template-columns:5.6em minmax(0,1fr) 5.2em;gap:10px;align-items:center}
+.sl label{font-weight:700;font-size:15.5px}.sl output{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--blue);height:32px;margin:0}
+select{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:44px}
+.big{font-size:clamp(34px,4vw,54px);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.bad{color:var(--bad)}.ok{color:var(--blue)}
+.note{font-size:14.5px;color:var(--sub);margin:0}
+.msg{background:var(--soft);border-radius:12px;padding:10px 14px;margin:0;font-size:16px}
+.msg:empty{display:none}
+table{border-collapse:collapse;width:100%;font-size:15.5px;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:right}th{font-weight:500;color:var(--sub);font-size:14px}
+td:first-child,th:first-child{text-align:left}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:6.4em minmax(0,1fr) 4.2em;gap:10px;align-items:center;font-variant-numeric:tabular-nums}
+.bar i{display:block;height:30px;background:var(--line);border-radius:6px;position:relative;overflow:hidden}
+.bar i u{position:absolute;inset:0 auto 0 0;border-radius:6px;transition:width .4s}
+.bar b{text-align:right}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:15px;align-items:center}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.tri{display:inline-block;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--sub);margin-right:4px;vertical-align:-1px}
+.verdict{font-size:clamp(30px,3.4vw,44px);font-weight:800;line-height:1.1}
+.wgrid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;font:12.5px/1 ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums}
+.wgrid span{padding:6px 2px;text-align:center;border-radius:4px}
+.steps{margin:0;padding-left:1.4em}.steps li{margin:6px 0}.steps li:last-child{font-weight:700}
+.cyc{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:15px}
+.cyc span{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:4px 12px}
+.cyc span.on{background:var(--soft);border-color:var(--blue);color:var(--blue);font-weight:700}
+footer{max-width:1240px;margin:0 auto;padding:0 max(3vw,14px) 32px;font-size:13.5px;color:var(--sub)}
+@media(max-width:860px){.grid,.two{grid-template-columns:minmax(0,1fr)}.sq{max-height:none}}
+@media(max-width:600px){body{font-size:16px}.ask{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="hin">
+<h1>32차시 · 인공지능과 함께 일하는 사회에서 무엇을 지켜야 할까?</h1>
+<nav id="tabs" aria-label="화면">
+<a href="#reliability"><b>1 · S7</b>신뢰성: 99%의 1%</a>
+<a href="#fairness"><b>2 · S8~9</b>공정성: 데이터 편향 실험</a>
+<a href="#transparency"><b>3 · S10</b>투명성: 왜 거절했나요?</a>
+</nav></div></header>
+<main>
+
+<!-- 1 신뢰성 -->
+<section class="view" id="reliability">
+<div class="head"><span class="slide">슬라이드 7 · 교과서 180쪽 · 카드 마</span>
+<h2>정확도 99%, 남은 1%는 몇 명일까?</h2>
+<p class="ask">발문 · <strong>“내가 개발한 인공지능은 99%의 좋은 성능을 보여!”</strong> 오류를 보이기 전에 몇 명일지 먼저 예상해 보세요.</p></div>
+<div class="grid">
+<div class="fig" id="rFig" style="aspect-ratio:125/80"><canvas id="rc" aria-label="사람 점 격자, 빨간 점은 인공지능이 틀린 경우"></canvas></div>
+<div class="panel">
+<div class="card panel">
+<div class="row"><span class="lab">상황</span><select id="rSc" aria-label="상황">
+<option value="0">병원 영상 진단 하루 10,000건 (카드 마)</option>
+<option value="1">자율주행 자동차의 판단 10,000번</option>
+<option value="2">우리 학교 출입 얼굴 인식 600명</option></select></div>
+<div class="sl"><label for="rAcc">정확도</label><input type="range" id="rAcc" min="90" max="99.9" step="0.1" value="99"><output id="rAccO"></output></div>
+<div class="row"><button class="pri" id="rShow">오류 보이기</button><button id="r999">99.9%로 올리면?</button></div>
+</div>
+<div class="card panel" style="gap:6px">
+<span class="note" id="rLab"></span>
+<div class="big" id="rNum">?</div>
+<p class="note" id="rSub"></p>
+</div>
+<p class="msg" id="rMsg"></p>
+<p class="note">★ = 그중 한 명이 우리 가족이라면. 틀린 자리는 무작위로 표시했습니다.</p>
+</div></div>
+</section>
+
+<!-- 2 공정성 -->
+<section class="view" id="fairness" hidden>
+<div class="head"><span class="slide">슬라이드 8~9 · 교과서 180~181쪽 · Gender Shades 앞</span>
+<h2>학습 데이터가 한쪽으로 치우치면</h2>
+<p class="ask">발문 · <strong>“전체 정확도 95%인 얼굴 인식, 모두에게 95%일까?”</strong> 집단 B의 정확도를 먼저 예상해 보세요.</p></div>
+<div class="grid">
+<div class="panel">
+<div class="fig sq"><canvas id="fc" aria-label="학습 데이터와 모델의 판단 경계"></canvas></div>
+<div class="legend"><span><i class="dot" style="background:#2b65b0"></i>집단 A</span><span><i class="tri" style="border-bottom-color:#2b65b0"></i>집단 B</span><span>색: <b style="color:#2b65b0">파랑 = 정답 0</b> · <b style="color:#d0802a">주황 = 정답 1</b></span><span>배경 = 모델의 판단</span></div>
+<div class="row"><span class="lab">그림에 보일 것</span><div class="seg" id="fView"><button data-v="train" aria-pressed="true">학습 데이터</button><button data-v="A">시험: 집단 A</button><button data-v="B">시험: 집단 B</button></div></div>
+<p class="note">수업용 모형: 점 하나 = 얼굴 사진 한 장의 특징 2개. 두 집단은 사진의 특징이 조금 다릅니다. 시험 화면에서 ✕ = 모델이 틀린 사진.</p>
+</div>
+<div class="panel">
+<div class="card panel">
+<div class="sl"><label for="fP">학습 데이터 속 집단 B</label><input type="range" id="fP" min="5" max="50" step="5" value="10"><output id="fPO"></output></div>
+<div class="row"><button class="pri" id="fTrain">이 데이터로 학습</button><button id="f50">B를 50%로 늘려 다시 학습</button></div>
+<div class="cyc" aria-label="편향이 생기는 과정"><span id="cy1">사회·사람의 편향</span>→<span id="cy2">반영: 데이터 편향</span>→<span id="cy3">학습: 모델 편향</span>→<span id="cy4">사용: 불공정한 결과</span></div>
+</div>
+<div class="card panel">
+<div class="bars" id="fBars"></div>
+<p class="msg" id="fMsg"></p>
+</div>
+<div class="card"><table id="fHist"><tr><th>B 비율</th><th>전체</th><th>집단 A</th><th>집단 B</th><th>격차</th></tr></table>
+<div class="row" style="margin-top:8px"><button id="fClr">기록 지우기</button><span class="note">같은 비율은 언제나 같은 결과가 나오도록 고정했습니다.</span></div></div>
+</div></div>
+</section>
+
+<!-- 3 투명성 -->
+<section class="view" id="transparency" hidden>
+<div class="head"><span class="slide">슬라이드 10 · 교과서 183쪽 · 카드 나</span>
+<h2>“왜 거절했나요?”에 답할 수 있을까?</h2>
+<p class="ask">발문 · <strong>“대출을 거절당한 사람이 이유를 묻는다면, 두 모델 중 어느 쪽이 답할 수 있을까?”</strong></p></div>
+<div class="card panel" style="margin-bottom:18px">
+<div class="two">
+<div class="panel" style="gap:6px">
+<div class="sl"><label for="lInc">연 소득</label><input type="range" id="lInc" min="1500" max="9000" step="100"><output id="lIncO"></output></div>
+<div class="sl"><label for="lLate">연체 횟수</label><input type="range" id="lLate" min="0" max="5" step="1"><output id="lLateO"></output></div>
+<div class="sl"><label for="lDebt">부채 비율</label><input type="range" id="lDebt" min="5" max="95" step="1"><output id="lDebtO"></output></div>
+</div>
+<div class="panel" style="gap:8px;align-content:start">
+<strong>신청자</strong>
+<div class="row"><button id="lP1">카드 나 신청자</button><button id="lP2">승인될 신청자</button><button id="lP3">두 모델이 갈리는 신청자</button></div>
+<p class="note">수업용 가상 데이터 500건으로 두 모델을 이 페이지에서 직접 학습시켰습니다. 실제 은행의 심사 기준이 아닙니다.</p>
+</div></div></div>
+<div class="two">
+<div class="card panel">
+<span class="slide" style="margin:0">모델 1 · 신경망 (블랙박스)</span>
+<div class="verdict" id="nV"></div>
+<p class="note" id="nP"></p>
+<div class="row"><button class="pri" id="nWhy">왜 이런 결과가 나왔나요?</button></div>
+<div id="nIn" hidden class="panel" style="gap:8px">
+<p class="msg">이 모델이 가진 것은 숫자뿐입니다. 첫 번째 층의 가중치 48개 중 40개:</p>
+<div class="wgrid" id="nW"></div>
+<p class="note" id="nCnt"></p>
+<p class="msg">이 숫자들에서 “연체가 있어서”, “소득이 낮아서” 같은 이유를 읽어 낼 수 있나요? → <b>블랙박스 모델</b></p>
+</div>
+</div>
+<div class="card panel">
+<span class="slide" style="margin:0">모델 2 · 결정트리 (깊이 3)</span>
+<div class="verdict" id="tV"></div>
+<p class="note">판단 경로 (31차시 붓꽃 트리와 같은 방식)</p>
+<ol class="steps" id="tPath"></ol>
+<p class="msg" id="tWhy"></p>
+</div>
+</div>
+<div class="card panel" style="margin-top:18px">
+<strong>그럼 설명할 수 있는 모델만 쓰면 될까?</strong>
+<div class="bars" id="accBars"></div>
+<p class="note">시험용 가상 신청자 1,000명에 대한 정확도. 설명하기 쉬운 모델이 늘 더 정확한 것은 아닙니다. 그래서 정확한 모델이 어떤 근거로 판단했는지 사람에게 보여 주는 기술, <b>설명 가능한 인공지능(XAI)</b>이 연구됩니다.</p>
+</div>
+</section>
+</main>
+<footer>숫자키 1~3으로 화면을 바꿀 수 있습니다. 모든 데이터는 수업용으로 만든 가상 데이터입니다.</footer>
+<span id="probe" class="note" hidden></span>
+
+<script>
+{
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const C={b:'#2b65b0',o:'#d0802a',r:'#c0392b',g:'#3d8a4a'};
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+function rng(s){return()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+function rgba(h,a){const n=parseInt(h.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+function fitC(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1,w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));if(c.width!==w*d||c.height!==h*d){c.width=w*d;c.height=h*d}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,w,h);return{x,w,h}}
+const ink=()=>getComputedStyle(document.body).color,sub=()=>getComputedStyle($('#probe')).color,lineC=()=>getComputedStyle($('.fig')).borderTopColor;
+const FONT='"Noto Sans KR","Malgun Gothic",sans-serif';
+function seg(el,cb){el.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;$$('button',el).forEach(x=>x.setAttribute('aria-pressed',x===b));cb(b.dataset.v)})}
+const pct=v=>(v*100).toFixed(1)+'%';
+const draw={};
+
+/* ---------- 신경망 엔진 (31차시와 같은 방식: relu 은닉층, softmax 출력, adam) ---------- */
+function newNet(sz,seed){const r=rng(seed);return{t:0,L:sz.slice(1).map((m,l)=>{const n=sz[l],W=new Float64Array(n*m),s=Math.sqrt(2/n)*(l===sz.length-2?.6:1);for(let i=0;i<W.length;i++)W[i]=gauss(r)*s;return{n,m,W,b:new Float64Array(m),gW:new Float64Array(n*m),gb:new Float64Array(m),mW:new Float64Array(n*m),vW:new Float64Array(n*m),mb:new Float64Array(m),vb:new Float64Array(m)}})}}
+function fwd(net,x){const as=[x],zs=[];let a=x;const NL=net.L.length;for(let l=0;l<NL;l++){const ly=net.L[l],z=new Float64Array(ly.m);for(let j=0;j<ly.m;j++){let s=ly.b[j];const o=j*ly.n;for(let i=0;i<ly.n;i++)s+=ly.W[o+i]*a[i];z[j]=s}zs.push(z);if(l<NL-1)a=z.map(v=>v>0?v:0);else{let mx=-Infinity;for(const v of z)mx=Math.max(mx,v);const e=z.map(v=>Math.exp(v-mx));let S=0;for(const v of e)S+=v;a=e.map(v=>v/S)}as.push(a)}return{as,zs}}
+function step(net,batch,lr){const NL=net.L.length;net.L.forEach(ly=>{ly.gW.fill(0);ly.gb.fill(0)});for(const[x,y]of batch){const{as,zs}=fwd(net,x);let d=Float64Array.from(as[NL]);d[y]-=1;for(let l=NL-1;l>=0;l--){const ly=net.L[l],a=as[l];for(let j=0;j<ly.m;j++){ly.gb[j]+=d[j];const o=j*ly.n;for(let i=0;i<ly.n;i++)ly.gW[o+i]+=d[j]*a[i]}if(l>0){const nd=new Float64Array(ly.n);for(let i=0;i<ly.n;i++){let s=0;for(let j=0;j<ly.m;j++)s+=ly.W[j*ly.n+i]*d[j];nd[i]=zs[l-1][i]<=0?0:s}d=nd}}}
+ net.t++;const b1=.9,b2=.999,k=1/batch.length,c1=1-b1**net.t,c2=1-b2**net.t;const up=(P,G,M,Q)=>{for(let i=0;i<P.length;i++){const g=G[i]*k;M[i]=b1*M[i]+(1-b1)*g;Q[i]=b2*Q[i]+(1-b2)*g*g;P[i]-=lr*(M[i]/c1)/(Math.sqrt(Q[i]/c2)+1e-7)}};net.L.forEach(ly=>{up(ly.W,ly.gW,ly.mW,ly.vW);up(ly.b,ly.gb,ly.mb,ly.vb)})}
+function train(net,D,epochs,seed,lr){const r=rng(seed);for(let e=0;e<epochs;e++){const idx=D.map((_,i)=>i);for(let i=idx.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}for(let s=0;s<idx.length;s+=32)step(net,idx.slice(s,s+32).map(i=>[D[i].x,D[i].y]),lr)}}
+const prob=(net,x)=>fwd(net,x).as.pop()[1];
+const pred=(net,x)=>prob(net,x)>.5?1:0;
+
+/* ---------- 탭 ---------- */
+const V=['reliability','fairness','transparency'];
+const cur=()=>{const v=location.hash.slice(1);return V.includes(v)?v:V[0]};
+function show(){const v=cur();$$('.view').forEach(s=>s.hidden=s.id!==v);$$('#tabs a').forEach(a=>a.setAttribute('aria-current',a.hash==='#'+v?'page':'false'));requestAnimationFrame(()=>draw[v]())}
+addEventListener('hashchange',show);
+addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea')||e.ctrlKey||e.metaKey||e.altKey)return;const i='123'.indexOf(e.key);if(i>=0){location.hash=V[i];scrollTo(0,0)}});
+
+/* ---------- 1. 신뢰성 ---------- */
+const SC=[{n:10000,cols:125,unit:'건',who:'놓친 진단',lab:'하루 영상 진단 10,000건 중 인공지능이 놓친 진단',harm:'종양을 놓친 환자'},
+ {n:10000,cols:125,unit:'번',who:'잘못된 판단',lab:'자율주행 판단 10,000번 중 잘못된 판단',harm:'한 번의 잘못된 판단이 사고'},
+ {n:600,cols:30,unit:'명',who:'인식 실패',lab:'전교생 600명 중 얼굴 인식에 실패한 학생',harm:'매일 교문 앞에서 멈춰 서는 학생'}];
+const R={sc:0,acc:99,show:false,anim:1,order:null,star:0};
+function rOrder(){const s=SC[R.sc],r=rng(77+R.sc),o=[...Array(s.n).keys()];for(let i=o.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[o[i],o[j]]=[o[j],o[i]]}R.order=o;R.rank=new Int32Array(s.n);o.forEach((v,i)=>R.rank[v]=i);R.star=o[Math.floor(s.n*.004)+3]}
+draw.reliability=()=>{const s=SC[R.sc],cols=s.cols,rows=Math.ceil(s.n/cols);$('#rFig').style.aspectRatio=`${cols}/${rows}`;
+ const{x,w,h}=fitC($('#rc')),pad=10,cw=(w-2*pad)/cols,ch=(h-2*pad)/rows,rad=Math.max(1.2,Math.min(cw,ch)*.36),err=Math.round(s.n*(100-R.acc)/100),shown=R.show?Math.round(err*R.anim):0;
+ const base=rgba('#8a93a3',.55);
+ for(let i=0;i<s.n;i++){const cx=pad+(i%cols+.5)*cw,cy=pad+(Math.floor(i/cols)+.5)*ch,bad=R.rank[i]<shown;x.beginPath();x.arc(cx,cy,bad?rad*1.35:rad,0,7);x.fillStyle=bad?C.r:base;x.fill()}
+ const si=R.star,sx=pad+(si%cols+.5)*cw,sy=pad+(Math.floor(si/cols)+.5)*ch,bad=R.rank[si]<shown;
+ x.font=`800 ${Math.max(18,cw*3)}px ${FONT}`;x.textAlign='center';x.textBaseline='middle';x.lineWidth=4;x.strokeStyle=getComputedStyle($('.card')).backgroundColor;x.strokeText('★',sx,sy);x.fillStyle=bad?C.r:C.o;x.fillText('★',sx,sy);
+ $('#rAccO').textContent=R.acc.toFixed(1)+'%';$('#rLab').textContent=s.lab;
+ $('#rNum').innerHTML=R.show?`<span class="bad">${err.toLocaleString()}${s.unit}</span>`:'?';
+ $('#rSub').textContent=R.show?`정확도 ${R.acc.toFixed(1)}% = ${s.n.toLocaleString()}${s.unit} 중 ${(s.n-err).toLocaleString()}${s.unit}은 맞고 ${err.toLocaleString()}${s.unit}은 틀림`:'몇 '+s.unit+'일까요?';
+ $('#rShow').textContent=R.show?'오류 가리기':'오류 보이기';
+ $('#rMsg').innerHTML=R.show?`“99%”는 작아 보이지만 쓰는 횟수가 많으면 피해를 입는 사람도 많아집니다. ★이 그 안에 들어갈 가능성은 ${(100-R.acc).toFixed(1)}%뿐이어도, 들어가면 그 가족에게는 전부입니다. → <b>신뢰성</b>: 오류 가능성은 항상 있으며, 작은 오류도 심각한 문제를 일으킬 수 있다.`:''};
+function rAnim(){R.anim=0;const t0=performance.now(),go=t=>{R.anim=Math.min(1,(t-t0)/900);draw.reliability();if(R.anim<1&&R.show)requestAnimationFrame(go)};
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches){R.anim=1;draw.reliability()}else requestAnimationFrame(go)}
+$('#rShow').onclick=()=>{R.show=!R.show;if(R.show)rAnim();else draw.reliability()};
+$('#rAcc').addEventListener('input',e=>{R.acc=+e.target.value;R.anim=1;draw.reliability()});
+$('#r999').onclick=()=>{R.acc=99.9;$('#rAcc').value=99.9;R.show=true;rAnim()};
+$('#rSc').addEventListener('change',e=>{R.sc=+e.target.value;R.show=false;rOrder();draw.reliability()});
+rOrder();
+
+/* ---------- 2. 공정성 ---------- */
+const F={p:10,net:null,res:null,view:'train',D:[],hist:[]};
+function grp(g,n,r){const P=[];for(let i=0;i<n;i++){let a,b,y;if(g===0){a=-.42+gauss(r)*.3;b=.15+gauss(r)*.3;y=(b-.15)>.5*(a+.42)?1:0}else{a=.42+gauss(r)*.3;b=-.15+gauss(r)*.3;y=(a-.42)-.6*(b+.15)<0?1:0}P.push({x:[a,b],y,g})}return P}
+const TA=grp(0,500,rng(999)),TB=grp(1,500,rng(1999));
+function fData(){const r=rng(107),N=400,nb=Math.round(N*F.p/100);F.D=[...grp(0,N-nb,r),...grp(1,nb,r)]}
+function fTrain(){const btn=$('#fTrain');btn.disabled=true;btn.textContent='학습 중…';setTimeout(()=>{fData();F.net=newNet([2,16,8,2],1);train(F.net,F.D,60,1,.01);
+ const acc=T=>T.filter(d=>pred(F.net,d.x)===d.y).length/T.length,a=acc(TA),b=acc(TB),all=(1-F.p/100)*a+F.p/100*b;F.res={a,b,all,p:F.p};
+ F.hist=F.hist.filter(h=>h.p!==F.p).concat([F.res]).sort((u,v)=>u.p-v.p);btn.disabled=false;btn.textContent='이 데이터로 학습';fUI();draw.fairness()},30)}
+function fUI(){$('#fPO').textContent=F.p+'%';const r=F.res;
+ ['cy1','cy2','cy3','cy4'].forEach((id,i)=>$('#'+id).classList.toggle('on',!!r&&r.b<r.a-.08&&i<4));
+ const bar=(n,v,c)=>`<div class="bar"><span>${n}</span><i><u style="width:${v==null?0:v*100}%;background:${c}"></u></i><b>${v==null?'?':pct(v)}</b></div>`;
+ $('#fBars').innerHTML=bar('전체 정확도',r&&r.all,'#8a93a3')+bar('집단 A',r&&r.a,C.b)+bar('집단 B',r&&r.b,r&&r.b<r.a-.08?C.r:C.b);
+ $('#fMsg').innerHTML=!r?'예상을 먼저 말한 뒤 학습시켜 보세요.':r.a-r.b>.08?`학습 데이터의 ${100-r.p}%가 집단 A였습니다. 전체 정확도는 <b>${pct(r.all)}</b>로 높아 보이지만 집단 B는 <b class="bad">${pct(r.b)}</b>, 격차 <b>${((r.a-r.b)*100).toFixed(1)}%p</b>. 모델은 많이 본 집단에 맞춰졌습니다 → <b>데이터 편향성</b>.`:
+  `집단 B가 학습 데이터의 ${r.p}%일 때 격차는 <b>${(Math.abs(r.a-r.b)*100).toFixed(1)}%p</b>. 다양한 집단을 대표하는 데이터를 모으면 격차가 줄어듭니다. 대신 집단 A가 대부분이던 때보다 A의 정확도는 조금 내려갈 수 있습니다.`;
+ $('#fHist').innerHTML='<tr><th>B 비율</th><th>전체</th><th>집단 A</th><th>집단 B</th><th>격차</th></tr>'+F.hist.map(h=>`<tr><td>${h.p}%</td><td>${pct(h.all)}</td><td>${pct(h.a)}</td><td class="${h.a-h.b>.08?'bad':''}">${pct(h.b)}</td><td>${((h.a-h.b)*100).toFixed(1)}%p</td></tr>`).join('')}
+const off=document.createElement('canvas');off.width=off.height=80;
+draw.fairness=()=>{const{x,w,h}=fitC($('#fc')),pad=16,S=Math.min(w,h)-2*pad,ox=(w-S)/2,oy=(h-S)/2,lo=-1.35,hi=1.35,tx=v=>ox+(v-lo)/(hi-lo)*S,ty=v=>oy+S-(v-lo)/(hi-lo)*S;
+ if(F.net){const N=80,ct=off.getContext('2d'),img=ct.createImageData(N,N),cb=[43,101,176],co=[208,128,42];for(let j=0;j<N;j++)for(let i=0;i<N;i++){const p=prob(F.net,[lo+(i+.5)/N*(hi-lo),lo+(1-(j+.5)/N)*(hi-lo)]),c=p>.5?co:cb,q=(j*N+i)*4;img.data[q]=c[0];img.data[q+1]=c[1];img.data[q+2]=c[2];img.data[q+3]=255*(.12+.3*Math.abs(p-.5)*2)}ct.putImageData(img,0,0);x.imageSmoothingEnabled=true;x.drawImage(off,ox,oy,S,S)}
+ x.strokeStyle=lineC();x.strokeRect(ox,oy,S,S);
+ const pts=F.view==='train'?F.D:(F.view==='A'?TA:TB).slice(0,220),card=getComputedStyle($('.card')).backgroundColor;
+ pts.forEach(d=>{const px=tx(d.x[0]),py=ty(d.x[1]),col=d.y?C.o:C.b;x.fillStyle=col;x.strokeStyle=card;x.lineWidth=1.5;x.beginPath();if(d.g===0)x.arc(px,py,5.5,0,7);else{x.moveTo(px,py-7);x.lineTo(px+6.5,py+5);x.lineTo(px-6.5,py+5);x.closePath()}x.fill();x.stroke();
+  if(F.view!=='train'&&F.net&&pred(F.net,d.x)!==d.y){x.strokeStyle=C.r;x.lineWidth=3;x.beginPath();x.moveTo(px-8,py-8);x.lineTo(px+8,py+8);x.moveTo(px+8,py-8);x.lineTo(px-8,py+8);x.stroke()}});
+ x.font=`700 15px ${FONT}`;x.fillStyle=ink();x.textAlign='left';x.textBaseline='top';
+ const nA=F.D.filter(d=>d.g===0).length,nB=F.D.length-nA;
+ x.fillText(F.view==='train'?`학습 데이터: 집단 A ${nA}장 · 집단 B ${nB}장`:F.view==='A'?'시험: 집단 A 사진 (일부)':'시험: 집단 B 사진 (일부)',ox+10,oy+8);
+ if(!F.net){x.fillStyle=sub();x.textAlign='center';x.fillText('아직 학습 전입니다',ox+S/2,oy+S-30)}};
+$('#fP').addEventListener('input',e=>{F.p=+e.target.value;fData();fUI();draw.fairness()});
+$('#fTrain').onclick=fTrain;$('#f50').onclick=()=>{F.p=50;$('#fP').value=50;fTrain()};
+$('#fClr').onclick=()=>{F.hist=[];fUI()};
+seg($('#fView'),v=>{F.view=v;draw.fairness()});
+fData();fUI();
+
+/* ---------- 3. 투명성 ---------- */
+const FN=['연 소득','연체 횟수','부채 비율'],fv=(i,v)=>i===0?`${Math.round(v).toLocaleString()}만 원`:i===1?`${v}회`:`${v}%`;
+function loan(n,r){const P=[];for(let i=0;i<n;i++){const inc=Math.round(clamp(4200+gauss(r)*1700,1200,9500)/10)*10,late=clamp(Math.round(Math.abs(gauss(r))*1.2-.2),0,5),debt=Math.round(clamp(40+gauss(r)*20,5,95));
+ const s=.0009*inc-1.1*late-.045*debt+gauss(r)*.6;P.push({f:[inc,late,debt],x:[inc/1e4,late/5,debt/100],y:s>1.6?1:0})}return P}
+const gini=c=>{const n=c[0]+c[1];return n?1-(c[0]/n)**2-(c[1]/n)**2:0};
+function cart(D,depth){const c=[0,0];D.forEach(d=>c[d.y]++);const nd={c,g:gini(c)};if(!depth||!nd.g||D.length<12)return nd;let best=null;
+ for(let f=0;f<3;f++){const vs=[...new Set(D.map(d=>d.f[f]))].sort((a,b)=>a-b);for(let k=0;k<vs.length-1;k++){const t=f===1?vs[k]:(vs[k]+vs[k+1])/2,L=[0,0],R=[0,0];D.forEach(d=>(d.f[f]<=t?L:R)[d.y]++);const nl=L[0]+L[1],nr=R[0]+R[1];if(nl<5||nr<5)continue;const w=(nl*gini(L)+nr*gini(R))/D.length;if(!best||w<best.w)best={w,f,t}}}
+ if(!best||best.w>=nd.g-1e-9)return nd;Object.assign(nd,{f:best.f,t:best.t,l:cart(D.filter(d=>d.f[best.f]<=best.t),depth-1),r:cart(D.filter(d=>d.f[best.f]>best.t),depth-1)});return nd}
+const LD=loan(500,rng(42)),LT=loan(1000,rng(7));
+const LN=newNet([3,16,8,2],3);train(LN,LD,150,3,.01);
+const TREE=cart(LD,3);
+const tLeaf=(n,f,path=[])=>{if(n.f==null)return{n,path};const yes=f[n.f]<=n.t;path.push({f:n.f,t:n.t,yes});return tLeaf(yes?n.l:n.r,f,path)};
+const tPred=f=>{const {n}=tLeaf(TREE,f);return n.c[1]>n.c[0]?1:0};
+const accN=LT.filter(d=>pred(LN,d.x)===d.y).length/LT.length,accT=LT.filter(d=>tPred(d.f)===d.y).length/LT.length;
+const A={f:[3200,1,55],why:false};
+const tTh=(f,t)=>f===0?`${Math.round(t).toLocaleString()}만 원`:f===1?`${t}회`:`${t}%`;
+draw.transparency=()=>{const f=A.f;[['lInc',0],['lLate',1],['lDebt',2]].forEach(([id,i])=>{$('#'+id).value=f[i];$('#'+id+'O').textContent=fv(i,f[i])});
+ const p=prob(LN,[f[0]/1e4,f[1]/5,f[2]/100]),nOk=p>.5;
+ $('#nV').innerHTML=nOk?'<span class="ok">승인</span>':'<span class="bad">거절</span>';$('#nP').textContent=`승인 확률 ${p.toFixed(2)} (0.5보다 크면 승인)`;
+ $('#nIn').hidden=!A.why;$('#nWhy').textContent=A.why?'숫자 닫기':'왜 이런 결과가 나왔나요?';
+ if(A.why){const W=LN.L[0].W,mx=Math.max(...W.map(Math.abs));$('#nW').innerHTML=[...W].slice(0,40).map(v=>`<span style="background:${rgba(v>0?C.o:C.b,Math.abs(v)/mx*.55+.08)}">${v.toFixed(2)}</span>`).join('');
+  const cnt=LN.L.reduce((s,l)=>s+l.W.length+l.b.length,0);$('#nCnt').textContent=`이런 가중치·편향이 모두 ${cnt}개. 이 숫자들을 모두 거쳐 계산한 결과가 “승인 확률 ${p.toFixed(2)}”입니다.`}
+ const {n,path}=tLeaf(TREE,f),tOk=n.c[1]>n.c[0];
+ $('#tV').innerHTML=tOk?'<span class="ok">승인</span>':'<span class="bad">거절</span>';
+ $('#tPath').innerHTML=path.map(s=>`<li>${FN[s.f]} ${fv(s.f,f[s.f])} ≤ ${tTh(s.f,s.t)} ? → <b>${s.yes?'예':'아니요'}</b></li>`).join('')+`<li>도착한 노드: 비슷한 신청자 거절 ${n.c[0]}명 · 승인 ${n.c[1]}명 → ${tOk?'승인':'거절'}</li>`;
+ const PS=['연 소득이','연체 횟수가','부채 비율이'],key=path.map(s=>`${PS[s.f]} ${tTh(s.f,s.t)} ${s.yes?'이하':'초과'}`).join(', ');
+ $('#tWhy').innerHTML=`신청자에게 설명: “${key}이기 때문에 ${tOk?'승인':'거절'}되었습니다.” → 판단 근거를 사람이 읽고 검증할 수 있습니다.`;
+ const bar=(nm,v,c)=>`<div class="bar"><span>${nm}</span><i><u style="width:${v*100}%;background:${c}"></u></i><b>${pct(v)}</b></div>`;
+ $('#accBars').innerHTML=bar('신경망',accN,C.b)+bar('결정트리',accT,C.o)};
+[['lInc',0],['lLate',1],['lDebt',2]].forEach(([id,i])=>$('#'+id).addEventListener('input',e=>{A.f[i]=+e.target.value;draw.transparency()}));
+const lSet=a=>{A.f=[...a];draw.transparency()};
+$('#lP1').onclick=()=>lSet([3200,1,55]);$('#lP2').onclick=()=>lSet([6500,0,20]);$('#lP3').onclick=()=>lSet([4500,0,45]);
+$('#nWhy').onclick=()=>{A.why=!A.why;draw.transparency()};
+
+/* ---------- 시작 ---------- */
+const ro=new ResizeObserver(()=>draw[cur()]());$$('.fig').forEach(f=>ro.observe(f));
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>draw[cur()]());
+new MutationObserver(()=>draw[cur()]()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+show();
+}
+</script>
+</body>
+</html>
